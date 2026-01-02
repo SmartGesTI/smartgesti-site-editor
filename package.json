@@ -1,0 +1,55 @@
+{
+  "name": "@smartgesti/site-editor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./shared": {
+      "import": "./dist/shared/index.js",
+      "types": "./dist/shared/index.d.ts"
+    },
+    "./shared/*": {
+      "import": "./dist/shared/*.js",
+      "types": "./dist/shared/*.d.ts"
+    },
+    "./styles/site-theme.css": "./dist/styles/site-theme.css",
+    "./styles/landing-page.css": "./dist/styles/landing-page.css"
+  },
+  "scripts": {
+    "build": "tsc && npm run copy-css",
+    "copy-css": "mkdir -p dist/styles && cp src/styles/*.css dist/styles/ 2>/dev/null || true && mkdir -p dist/templates && cp src/templates/*.ts dist/templates/ 2>/dev/null || true",
+    "dev": "tsc --watch",
+    "lint": "eslint . --ext ts,tsx"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.1.0",
+    "@dnd-kit/sortable": "^8.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.6.0",
+    "react-colorful": "^5.6.1",
+    "lucide-react": "^0.447.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
+    "eslint": "^9.15.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.11",
+    "typescript": "^5.6.3"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

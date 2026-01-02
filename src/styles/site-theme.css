@@ -1,0 +1,66 @@
+/**
+ * CSS para o site gerado (não para o editor)
+ * Todas as variáveis usam prefixo --site-* para isolamento total
+ * O editor usa o design system do Ensino normalmente
+ */
+
+:root {
+  /* Valores padrão - serão sobrescritos dinamicamente via themeApplier */
+  --site-primary-color: #264653;
+  --site-secondary-color: #2a9d8f;
+  --site-accent-color: #e9c46a;
+  --site-background: #0a0a0a;
+  --site-surface: #1a1a1a;
+  --site-text: #ffffff;
+  --site-text-secondary: #e9c46a;
+  --site-primary-gradient: linear-gradient(135deg, #264653, #2a9d8f, #e9c46a);
+  --site-radial-gradient: radial-gradient(circle, #264653, #2a9d8f, #e9c46a);
+}
+
+/* Classes utilitárias para o site gerado */
+.site-hero {
+  background: var(--site-primary-color);
+  color: var(--site-text);
+}
+
+.site-section {
+  background: var(--site-surface);
+  color: var(--site-text);
+}
+
+.site-text-primary {
+  color: var(--site-text);
+}
+
+.site-text-secondary {
+  color: var(--site-text-secondary);
+}
+
+.site-bg-primary {
+  background-color: var(--site-primary-color);
+}
+
+.site-bg-secondary {
+  background-color: var(--site-secondary-color);
+}
+
+.site-bg-accent {
+  background-color: var(--site-accent-color);
+}
+
+.site-gradient {
+  background: var(--site-primary-gradient);
+}
+
+/* Container do site gerado - isolado do editor */
+.site-container {
+  /* Garantir que o site gerado não herde estilos do editor */
+  all: initial;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--site-text);
+  background: var(--site-background);
+}
+
+.site-container * {
+  box-sizing: border-box;
+}

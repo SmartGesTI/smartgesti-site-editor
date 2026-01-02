@@ -1,0 +1,208 @@
+/**
+ * Export component definitions for use in other components
+ */
+
+import { ComponentDefinition } from '../../types'
+
+export const componentDefinitions: ComponentDefinition[] = [
+  {
+    type: 'hero',
+    name: 'Hero',
+    category: 'content',
+    defaultProps: {
+      heroTitle: 'Título Principal',
+      heroSubtitle: 'Subtítulo',
+      heroImage: '',
+      buttonText: 'Saiba Mais',
+    },
+    defaultStyles: {},
+    editableProps: ['heroTitle', 'heroSubtitle', 'heroImage', 'buttonText', 'heroWelcome', 'heroSpecialty'],
+    editableStyles: ['heroTitleColor', 'heroSubtitleColor', 'heroWelcomeColor', 'heroSpecialtyColor'],
+  },
+  {
+    type: 'navbar',
+    name: 'Navbar',
+    category: 'layout',
+    defaultProps: {
+      logoText: 'Logo',
+      menuItems: [],
+    },
+    defaultStyles: {},
+    editableProps: ['logoText', 'menuItems'],
+    editableStyles: ['navbarColor', 'navbarTextColor'],
+  },
+  {
+    type: 'about',
+    name: 'Sobre',
+    category: 'content',
+    defaultProps: {
+      title: 'Sobre Mim',
+      content: 'Texto sobre você...',
+      image: '',
+    },
+    defaultStyles: {},
+    editableProps: ['title', 'content', 'image'],
+    editableStyles: ['backgroundColor', 'textColor'],
+  },
+  {
+    type: 'gallery',
+    name: 'Galeria',
+    category: 'content',
+    defaultProps: {
+      title: 'Galeria',
+      items: [],
+    },
+    defaultStyles: {},
+    editableProps: ['title', 'items'],
+    editableStyles: ['backgroundColor'],
+  },
+  {
+    type: 'services',
+    name: 'Serviços',
+    category: 'content',
+    defaultProps: {
+      title: 'Serviços',
+      items: [],
+    },
+    defaultStyles: {},
+    editableProps: ['title', 'items'],
+    editableStyles: ['backgroundColor'],
+  },
+  {
+    type: 'testimonials',
+    name: 'Depoimentos',
+    category: 'content',
+    defaultProps: {
+      title: 'Depoimentos',
+      items: [],
+    },
+    defaultStyles: {},
+    editableProps: ['title', 'items'],
+    editableStyles: ['backgroundColor'],
+  },
+  {
+    type: 'contact',
+    name: 'Contato',
+    category: 'content',
+    defaultProps: {
+      title: 'Entre em Contato',
+      phone: '',
+      email: '',
+      address: '',
+    },
+    defaultStyles: {},
+    editableProps: ['title', 'phone', 'email', 'address'],
+    editableStyles: ['backgroundColor'],
+  },
+  {
+    type: 'footer',
+    name: 'Rodapé',
+    category: 'layout',
+    defaultProps: {
+      copyright: '© 2024 Todos os direitos reservados',
+      links: [],
+    },
+    defaultStyles: {},
+    editableProps: ['copyright', 'links'],
+    editableStyles: ['backgroundColor', 'textColor'],
+  },
+  {
+    type: 'section',
+    name: 'Seção',
+    category: 'layout',
+    defaultProps: {},
+    defaultStyles: {},
+    editableProps: [],
+    editableStyles: ['backgroundColor', 'padding'],
+  },
+  {
+    type: 'text',
+    name: 'Texto',
+    category: 'content',
+    defaultProps: {
+      content: 'Digite seu texto aqui...',
+    },
+    defaultStyles: {},
+    editableProps: ['content'],
+    editableStyles: ['fontSize', 'fontWeight', 'textColor'],
+  },
+  {
+    type: 'heading',
+    name: 'Título',
+    category: 'content',
+    defaultProps: {
+      text: 'Título',
+      level: 2,
+    },
+    defaultStyles: {},
+    editableProps: ['text', 'level'],
+    editableStyles: ['fontSize', 'fontWeight', 'textColor'],
+  },
+  {
+    type: 'image',
+    name: 'Imagem',
+    category: 'media',
+    defaultProps: {
+      src: '',
+      alt: '',
+    },
+    defaultStyles: {},
+    editableProps: ['src', 'alt'],
+    editableStyles: ['width', 'height', 'objectFit'],
+  },
+  {
+    type: 'button',
+    name: 'Botão',
+    category: 'content',
+    defaultProps: {
+      text: 'Clique aqui',
+      href: '#',
+    },
+    defaultStyles: {},
+    editableProps: ['text', 'href'],
+    editableStyles: ['backgroundColor', 'textColor', 'padding'],
+  },
+  {
+    type: 'grid',
+    name: 'Grid',
+    category: 'layout',
+    defaultProps: {
+      columns: 3,
+    },
+    defaultStyles: {},
+    editableProps: ['columns'],
+    editableStyles: ['gap'],
+  },
+  {
+    type: 'card',
+    name: 'Card',
+    category: 'content',
+    defaultProps: {
+      title: 'Título do Card',
+      content: 'Conteúdo do card',
+    },
+    defaultStyles: {},
+    editableProps: ['title', 'content'],
+    editableStyles: ['backgroundColor', 'borderRadius', 'padding'],
+  },
+  {
+    type: 'spacer',
+    name: 'Espaçador',
+    category: 'layout',
+    defaultProps: {
+      height: 40,
+    },
+    defaultStyles: {},
+    editableProps: ['height'],
+    editableStyles: [],
+  },
+  {
+    type: 'divider',
+    name: 'Divisor',
+    category: 'layout',
+    defaultProps: {},
+    defaultStyles: {},
+    editableProps: [],
+    editableStyles: ['borderColor', 'borderWidth'],
+  },
+]
