@@ -1,7 +1,7 @@
 {
   "name": "@smartgesti/site-editor",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "description": "Site editor component for SmartGesti platform",
   "author": "SmartGesTI",
@@ -9,6 +9,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/SmartGesTI/smartgesti-site-editor.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "site-editor",
