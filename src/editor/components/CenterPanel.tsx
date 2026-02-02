@@ -1,7 +1,12 @@
-import React from "react";
+import { lazy, Suspense } from "react";
 import { SiteDocumentV2 } from "../../engine";
-import { PreviewV2 } from "../../engine";
 import { PageTabBar } from "../PageTabBar";
+import { LoadingSpinner } from "../../components/LoadingSpinner";
+
+// Lazy load PreviewV2 (componente pesado)
+const PreviewV2 = lazy(() =>
+  import("../../engine").then(module => ({ default: module.PreviewV2 }))
+);
 
 interface CenterPanelProps {
   document: SiteDocumentV2;
@@ -41,13 +46,15 @@ export function CenterPanel({
       {/* Preview */}
       <div className="flex-1 overflow-hidden">
         {currentPage ? (
-          <PreviewV2
-            document={document}
-            pageId={currentPageId}
-            style={{ height: "100%" }}
-            onBlockClick={onBlockClick}
-            selectedBlockId={selectedBlockId}
-          />
+          <Suspense fallback={<LoadingSpinner />}>
+            <PreviewV2
+              document={document}
+              pageId={currentPageId}
+              style={{ height: "100%" }}
+              onBlockClick={onBlockClick}
+              selectedBlockId={selectedBlockId}
+            />
+          </Suspense>
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-gray-500">Nenhuma página encontrada</div>

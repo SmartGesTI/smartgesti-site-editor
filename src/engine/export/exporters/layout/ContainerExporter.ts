@@ -11,7 +11,7 @@ export function exportContainer(
   depth: number,
   basePath?: string,
   theme?: ThemeTokens,
-  renderChild?: (block: Block, depth: number, basePath?: string, theme?: ThemeTokens) => string,
+  renderChild?: (block: Block, _depth: number, basePath?: string, theme?: ThemeTokens) => string,
 ): string {
   const {
     maxWidth = "1200px",

@@ -3,7 +3,7 @@
  * Editor dinâmico de propriedades baseado em inspectorMeta
  */
 
-import React, { useMemo } from "react";
+import { memo, useMemo, useCallback } from "react";
 import { Block, SiteDocumentV2, componentRegistry, InspectorMeta } from "../../engine";
 import { VariationSelector } from "./VariationSelector";
 import { PropertyGroup } from "./PropertyGroup";
@@ -17,8 +17,9 @@ interface BlockPropertyEditorProps {
 
 /**
  * Componente principal do editor de propriedades
+ * Memoizado para performance
  */
-export function BlockPropertyEditor({
+export const BlockPropertyEditor = memo(function BlockPropertyEditor({
   block,
   onUpdate,
 }: BlockPropertyEditorProps) {
@@ -71,9 +72,9 @@ export function BlockPropertyEditor({
     );
   }
 
-  const handlePropChange = (propName: string, value: any) => {
+  const handlePropChange = useCallback((propName: string, value: any) => {
     onUpdate({ [propName]: value });
-  };
+  }, [onUpdate]);
 
   return (
     <div className="p-3 space-y-4">
@@ -109,4 +110,4 @@ export function BlockPropertyEditor({
       )}
     </div>
   );
-}
+});

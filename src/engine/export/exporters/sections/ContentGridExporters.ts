@@ -38,7 +38,7 @@ export function exportBlogCardGrid(
   depth: number,
   basePath?: string,
   theme?: ThemeTokens,
-  renderChild?: (block: Block, depth: number, basePath?: string, theme?: ThemeTokens) => string,
+  renderChild?: (block: Block, _depth: number, basePath?: string, theme?: ThemeTokens) => string,
 ): string {
   const { title, subtitle, columns = 3, cards = [] } = (block as any).props;
 
@@ -89,7 +89,7 @@ export function exportTeamGrid(
   depth: number,
   basePath?: string,
   theme?: ThemeTokens,
-  renderChild?: (block: Block, depth: number, basePath?: string, theme?: ThemeTokens) => string,
+  renderChild?: (block: Block, _depth: number, basePath?: string, theme?: ThemeTokens) => string,
 ): string {
   const {
     title,

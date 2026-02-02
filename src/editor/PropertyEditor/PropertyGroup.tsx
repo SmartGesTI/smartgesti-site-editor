@@ -1,4 +1,4 @@
-import React from "react";
+import { memo } from "react";
 import { InspectorMeta } from "../../engine";
 import { renderPropertyInput } from "./renderPropertyInput";
 
@@ -14,8 +14,9 @@ interface PropertyGroupProps {
 
 /**
  * Componente para agrupar propriedades relacionadas
+ * Memoizado para evitar re-renders desnecessários
  */
-export function PropertyGroup({
+export const PropertyGroup = memo(function PropertyGroup({
   groupName,
   props,
   onPropChange,
@@ -38,4 +39,4 @@ export function PropertyGroup({
       </div>
     </div>
   );
-}
+});

@@ -11,7 +11,7 @@ export function exportSection(
   depth: number,
   basePath?: string,
   theme?: ThemeTokens,
-  renderChild?: (block: Block, depth: number, basePath?: string, theme?: ThemeTokens) => string,
+  renderChild?: (block: Block, _depth: number, basePath?: string, theme?: ThemeTokens) => string,
 ): string {
   const { id, bg, padding = "2rem", children = [] } = (block as any).props;
 

@@ -3,11 +3,12 @@
  * Editor de landing pages usando engine V2
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, lazy, Suspense } from "react";
 import { TemplatePicker } from "./TemplatePicker";
 import { Toolbar, LeftPanel, CenterPanel, RightPanel } from "./components";
-import { cn } from "../utils/cn";
 import { useEditorState } from "../hooks/useEditorState";
+import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 import { SiteDocumentV2, PatchBuilder } from "../engine";
 import { getTemplate } from "../shared/templates";
 import type { TemplateId } from "../shared/templates";
@@ -136,6 +137,19 @@ export function LandingPageEditorV2({
   };
 
   // No editor: cliques em links no preview não navegam; trocam a página em edição
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onUndo: handleUndo,
+    onRedo: handleRedo,
+    onSave: handleSave,
+    onDelete: () => {
+      if (selectedBlockId) {
+        handleDeleteBlock(selectedBlockId);
+      }
+    },
+    onDeselect: () => setSelectedBlockId(null),
+  });
+
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type !== "editor-navigate" || !event.data.href) return;

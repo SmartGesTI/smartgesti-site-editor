@@ -25,7 +25,7 @@ export function exportFeatureGrid(
   depth: number,
   basePath?: string,
   theme?: ThemeTokens,
-  renderChild?: (block: Block, depth: number, basePath?: string, theme?: ThemeTokens) => string,
+  renderChild?: (block: Block, _depth: number, basePath?: string, theme?: ThemeTokens) => string,
 ): string {
   const {
     title,
@@ -136,7 +136,7 @@ export function exportPricing(
   depth: number,
   basePath?: string,
   theme?: ThemeTokens,
-  renderChild?: (block: Block, depth: number, basePath?: string, theme?: ThemeTokens) => string,
+  renderChild?: (block: Block, _depth: number, basePath?: string, theme?: ThemeTokens) => string,
 ): string {
   const { title, subtitle, plans = [] } = (block as any).props;
 
@@ -201,7 +201,7 @@ export function exportTestimonialGrid(
   depth: number,
   basePath?: string,
   theme?: ThemeTokens,
-  renderChild?: (block: Block, depth: number, basePath?: string, theme?: ThemeTokens) => string,
+  renderChild?: (block: Block, _depth: number, basePath?: string, theme?: ThemeTokens) => string,
 ): string {
   const {
     title,
@@ -248,7 +248,7 @@ export function exportFaq(
   depth: number,
   basePath?: string,
   theme?: ThemeTokens,
-  renderChild?: (block: Block, depth: number, basePath?: string, theme?: ThemeTokens) => string,
+  renderChild?: (block: Block, _depth: number, basePath?: string, theme?: ThemeTokens) => string,
 ): string {
   const { title, subtitle, items = [] } = (block as any).props;
 

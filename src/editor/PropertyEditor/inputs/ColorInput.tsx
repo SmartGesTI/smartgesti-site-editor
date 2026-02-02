@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useRef } from "react";
+import { memo, useCallback, useState, useEffect, useRef } from "react";
 import { cn } from "../../../utils/cn";
 
 interface ColorInputProps {
@@ -10,8 +10,9 @@ interface ColorInputProps {
 
 /**
  * Componente de input de cor com debounce para arrastar
+ * Memoizado para performance
  */
-export function ColorInput({
+export const ColorInput = memo(function ColorInput({
   value,
   onChange,
   label,
@@ -92,4 +93,4 @@ export function ColorInput({
       </div>
     </div>
   );
-}
+});
