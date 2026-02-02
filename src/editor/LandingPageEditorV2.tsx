@@ -27,7 +27,7 @@ export interface UploadConfig {
   authToken?: string;
 }
 
-interface LandingPageEditorV2Props {
+export interface LandingPageEditorV2Props {
   initialData?: SiteDocumentV2;
   /** ID do template a carregar quando não houver initialData (ex.: "escola-edvi") */
   defaultTemplateId?: TemplateId;

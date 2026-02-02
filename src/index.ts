@@ -18,6 +18,7 @@ export { moduleRegistry, createModule } from './modules/registry'
 
 // Landing Page Builder V2 exports
 export { LandingPageEditorV2 } from './editor/LandingPageEditorV2'
+export type { UploadConfig, LandingPageEditorV2Props } from './editor/LandingPageEditorV2'
 export { LandingPageViewerV2 } from './viewer/LandingPageViewerV2'
 export type {
   Site,
