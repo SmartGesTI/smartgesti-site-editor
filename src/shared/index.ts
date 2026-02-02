@@ -1,15 +1,14 @@
 /**
  * SmartGesti Site Editor - Shared Module
- * 
- * Este módulo exporta tipos, prompts, validadores e templates
+ *
+ * Este módulo exporta tipos, validadores e templates
  * para uso por backends que consomem o Editor
- * 
+ *
  * Uso:
- * import { 
- *   SiteDocumentV2, 
- *   validateDocument, 
- *   SITE_GENERATOR_SYSTEM_PROMPT,
- *   templates 
+ * import {
+ *   SiteDocumentV2,
+ *   validateDocument,
+ *   templates
  * } from '@smartgesti/site-editor/shared'
  */
 
@@ -73,7 +72,7 @@ export type {
   LayoutTokens,
   ComponentTokens,
   ThemePreset,
-} from './schema'
+} from "./schema";
 
 // Theme utilities
 export {
@@ -81,22 +80,7 @@ export {
   generateThemeCSSVariables,
   themePresets,
   generateBlockId,
-} from './schema'
-
-// ============================================
-// PROMPTS
-// ============================================
-export {
-  AVAILABLE_BLOCK_TYPES,
-  SCHEMA_REFERENCE,
-  SITE_GENERATOR_SYSTEM_PROMPT,
-  SECTION_REFINE_SYSTEM_PROMPT,
-  CONTENT_GENERATOR_SYSTEM_PROMPT,
-  buildSiteGenerationPrompt,
-  buildSectionRefinePrompt,
-} from './prompts/siteGeneratorPrompt'
-
-export type { GenerationOptions } from './prompts/siteGeneratorPrompt'
+} from "./schema";
 
 // ============================================
 // VALIDATORS
@@ -105,23 +89,18 @@ export {
   validateDocument,
   sanitizeDocument,
   ensureBlockIds,
-} from './validators'
+} from "./validators";
 
-export type {
-  ValidationError,
-  ValidationResult,
-} from './validators'
+export type { ValidationError, ValidationResult } from "./validators";
 
 // ============================================
 // TEMPLATES
 // ============================================
 export {
   // Individual templates
-  landingSaasTemplate,
-  landingEscolaTemplate,
-  landingPortfolioTemplate,
-  landingEmpresaTemplate,
-  landingEventoTemplate,
+  escolaPremiumTemplate,
+  escolaEdviTemplate,
+  escolaZilomTemplate,
   // Template utilities
   templates,
   templateList,
@@ -129,9 +108,6 @@ export {
   getTemplatesByCategory,
   getTemplatesByTag,
   searchTemplates,
-} from './templates'
+} from "./templates";
 
-export type {
-  TemplateInfo,
-  TemplateId,
-} from './templates'
+export type { TemplateInfo, TemplateId } from "./templates";

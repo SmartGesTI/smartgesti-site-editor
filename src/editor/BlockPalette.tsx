@@ -3,14 +3,18 @@
  * Paleta de blocos disponíveis para adicionar
  */
 
-import { useMemo } from 'react'
-import { BlockType, BlockDefinition } from '../engine'
-import { componentRegistry } from '../engine'
-import { cn } from '../utils/cn'
+import { useMemo } from "react";
+import { BlockType, BlockDefinition } from "../engine";
+import { componentRegistry } from "../engine";
+import { cn } from "../utils/cn";
 
 interface BlockPaletteProps {
-  onAddBlock: (blockType: BlockType, parentBlockId?: string, position?: number) => void
-  selectedParentBlockId?: string | null
+  onAddBlock: (
+    blockType: BlockType,
+    parentBlockId?: string,
+    position?: number,
+  ) => void;
+  selectedParentBlockId?: string | null;
 }
 
 /**
@@ -19,52 +23,54 @@ interface BlockPaletteProps {
 function getBlockIcon(type: BlockType): string {
   const icons: Record<string, string> = {
     // Layout
-    container: '📦',
-    stack: '📚',
-    grid: '⊞',
-    box: '☐',
-    section: '▦',
-    spacer: '↕',
-    
+    container: "📦",
+    stack: "📚",
+    grid: "⊞",
+    box: "☐",
+    section: "▦",
+    spacer: "↕",
+
     // Conteúdo
-    heading: 'H',
-    text: 'T',
-    image: '🖼️',
-    video: '🎥',
-    icon: '★',
-    badge: '🎟️',
-    avatar: '👤',
-    socialLinks: '🌐',
-    
+    heading: "H",
+    text: "T",
+    image: "🖼️",
+    video: "🎥",
+    icon: "★",
+    badge: "🎟️",
+    avatar: "👤",
+    socialLinks: "🌐",
+
     // Interativos
-    button: '🔘',
-    link: '🔗',
-    divider: '─',
-    card: '🃏',
-    
+    button: "🔘",
+    link: "🔗",
+    divider: "─",
+    card: "🃏",
+
     // Seções
-    hero: '🏆',
-    feature: '✨',
-    featureGrid: '⭐',
-    pricing: '💰',
-    pricingCard: '💳',
-    testimonial: '💬',
-    testimonialGrid: '🗨️',
-    faq: '❓',
-    faqItem: '📝',
-    cta: '📣',
-    stats: '📊',
-    statItem: '#',
-    logoCloud: '🏂',
-    navbar: '☰',
-    
+    hero: "🏆",
+    feature: "✨",
+    featureGrid: "⭐",
+    pricing: "💰",
+    pricingCard: "💳",
+    testimonial: "💬",
+    testimonialGrid: "🗨️",
+    courseCardGrid: "📚",
+    categoryCardGrid: "📂",
+    faq: "❓",
+    faqItem: "📝",
+    cta: "📣",
+    stats: "📊",
+    statItem: "#",
+    logoCloud: "🏂",
+    navbar: "☰",
+
     // Formulários
-    form: '📋',
-    input: '✏️',
-    textarea: '📑',
-    formSelect: '👇',
-  }
-  return icons[type] || '•'
+    form: "📋",
+    input: "✏️",
+    textarea: "📑",
+    formSelect: "👇",
+  };
+  return icons[type] || "•";
 }
 
 export function BlockPalette({
@@ -79,26 +85,28 @@ export function BlockPalette({
       composition: [],
       sections: [],
       forms: [],
-    }
+    };
 
     componentRegistry.getAll().forEach((def) => {
       if (categories[def.category]) {
-        categories[def.category].push(def)
+        categories[def.category].push(def);
       }
-    })
+    });
 
-    return categories
-  }, [])
+    return categories;
+  }, []);
 
   const handleAddBlock = (blockType: BlockType) => {
-    onAddBlock(blockType, selectedParentBlockId || undefined)
-  }
+    onAddBlock(blockType, selectedParentBlockId || undefined);
+  };
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex-shrink-0 p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Adicionar Bloco</h2>
+        <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+          Adicionar Bloco
+        </h2>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           Clique para adicionar ao site
         </p>
@@ -118,10 +126,10 @@ export function BlockPalette({
                   key={def.type}
                   onClick={() => handleAddBlock(def.type)}
                   className={cn(
-                    'flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all',
-                    'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
-                    'hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20',
-                    'hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
+                    "flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all",
+                    "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
+                    "hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20",
+                    "hover:scale-[1.02] active:scale-[0.98] cursor-pointer",
                   )}
                   title={def.description}
                 >
@@ -147,10 +155,10 @@ export function BlockPalette({
                   key={def.type}
                   onClick={() => handleAddBlock(def.type)}
                   className={cn(
-                    'flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all',
-                    'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
-                    'hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20',
-                    'hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
+                    "flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all",
+                    "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
+                    "hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20",
+                    "hover:scale-[1.02] active:scale-[0.98] cursor-pointer",
                   )}
                   title={def.description}
                 >
@@ -176,10 +184,10 @@ export function BlockPalette({
                   key={def.type}
                   onClick={() => handleAddBlock(def.type)}
                   className={cn(
-                    'flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all',
-                    'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
-                    'hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20',
-                    'hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
+                    "flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all",
+                    "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
+                    "hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20",
+                    "hover:scale-[1.02] active:scale-[0.98] cursor-pointer",
                   )}
                   title={def.description}
                 >
@@ -205,10 +213,10 @@ export function BlockPalette({
                   key={def.type}
                   onClick={() => handleAddBlock(def.type)}
                   className={cn(
-                    'flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all',
-                    'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
-                    'hover:border-purple-500 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-950/20',
-                    'hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
+                    "flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all",
+                    "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
+                    "hover:border-purple-500 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-950/20",
+                    "hover:scale-[1.02] active:scale-[0.98] cursor-pointer",
                   )}
                   title={def.description}
                 >
@@ -234,10 +242,10 @@ export function BlockPalette({
                   key={def.type}
                   onClick={() => handleAddBlock(def.type)}
                   className={cn(
-                    'flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all',
-                    'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
-                    'hover:border-green-500 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950/20',
-                    'hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
+                    "flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all",
+                    "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
+                    "hover:border-green-500 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950/20",
+                    "hover:scale-[1.02] active:scale-[0.98] cursor-pointer",
                   )}
                   title={def.description}
                 >
@@ -258,5 +266,5 @@ export function BlockPalette({
         )}
       </div>
     </div>
-  )
+  );
 }

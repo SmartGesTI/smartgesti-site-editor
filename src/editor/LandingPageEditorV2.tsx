@@ -3,40 +3,33 @@
  * Editor de landing pages usando engine V2
  */
 
-import { useState } from 'react'
-import { BlockSelector } from './BlockSelector'
-import { BlockPropertyEditor } from './BlockPropertyEditor'
-import { BlockPalette } from './BlockPalette'
-import { AIAgentPanel } from './AIAgentPanel'
-import { PreviewV2 } from '../engine'
-import { PaletteSelector } from './PaletteSelector'
-import { Save, Eye, Undo, Redo, RotateCcw, Sparkles } from 'lucide-react'
-import { cn } from '../utils/cn'
-import { useEditorState } from '../hooks/useEditorState'
-import { SiteDocumentV2, PatchBuilder } from '../engine'
-import type { Patch } from '../engine/patch/types'
-import type { SiteDocumentV2 as AIDocumentV2 } from '../shared/schema'
-
-/** JSON Patch Operation (RFC 6902) - tipo local para interface com API */
-interface APIPatchOperation {
-  op: 'add' | 'remove' | 'replace' | 'move' | 'copy' | 'test'
-  path: string
-  value?: any
-  from?: string
-}
+import { useState, useCallback, useEffect } from "react";
+import { BlockSelector } from "./BlockSelector";
+import { BlockPropertyEditor } from "./BlockPropertyEditor";
+import { TemplatePicker } from "./TemplatePicker";
+import { PageTabBar } from "./PageTabBar";
+import { PreviewV2 } from "../engine";
+import { PaletteSelector } from "./PaletteSelector";
+import { Save, Eye, Undo, Redo, RotateCcw } from "lucide-react";
+import { cn } from "../utils/cn";
+import { useEditorState } from "../hooks/useEditorState";
+import { SiteDocumentV2, PatchBuilder } from "../engine";
+import { getTemplate } from "../shared/templates";
+import type { TemplateId } from "../shared/templates";
+import { sharedTemplateToEngineDocument } from "../utils/sharedTemplateToEngine";
+import { findBlockInStructure } from "../utils/blockUtils";
+import { isLightColor } from "../utils/colorUtils";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 interface LandingPageEditorV2Props {
-  initialData?: SiteDocumentV2
-  onSave?: (data: SiteDocumentV2) => Promise<void>
-  onPublish?: (data: SiteDocumentV2) => Promise<void>
-  /** URL do endpoint de geração de sites por IA */
-  aiEndpoint?: string
-  /** Token de autenticação para o endpoint de IA */
-  aiAuthToken?: string
+  initialData?: SiteDocumentV2;
+  /** ID do template a carregar quando não houver initialData (ex.: "escola-edvi") */
+  defaultTemplateId?: TemplateId;
+  onSave?: (data: SiteDocumentV2) => Promise<void>;
+  onPublish?: (data: SiteDocumentV2) => Promise<void>;
 }
 
 // ============================================================================
@@ -45,62 +38,90 @@ interface LandingPageEditorV2Props {
 
 export function LandingPageEditorV2({
   initialData,
+  defaultTemplateId,
   onSave,
   onPublish,
-  aiEndpoint,
-  aiAuthToken,
 }: LandingPageEditorV2Props) {
-  // Hook de estado do editor
+  // Hook de estado do editor (edição por páginas; sem navegação)
   const {
     document,
+    currentPageId,
     currentPage,
     selectedBlockId,
     selectedBlock,
     history,
+    setCurrentPageId,
+    addPage,
+    removePage,
+    canRemovePage,
     setSelectedBlockId,
     handleUndo,
     handleRedo,
-    handleAddBlock,
     handleDeleteBlock,
     handleUpdateBlock,
     applyChange,
     resetToTemplate,
     isPaletteSelected,
     loadDocument,
-  } = useEditorState({ initialData })
+  } = useEditorState({ initialData });
 
   // Estado local da UI
-  const [showPalette, setShowPalette] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [showAIAgent, setShowAIAgent] = useState(false)
+  const [isSaving, setIsSaving] = useState(false);
+  const [currentTemplateId, setCurrentTemplateId] = useState<TemplateId | null>(
+    null,
+  );
+
+  // Carregar template escolhido (converter shared → engine e carregar no editor)
+  const handleSelectTemplate = useCallback(
+    (templateId: TemplateId) => {
+      const sharedDoc = getTemplate(templateId);
+      if (!sharedDoc) return;
+      const engineDoc = sharedTemplateToEngineDocument(sharedDoc);
+      loadDocument(engineDoc);
+      setCurrentTemplateId(templateId);
+    },
+    [loadDocument],
+  );
+
+  // Ao montar sem documento: carregar defaultTemplateId se informado
+  useEffect(() => {
+    if (!document && defaultTemplateId) {
+      handleSelectTemplate(defaultTemplateId);
+    }
+  }, [defaultTemplateId]); // eslint-disable-line react-hooks/exhaustive-deps -- carregar só uma vez quando defaultTemplateId existe
 
   // Handlers de save/publish
   const handleSave = async () => {
-    if (!onSave) return
-    setIsSaving(true)
+    if (!document || !onSave) return;
+    setIsSaving(true);
     try {
-      await onSave(document)
+      await onSave(document);
     } catch (error) {
-      console.error('Error saving:', error)
+      console.error("Error saving:", error);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const handlePublish = async () => {
-    if (!onPublish) return
-    setIsSaving(true)
+    if (!document || !onPublish) return;
+    setIsSaving(true);
     try {
-      await onPublish(document)
+      await onPublish(document);
     } catch (error) {
-      console.error('Error publishing:', error)
+      console.error("Error publishing:", error);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
-  // Handler para atualizar paleta de cores
+  // Handler para atualizar paleta de cores (inclui mutedText, primaryText, linkColor e menuLinkColor)
   const handlePaletteChange = (palette: any) => {
+    if (!document) return;
+    const bgLight = isLightColor(palette.background ?? "#ffffff");
+    const primaryLight = isLightColor(palette.primary ?? "#3b82f6");
+    const mutedText = bgLight ? "#6b7280" : "#9ca3af";
+    const primaryText = primaryLight ? "#1f2937" : "#ffffff";
     const patch = PatchBuilder.updateTheme(document, {
       colors: {
         ...document.theme.colors,
@@ -110,179 +131,52 @@ export function LandingPageEditorV2({
         bg: palette.background,
         surface: palette.surface || document.theme.colors.surface,
         text: palette.text || document.theme.colors.text,
+        mutedText,
+        primaryText,
+        linkColor: palette.linkColor || palette.primary, // Links gerais
+        menuLinkColor: palette.menuLinkColor || palette.primary, // Links do menu navbar
       },
-    })
-    applyChange(patch, 'Update color palette')
-  }
+    });
+    applyChange(patch, "Update color palette");
+  };
 
-  // Função para converter documento do Editor para formato da API de IA
-  const convertToAIDocument = (doc: SiteDocumentV2, page: any): AIDocumentV2 => {
-    return {
-      meta: {
-        title: page?.name || doc.pages?.[0]?.name || 'Site',
-        description: '',
-        language: 'pt-BR',
-      },
-      theme: {
-        colors: {
-          primary: doc.theme.colors.primary,
-          secondary: doc.theme.colors.secondary,
-          accent: doc.theme.colors.accent,
-          background: doc.theme.colors.bg,
-          surface: doc.theme.colors.surface,
-          text: doc.theme.colors.text,
-          textMuted: doc.theme.colors.mutedText,
-          border: doc.theme.colors.border,
-          success: '#22c55e',
-          warning: '#f59e0b',
-          error: '#ef4444',
-        },
-        typography: {
-          fontFamily: doc.theme.typography?.fontFamily?.body || 'Inter, system-ui, sans-serif',
-          fontFamilyHeading: doc.theme.typography?.fontFamily?.heading || 'Inter, system-ui, sans-serif',
-          baseFontSize: doc.theme.typography?.baseSize || '16px',
-          lineHeight: 1.6,
-          headingLineHeight: 1.2,
-        },
-        spacing: {
-          unit: '0.25rem',
-          scale: [0, 1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64],
-        },
-        effects: {
-          borderRadius: '0.5rem',
-          shadow: '0 1px 3px rgba(0,0,0,0.1)',
-          shadowLg: '0 10px 15px rgba(0,0,0,0.1)',
-          transition: '0.2s ease',
-        },
-      },
-      structure: page?.structure || [],
-    }
-  }
-
-  // Handler para quando IA gera um novo site
-  const handleAIGenerate = (aiDocument: AIDocumentV2) => {
-    // Converter documento da IA para o formato do Editor
-    const editorDocument: SiteDocumentV2 = {
-      schemaVersion: 2,
-      theme: {
-        colors: {
-          bg: aiDocument.theme.colors.background,
-          surface: aiDocument.theme.colors.surface,
-          border: aiDocument.theme.colors.border,
-          text: aiDocument.theme.colors.text,
-          mutedText: aiDocument.theme.colors.textMuted,
-          primary: aiDocument.theme.colors.primary,
-          primaryText: '#ffffff',
-          secondary: aiDocument.theme.colors.secondary,
-          accent: aiDocument.theme.colors.accent,
-          ring: aiDocument.theme.colors.primary,
-        },
-        radiusScale: 'md',
-        shadowScale: 'soft',
-        spacingScale: 'normal',
-        motion: 'subtle',
-        backgroundStyle: 'flat',
-        typography: {
-          fontFamily: {
-            heading: aiDocument.theme.typography.fontFamilyHeading,
-            body: aiDocument.theme.typography.fontFamily,
-          },
-          baseSize: aiDocument.theme.typography.baseFontSize,
-          headingScale: {
-            h1: '2.5rem',
-            h2: '2rem',
-            h3: '1.75rem',
-            h4: '1.5rem',
-            h5: '1.25rem',
-            h6: '1rem',
-          },
-        },
-      },
-      pages: [
-        {
-          id: 'home',
-          name: aiDocument.meta.title || 'Home',
-          slug: 'home',
-          structure: aiDocument.structure as any,
-        },
-      ],
-    }
-
-    // Carregar o documento no editor
-    if (loadDocument) {
-      loadDocument(editorDocument)
-    }
-
-    // Fechar o painel de IA
-    setShowAIAgent(false)
-    setSelectedBlockId(null)
-  }
-
-  // Handler para quando IA gera patches (modo edição rápida)
-  const handleAIPatches = (patches: APIPatchOperation[]) => {
-    console.log('============================================')
-    console.log('[AI Patches] INICIANDO APLICAÇÃO DE PATCHES')
-    console.log('[AI Patches] Patches recebidos:', JSON.stringify(patches, null, 2))
-
-    // Converter patches do formato AI para o formato do Editor
-    const convertedPatches: Patch = patches.map(patch => {
-      let path = patch.path
-      
-      // Converter /structure/N para /pages/0/structure/N
-      if (path.startsWith('/structure')) {
-        path = `/pages/0${path}`
+  // No editor: cliques em links no preview não navegam; trocam a página em edição
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type !== "editor-navigate" || !event.data.href) return;
+      const href = String(event.data.href);
+      if (!document) return;
+      // Links internos: /site/p/:slug ou /p/:slug
+      const match = href.match(/^(?:\/site)?\/p\/([^#?]+)/);
+      if (match) {
+        const slug = match[1];
+        const page = document.pages.find((p) => p.slug === slug);
+        if (page) setCurrentPageId(page.id);
+        return;
       }
-      
-      // Corrigir caminho de props - a IA pode enviar /structure/0/bg mas deveria ser /structure/0/props/bg
-      // Detectar se está tentando acessar uma prop diretamente no bloco
-      const structureMatch = path.match(/^\/pages\/0\/structure\/(\d+)\/([^/]+)$/)
-      if (structureMatch) {
-        const [, index, propName] = structureMatch
-        // Se não é id, type ou props, provavelmente é uma prop que deveria estar em props/
-        if (!['id', 'type', 'props'].includes(propName)) {
-          path = `/pages/0/structure/${index}/props/${propName}`
-          console.log(`[AI Patches] Corrigindo path: ${patch.path} -> ${path}`)
+      // Âncora #id: selecionar bloco com esse id e trocar para a página que o contém
+      if (href.startsWith("#")) {
+        const id = href.slice(1);
+        for (const p of document.pages) {
+          if (findBlockInStructure(p.structure || [], id)) {
+            setCurrentPageId(p.id);
+            setSelectedBlockId(id);
+            break;
+          }
         }
       }
-      
-      // Converter /theme/colors/background para /theme/colors/bg
-      if (path === '/theme/colors/background') {
-        path = '/theme/colors/bg'
-      }
-      // Converter /theme/colors/textMuted para /theme/colors/mutedText
-      if (path === '/theme/colors/textMuted') {
-        path = '/theme/colors/mutedText'
-      }
-      
-      // Retornar com tipo correto para o engine
-      if (patch.op === 'add') {
-        return { op: 'add' as const, path, value: patch.value }
-      } else if (patch.op === 'remove') {
-        return { op: 'remove' as const, path }
-      } else if (patch.op === 'replace') {
-        return { op: 'replace' as const, path, value: patch.value }
-      } else if (patch.op === 'move') {
-        return { op: 'move' as const, path, from: patch.from! }
-      } else if (patch.op === 'copy') {
-        return { op: 'copy' as const, path, from: patch.from! }
-      } else {
-        return { op: 'test' as const, path, value: patch.value }
-      }
-    })
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [document, setCurrentPageId, setSelectedBlockId]);
 
-    console.log('[AI Patches] Patches convertidos:', JSON.stringify(convertedPatches, null, 2))
-
-    // Aplicar patches usando applyChange (atualização suave com histórico)
-    try {
-      applyChange(convertedPatches, 'AI Edit')
-      console.log('[AI Patches] Patches aplicados com sucesso via applyChange!')
-    } catch (err) {
-      console.error('[AI Patches] Erro ao aplicar patches:', err)
-    }
-
-    // NÃO fechar o painel de IA - manter o chat aberto
-    console.log('[AI Patches] FIM - mantendo chat aberto')
-    console.log('============================================')
+  // Sem documento: mostrar seletor de templates
+  if (!document) {
+    return (
+      <div className="h-[91vh] max-h-[91vh] flex flex-col bg-background overflow-hidden">
+        <TemplatePicker onSelectTemplate={handleSelectTemplate} />
+      </div>
+    );
   }
 
   return (
@@ -291,59 +185,62 @@ export function LandingPageEditorV2({
       <Toolbar
         history={history}
         isSaving={isSaving}
-        showAIAgent={showAIAgent}
         onUndo={handleUndo}
         onRedo={handleRedo}
         onSave={handleSave}
         onPublish={onPublish ? handlePublish : undefined}
-        onReset={resetToTemplate}
-        onToggleAI={() => {
-          setShowAIAgent(!showAIAgent)
-          if (!showAIAgent) {
-            setSelectedBlockId(null)
-          }
-        }}
+        onReset={
+          currentTemplateId
+            ? () => {
+                // Recarregar o mesmo template
+                const sharedDoc = getTemplate(currentTemplateId);
+                if (sharedDoc)
+                  loadDocument(sharedTemplateToEngineDocument(sharedDoc));
+              }
+            : resetToTemplate
+        }
       />
 
       {/* Main Content - 3 Columns */}
       <div className="flex-1 flex overflow-hidden min-h-0 max-h-full">
-        {/* Left: Block Selector / Palette */}
+        {/* Left: Block Selector + Paletas */}
         <LeftPanel
-          showPalette={showPalette}
-          setShowPalette={setShowPalette}
           currentPage={currentPage}
           selectedBlockId={selectedBlockId}
           isPaletteSelected={isPaletteSelected}
           onSelectBlock={setSelectedBlockId}
           onDeleteBlock={handleDeleteBlock}
-          onAddBlock={handleAddBlock}
         />
 
-        {/* Center: Preview */}
+        {/* Center: Preview (apenas a página em edição) */}
         <CenterPanel
           document={document}
+          currentPageId={currentPageId}
           currentPage={currentPage}
           selectedBlockId={selectedBlockId}
           onBlockClick={setSelectedBlockId}
+          onSelectPage={setCurrentPageId}
+          onAddPage={() => {
+            const name = prompt("Nome da página:");
+            if (!name) return;
+            const slug = name.toLowerCase().replace(/\s+/g, "-");
+            const id = slug;
+            addPage(id, name, slug);
+          }}
+          onRemovePage={removePage}
+          canRemovePage={canRemovePage}
         />
 
         {/* Right: Editor Panel */}
         <RightPanel
           isPaletteSelected={isPaletteSelected}
           selectedBlock={selectedBlock}
-          showAIAgent={showAIAgent}
-          aiEndpoint={aiEndpoint}
-          aiAuthToken={aiAuthToken}
-          currentDocument={currentPage ? convertToAIDocument(document, currentPage) : undefined}
           onPaletteChange={handlePaletteChange}
           onUpdateBlock={handleUpdateBlock}
-          onAIGenerate={handleAIGenerate}
-          onApplyPatches={handleAIPatches}
-          onCloseAI={() => setShowAIAgent(false)}
         />
       </div>
     </div>
-  )
+  );
 }
 
 // ============================================================================
@@ -353,45 +250,25 @@ export function LandingPageEditorV2({
 function Toolbar({
   history,
   isSaving,
-  showAIAgent,
   onUndo,
   onRedo,
   onSave,
   onPublish,
   onReset,
-  onToggleAI,
 }: {
-  history: any
-  isSaving: boolean
-  showAIAgent: boolean
-  onUndo: () => void
-  onRedo: () => void
-  onSave: () => void
-  onPublish?: () => void
-  onReset: () => void
-  onToggleAI: () => void
+  history: any;
+  isSaving: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
+  onSave: () => void;
+  onPublish?: () => void;
+  onReset: () => void;
 }) {
   return (
     <div className="h-12 flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md flex items-center justify-between px-4">
       <h1 className="text-base font-semibold text-gray-800 dark:text-gray-100">
         Editor de Landing Page
       </h1>
-
-      {/* Center: AI Agent Button */}
-      <button
-        onClick={onToggleAI}
-        className={cn(
-          'h-8 px-4 rounded-full text-xs font-semibold transition-all cursor-pointer',
-          'flex items-center gap-2',
-          showAIAgent
-            ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/25'
-            : 'bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 hover:shadow-lg hover:shadow-purple-500/25',
-          'hover:scale-[1.02] active:scale-[0.98]'
-        )}
-      >
-        <Sparkles className="w-4 h-4" />
-        Agente Gerador de Sites
-      </button>
 
       <div className="flex items-center gap-2">
         {/* Undo/Redo */}
@@ -407,7 +284,7 @@ function Toolbar({
           title="Refazer"
           icon={<Redo className="w-4 h-4" />}
         />
-        
+
         {/* Reset */}
         <ToolbarButton
           onClick={onReset}
@@ -420,14 +297,14 @@ function Toolbar({
           onClick={onSave}
           disabled={isSaving}
           className={cn(
-            'h-8 px-3 rounded-md text-xs font-medium transition-all cursor-pointer',
-            'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl',
-            'disabled:opacity-60 disabled:cursor-not-allowed',
-            'flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]'
+            "h-8 px-3 rounded-md text-xs font-medium transition-all cursor-pointer",
+            "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl",
+            "disabled:opacity-60 disabled:cursor-not-allowed",
+            "flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]",
           )}
         >
           <Save className="w-3.5 h-3.5" />
-          {isSaving ? 'Salvando...' : 'Salvar'}
+          {isSaving ? "Salvando..." : "Salvar"}
         </button>
 
         {/* Publish */}
@@ -436,11 +313,11 @@ function Toolbar({
             onClick={onPublish}
             disabled={isSaving}
             className={cn(
-              'h-8 px-3 rounded-md text-xs font-medium transition-all cursor-pointer',
-              'border-2 border-purple-500 text-purple-600 dark:text-purple-400 bg-transparent',
-              'hover:bg-purple-50 dark:hover:bg-purple-950/50',
-              'disabled:opacity-60 disabled:cursor-not-allowed',
-              'flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]'
+              "h-8 px-3 rounded-md text-xs font-medium transition-all cursor-pointer",
+              "border-2 border-purple-500 text-purple-600 dark:text-purple-400 bg-transparent",
+              "hover:bg-purple-50 dark:hover:bg-purple-950/50",
+              "disabled:opacity-60 disabled:cursor-not-allowed",
+              "flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]",
             )}
           >
             <Eye className="w-3.5 h-3.5" />
@@ -449,7 +326,7 @@ function Toolbar({
         )}
       </div>
     </div>
-  )
+  );
 }
 
 function ToolbarButton({
@@ -458,187 +335,142 @@ function ToolbarButton({
   title,
   icon,
 }: {
-  onClick: () => void
-  disabled?: boolean
-  title: string
-  icon: React.ReactNode
+  onClick: () => void;
+  disabled?: boolean;
+  title: string;
+  icon: React.ReactNode;
 }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'h-8 w-8 rounded-md text-xs font-medium transition-all cursor-pointer',
-        'border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300',
-        'hover:bg-gray-100 dark:hover:bg-gray-800',
-        'disabled:opacity-40 disabled:cursor-not-allowed',
-        'flex items-center justify-center'
+        "h-8 w-8 rounded-md text-xs font-medium transition-all cursor-pointer",
+        "border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300",
+        "hover:bg-gray-100 dark:hover:bg-gray-800",
+        "disabled:opacity-40 disabled:cursor-not-allowed",
+        "flex items-center justify-center",
       )}
       title={title}
     >
       {icon}
     </button>
-  )
+  );
 }
 
 function LeftPanel({
-  showPalette,
-  setShowPalette,
   currentPage,
   selectedBlockId,
   isPaletteSelected,
   onSelectBlock,
   onDeleteBlock,
-  onAddBlock,
 }: {
-  showPalette: boolean
-  setShowPalette: (show: boolean) => void
-  currentPage: any
-  selectedBlockId: string | null
-  isPaletteSelected: boolean
-  onSelectBlock: (id: string | null) => void
-  onDeleteBlock: (id: string) => void
-  onAddBlock: (type: any, parentId?: string, position?: number) => void
+  currentPage: any;
+  selectedBlockId: string | null;
+  isPaletteSelected: boolean;
+  onSelectBlock: (id: string | null) => void;
+  onDeleteBlock: (id: string) => void;
 }) {
   return (
     <div className="w-64 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
-      {/* Tabs */}
-      <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <div className="grid grid-cols-2 h-9">
-          <button
-            onClick={() => {
-              setShowPalette(false)
-              onSelectBlock(null)
-            }}
-            className={cn(
-              'text-xs font-semibold transition-all',
-              !showPalette
-                ? 'bg-blue-500 text-white'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-            )}
-          >
-            Blocos
-          </button>
-          <button
-            onClick={() => {
-              setShowPalette(true)
-              onSelectBlock(null)
-            }}
-            className={cn(
-              'text-xs font-semibold transition-all',
-              showPalette
-                ? 'bg-blue-500 text-white'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-            )}
-          >
-            Adicionar
-          </button>
-        </div>
+      {/* Paletas de Cores */}
+      <div className="flex-shrink-0 p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+        <button
+          onClick={() => onSelectBlock("palette-selector")}
+          className={cn(
+            "w-full px-2 py-1.5 text-xs font-medium rounded transition-all",
+            isPaletteSelected
+              ? "bg-blue-500 text-white"
+              : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600",
+          )}
+        >
+          🎨 Paletas de Cores
+        </button>
       </div>
-
-      {/* Content */}
-      {showPalette ? (
-        <BlockPalette
-          onAddBlock={onAddBlock}
-          selectedParentBlockId={selectedBlockId}
-        />
-      ) : (
-        currentPage && (
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Ação rápida: Paletas */}
-            <div className="flex-shrink-0 p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-              <button
-                onClick={() => onSelectBlock('palette-selector')}
-                className={cn(
-                  'w-full px-2 py-1.5 text-xs font-medium rounded transition-all',
-                  isPaletteSelected
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
-                )}
-              >
-                🎨 Paletas de Cores
-              </button>
-            </div>
-            <BlockSelector
-              structure={currentPage.structure?.filter((b: any) => b?.id && b?.type) || []}
-              selectedBlockId={selectedBlockId}
-              onSelectBlock={onSelectBlock}
-              onDeleteBlock={onDeleteBlock}
-            />
-          </div>
-        )
+      {/* Lista de blocos da página atual */}
+      {currentPage && (
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+          <BlockSelector
+            structure={
+              currentPage.structure?.filter((b: any) => b?.id && b?.type) || []
+            }
+            selectedBlockId={selectedBlockId}
+            onSelectBlock={onSelectBlock}
+            onDeleteBlock={onDeleteBlock}
+          />
+        </div>
       )}
     </div>
-  )
+  );
 }
 
 function CenterPanel({
   document,
+  currentPageId,
   currentPage,
   selectedBlockId,
   onBlockClick,
+  onSelectPage,
+  onAddPage,
+  onRemovePage,
+  canRemovePage,
 }: {
-  document: SiteDocumentV2
-  currentPage: any
-  selectedBlockId: string | null
-  onBlockClick: (id: string) => void
+  document: SiteDocumentV2;
+  currentPageId: string;
+  currentPage: any;
+  selectedBlockId: string | null;
+  onBlockClick: (id: string) => void;
+  onSelectPage: (id: string) => void;
+  onAddPage: () => void;
+  onRemovePage: (id: string) => void;
+  canRemovePage: (id: string) => boolean;
 }) {
   return (
-    <div className="flex-1 overflow-hidden bg-gray-50/30 dark:bg-gray-900/30">
-      {currentPage ? (
-        <PreviewV2
-          document={document}
-          pageId="home"
-          style={{ height: '100%' }}
-          onBlockClick={onBlockClick}
-          selectedBlockId={selectedBlockId}
-        />
-      ) : (
-        <div className="flex items-center justify-center h-full">
-          <div className="text-gray-500">Nenhuma página encontrada</div>
-        </div>
-      )}
+    <div className="flex-1 flex flex-col overflow-hidden bg-gray-50/30 dark:bg-gray-900/30">
+      {/* Barra de abas das páginas */}
+      <PageTabBar
+        pages={document.pages}
+        currentPageId={currentPageId}
+        onSelectPage={onSelectPage}
+        onAddPage={onAddPage}
+        onRemovePage={onRemovePage}
+        canRemovePage={canRemovePage}
+      />
+
+      {/* Preview */}
+      <div className="flex-1 overflow-hidden">
+        {currentPage ? (
+          <PreviewV2
+            document={document}
+            pageId={currentPageId}
+            style={{ height: "100%" }}
+            onBlockClick={onBlockClick}
+            selectedBlockId={selectedBlockId}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-gray-500">Nenhuma página encontrada</div>
+          </div>
+        )}
+      </div>
     </div>
-  )
+  );
 }
 
 function RightPanel({
   isPaletteSelected,
   selectedBlock,
-  showAIAgent,
-  aiEndpoint,
-  aiAuthToken,
-  currentDocument,
   onPaletteChange,
   onUpdateBlock,
-  onAIGenerate,
-  onApplyPatches,
-  onCloseAI,
 }: {
-  isPaletteSelected: boolean
-  selectedBlock: any
-  showAIAgent: boolean
-  aiEndpoint?: string
-  aiAuthToken?: string
-  currentDocument?: AIDocumentV2
-  onPaletteChange: (palette: any) => void
-  onUpdateBlock: (updates: Record<string, any>) => void
-  onAIGenerate: (document: AIDocumentV2) => void
-  onApplyPatches: (patches: APIPatchOperation[]) => void
-  onCloseAI: () => void
+  isPaletteSelected: boolean;
+  selectedBlock: any;
+  onPaletteChange: (palette: any) => void;
+  onUpdateBlock: (updates: Record<string, any>) => void;
 }) {
   return (
     <div className="w-80 flex-shrink-0 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden flex flex-col">
-      {showAIAgent ? (
-        <AIAgentPanel
-          onGenerate={onAIGenerate}
-          onApplyPatches={onApplyPatches}
-          apiEndpoint={aiEndpoint}
-          authToken={aiAuthToken}
-          onClose={onCloseAI}
-          currentDocument={currentDocument}
-        />
-      ) : isPaletteSelected ? (
+      {isPaletteSelected ? (
         <div className="p-4 overflow-y-auto">
           <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-4">
             Escolha uma Paleta de Cores
@@ -650,10 +482,7 @@ function RightPanel({
         </div>
       ) : selectedBlock ? (
         <div className="overflow-y-auto overflow-x-hidden flex-1">
-          <BlockPropertyEditor
-            block={selectedBlock}
-            onUpdate={onUpdateBlock}
-          />
+          <BlockPropertyEditor block={selectedBlock} onUpdate={onUpdateBlock} />
         </div>
       ) : (
         <div className="p-4 text-center text-gray-500 dark:text-gray-400">
@@ -661,5 +490,5 @@ function RightPanel({
         </div>
       )}
     </div>
-  )
+  );
 }

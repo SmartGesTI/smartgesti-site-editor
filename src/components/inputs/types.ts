@@ -6,6 +6,7 @@ export interface ColorInputConfig {
   value: string
   onChange: (value: string) => void
   label?: string
+  description?: string
   placeholder?: string
   size?: 'small' | 'medium' | 'large'
 }

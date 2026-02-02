@@ -3,86 +3,90 @@
  * Usados para garantir que documentos gerados por IA são válidos
  */
 
-import type { SiteDocumentV2, Block, BlockType, SimpleThemeTokens } from './schema'
-import { defaultThemeTokens } from './schema'
-import { AVAILABLE_BLOCK_TYPES } from './prompts/siteGeneratorPrompt'
+import type {
+  SiteDocumentV2,
+  Block,
+  BlockType,
+  SimpleThemeTokens,
+} from "./schema";
+import { defaultThemeTokens, AVAILABLE_BLOCK_TYPES } from "./schema";
 
 export interface ValidationError {
-  path: string
-  message: string
-  severity: 'error' | 'warning'
+  path: string;
+  message: string;
+  severity: "error" | "warning";
 }
 
 export interface ValidationResult {
-  valid: boolean
-  errors: ValidationError[]
-  warnings: ValidationError[]
+  valid: boolean;
+  errors: ValidationError[];
+  warnings: ValidationError[];
 }
 
 /**
  * Valida um documento SiteDocumentV2 completo
  */
 export function validateDocument(doc: unknown): ValidationResult {
-  const errors: ValidationError[] = []
-  const warnings: ValidationError[] = []
+  const errors: ValidationError[] = [];
+  const warnings: ValidationError[] = [];
 
   // Verificar se é objeto
-  if (!doc || typeof doc !== 'object') {
+  if (!doc || typeof doc !== "object") {
     errors.push({
-      path: '',
-      message: 'Documento deve ser um objeto',
-      severity: 'error',
-    })
-    return { valid: false, errors, warnings }
+      path: "",
+      message: "Documento deve ser um objeto",
+      severity: "error",
+    });
+    return { valid: false, errors, warnings };
   }
 
-  const document = doc as Record<string, unknown>
+  const document = doc as Record<string, unknown>;
 
   // Validar meta
-  if (!document.meta || typeof document.meta !== 'object') {
+  if (!document.meta || typeof document.meta !== "object") {
     errors.push({
-      path: 'meta',
+      path: "meta",
       message: 'Campo "meta" é obrigatório',
-      severity: 'error',
-    })
+      severity: "error",
+    });
   } else {
-    const meta = document.meta as Record<string, unknown>
-    if (!meta.title || typeof meta.title !== 'string') {
+    const meta = document.meta as Record<string, unknown>;
+    if (!meta.title || typeof meta.title !== "string") {
       errors.push({
-        path: 'meta.title',
+        path: "meta.title",
         message: 'Campo "meta.title" é obrigatório e deve ser string',
-        severity: 'error',
-      })
+        severity: "error",
+      });
     }
   }
 
   // Validar theme
-  if (!document.theme || typeof document.theme !== 'object') {
+  if (!document.theme || typeof document.theme !== "object") {
     warnings.push({
-      path: 'theme',
+      path: "theme",
       message: 'Campo "theme" não encontrado, será usado tema padrão',
-      severity: 'warning',
-    })
+      severity: "warning",
+    });
   } else {
-    validateTheme(document.theme as Record<string, unknown>, errors, warnings)
+    validateTheme(document.theme as Record<string, unknown>, errors, warnings);
   }
 
   // Validar structure
   if (!document.structure || !Array.isArray(document.structure)) {
     errors.push({
-      path: 'structure',
+      path: "structure",
       message: 'Campo "structure" é obrigatório e deve ser array',
-      severity: 'error',
-    })
+      severity: "error",
+    });
   } else {
-    validateBlocks(document.structure, 'structure', errors, warnings)
+    validateBlocks(document.structure, "structure", errors, warnings);
   }
 
   return {
     valid: errors.length === 0,
     errors,
     warnings,
-  }
+  };
 }
 
 /**
@@ -91,32 +95,32 @@ export function validateDocument(doc: unknown): ValidationResult {
 function validateTheme(
   theme: Record<string, unknown>,
   _errors: ValidationError[],
-  warnings: ValidationError[]
+  warnings: ValidationError[],
 ): void {
   // Validar colors
-  if (theme.colors && typeof theme.colors === 'object') {
-    const colors = theme.colors as Record<string, unknown>
-    const requiredColors = ['primary', 'background', 'text']
+  if (theme.colors && typeof theme.colors === "object") {
+    const colors = theme.colors as Record<string, unknown>;
+    const requiredColors = ["primary", "background", "text"];
     for (const color of requiredColors) {
       if (!colors[color]) {
         warnings.push({
           path: `theme.colors.${color}`,
           message: `Cor "${color}" não definida, será usado valor padrão`,
-          severity: 'warning',
-        })
+          severity: "warning",
+        });
       }
     }
   }
 
   // Validar typography
-  if (theme.typography && typeof theme.typography === 'object') {
-    const typo = theme.typography as Record<string, unknown>
+  if (theme.typography && typeof theme.typography === "object") {
+    const typo = theme.typography as Record<string, unknown>;
     if (!typo.fontFamily) {
       warnings.push({
-        path: 'theme.typography.fontFamily',
-        message: 'fontFamily não definido, será usado padrão',
-        severity: 'warning',
-      })
+        path: "theme.typography.fontFamily",
+        message: "fontFamily não definido, será usado padrão",
+        severity: "warning",
+      });
     }
   }
 }
@@ -128,70 +132,79 @@ function validateBlocks(
   blocks: unknown[],
   path: string,
   errors: ValidationError[],
-  warnings: ValidationError[]
+  warnings: ValidationError[],
 ): void {
-  const seenIds = new Set<string>()
+  const seenIds = new Set<string>();
 
   blocks.forEach((block, index) => {
-    const blockPath = `${path}[${index}]`
+    const blockPath = `${path}[${index}]`;
 
-    if (!block || typeof block !== 'object') {
+    if (!block || typeof block !== "object") {
       errors.push({
         path: blockPath,
-        message: 'Bloco deve ser um objeto',
-        severity: 'error',
-      })
-      return
+        message: "Bloco deve ser um objeto",
+        severity: "error",
+      });
+      return;
     }
 
-    const b = block as Record<string, unknown>
+    const b = block as Record<string, unknown>;
 
     // Validar id
-    if (!b.id || typeof b.id !== 'string') {
+    if (!b.id || typeof b.id !== "string") {
       errors.push({
         path: `${blockPath}.id`,
         message: 'Bloco deve ter "id" string',
-        severity: 'error',
-      })
+        severity: "error",
+      });
     } else {
       if (seenIds.has(b.id)) {
         errors.push({
           path: `${blockPath}.id`,
           message: `ID duplicado: "${b.id}"`,
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      seenIds.add(b.id)
+      seenIds.add(b.id);
     }
 
     // Validar type
-    if (!b.type || typeof b.type !== 'string') {
+    if (!b.type || typeof b.type !== "string") {
       errors.push({
         path: `${blockPath}.type`,
         message: 'Bloco deve ter "type" string',
-        severity: 'error',
-      })
-    } else if (!AVAILABLE_BLOCK_TYPES.includes(b.type as typeof AVAILABLE_BLOCK_TYPES[number])) {
+        severity: "error",
+      });
+    } else if (
+      !AVAILABLE_BLOCK_TYPES.includes(
+        b.type as (typeof AVAILABLE_BLOCK_TYPES)[number],
+      )
+    ) {
       errors.push({
         path: `${blockPath}.type`,
         message: `Tipo de bloco inválido: "${b.type}"`,
-        severity: 'error',
-      })
+        severity: "error",
+      });
     }
 
     // Validar props
-    if (b.props && typeof b.props === 'object') {
-      const props = b.props as Record<string, unknown>
-      
+    if (b.props && typeof b.props === "object") {
+      const props = b.props as Record<string, unknown>;
+
       // Validar children recursivamente
       if (props.children && Array.isArray(props.children)) {
-        validateBlocks(props.children, `${blockPath}.props.children`, errors, warnings)
+        validateBlocks(
+          props.children,
+          `${blockPath}.props.children`,
+          errors,
+          warnings,
+        );
       }
 
       // Validações específicas por tipo
-      validateBlockProps(b.type as string, props, blockPath, errors, warnings)
+      validateBlockProps(b.type as string, props, blockPath, errors, warnings);
     }
-  })
+  });
 }
 
 /**
@@ -202,238 +215,263 @@ function validateBlockProps(
   props: Record<string, unknown>,
   path: string,
   errors: ValidationError[],
-  warnings: ValidationError[]
+  warnings: ValidationError[],
 ): void {
   switch (type) {
-    case 'heading':
-      if (!props.text || typeof props.text !== 'string') {
+    case "heading":
+      if (!props.text || typeof props.text !== "string") {
         errors.push({
           path: `${path}.props.text`,
           message: 'Heading deve ter "text"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      if (!props.level || typeof props.level !== 'number' || props.level < 1 || props.level > 6) {
+      if (
+        !props.level ||
+        typeof props.level !== "number" ||
+        props.level < 1 ||
+        props.level > 6
+      ) {
         warnings.push({
           path: `${path}.props.level`,
           message: 'Heading deve ter "level" entre 1-6',
-          severity: 'warning',
-        })
+          severity: "warning",
+        });
       }
-      break
+      break;
 
-    case 'text':
-      if (!props.text || typeof props.text !== 'string') {
+    case "text":
+      if (!props.text || typeof props.text !== "string") {
         errors.push({
           path: `${path}.props.text`,
           message: 'Text deve ter "text"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'image':
-      if (!props.src || typeof props.src !== 'string') {
+    case "image":
+      if (!props.src || typeof props.src !== "string") {
         errors.push({
           path: `${path}.props.src`,
           message: 'Image deve ter "src"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'button':
-      if (!props.text || typeof props.text !== 'string') {
+    case "button":
+      if (!props.text || typeof props.text !== "string") {
         errors.push({
           path: `${path}.props.text`,
           message: 'Button deve ter "text"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'link':
-      if (!props.text || typeof props.text !== 'string') {
+    case "link":
+      if (!props.text || typeof props.text !== "string") {
         errors.push({
           path: `${path}.props.text`,
           message: 'Link deve ter "text"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      if (!props.href || typeof props.href !== 'string') {
+      if (!props.href || typeof props.href !== "string") {
         errors.push({
           path: `${path}.props.href`,
           message: 'Link deve ter "href"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'hero':
-      if (!props.title || typeof props.title !== 'string') {
+    case "hero":
+      if (!props.title || typeof props.title !== "string") {
         errors.push({
           path: `${path}.props.title`,
           message: 'Hero deve ter "title"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'feature':
-      if (!props.title || typeof props.title !== 'string') {
+    case "feature":
+      if (!props.title || typeof props.title !== "string") {
         errors.push({
           path: `${path}.props.title`,
           message: 'Feature deve ter "title"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      if (!props.description || typeof props.description !== 'string') {
+      if (!props.description || typeof props.description !== "string") {
         errors.push({
           path: `${path}.props.description`,
           message: 'Feature deve ter "description"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'featureGrid':
+    case "featureGrid":
       if (!props.features || !Array.isArray(props.features)) {
         errors.push({
           path: `${path}.props.features`,
           message: 'FeatureGrid deve ter array "features"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'pricing':
+    case "pricing":
       if (!props.plans || !Array.isArray(props.plans)) {
         errors.push({
           path: `${path}.props.plans`,
           message: 'Pricing deve ter array "plans"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'testimonial':
-      if (!props.quote || typeof props.quote !== 'string') {
+    case "testimonial":
+      if (!props.quote || typeof props.quote !== "string") {
         errors.push({
           path: `${path}.props.quote`,
           message: 'Testimonial deve ter "quote"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      if (!props.author || typeof props.author !== 'string') {
+      if (!props.author || typeof props.author !== "string") {
         errors.push({
           path: `${path}.props.author`,
           message: 'Testimonial deve ter "author"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'testimonialGrid':
+    case "testimonialGrid":
       if (!props.testimonials || !Array.isArray(props.testimonials)) {
         errors.push({
           path: `${path}.props.testimonials`,
           message: 'TestimonialGrid deve ter array "testimonials"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'faq':
+    case "faq":
       if (!props.items || !Array.isArray(props.items)) {
         errors.push({
           path: `${path}.props.items`,
           message: 'FAQ deve ter array "items"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'faqItem':
-      if (!props.question || typeof props.question !== 'string') {
+    case "faqItem":
+      if (!props.question || typeof props.question !== "string") {
         errors.push({
           path: `${path}.props.question`,
           message: 'FAQItem deve ter "question"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      if (!props.answer || typeof props.answer !== 'string') {
+      if (!props.answer || typeof props.answer !== "string") {
         errors.push({
           path: `${path}.props.answer`,
           message: 'FAQItem deve ter "answer"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'cta':
-      if (!props.title || typeof props.title !== 'string') {
+    case "cta":
+      if (!props.title || typeof props.title !== "string") {
         errors.push({
           path: `${path}.props.title`,
           message: 'CTA deve ter "title"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      if (!props.buttonText || typeof props.buttonText !== 'string') {
+      if (!props.buttonText || typeof props.buttonText !== "string") {
         errors.push({
           path: `${path}.props.buttonText`,
           message: 'CTA deve ter "buttonText"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'stats':
+    case "stats":
       if (!props.items || !Array.isArray(props.items)) {
         errors.push({
           path: `${path}.props.items`,
           message: 'Stats deve ter array "items"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'navbar':
+    case "navbar":
       if (!props.links || !Array.isArray(props.links)) {
         warnings.push({
           path: `${path}.props.links`,
-          message: 'Navbar sem links de navegação',
-          severity: 'warning',
-        })
+          message: "Navbar sem links de navegação",
+          severity: "warning",
+        });
       }
-      break
+      break;
 
-    case 'input':
-    case 'textarea':
-      if (!props.name || typeof props.name !== 'string') {
+    case "courseCardGrid":
+      if (!props.cards || !Array.isArray(props.cards)) {
+        errors.push({
+          path: `${path}.props.cards`,
+          message: 'CourseCardGrid deve ter array "cards"',
+          severity: "error",
+        });
+      }
+      break;
+
+    case "categoryCardGrid":
+      if (!props.categories || !Array.isArray(props.categories)) {
+        errors.push({
+          path: `${path}.props.categories`,
+          message: 'CategoryCardGrid deve ter array "categories"',
+          severity: "error",
+        });
+      }
+      break;
+
+    case "input":
+    case "textarea":
+      if (!props.name || typeof props.name !== "string") {
         errors.push({
           path: `${path}.props.name`,
           message: `${type} deve ter "name"`,
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
 
-    case 'formSelect':
-      if (!props.name || typeof props.name !== 'string') {
+    case "formSelect":
+      if (!props.name || typeof props.name !== "string") {
         errors.push({
           path: `${path}.props.name`,
           message: 'FormSelect deve ter "name"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
       if (!props.options || !Array.isArray(props.options)) {
         errors.push({
           path: `${path}.props.options`,
           message: 'FormSelect deve ter array "options"',
-          severity: 'error',
-        })
+          severity: "error",
+        });
       }
-      break
+      break;
   }
 }
 
@@ -441,162 +479,169 @@ function validateBlockProps(
  * Tenta corrigir erros comuns em documentos gerados por IA
  */
 export function sanitizeDocument(doc: unknown): SiteDocumentV2 | null {
-  if (!doc || typeof doc !== 'object') {
-    return null
+  if (!doc || typeof doc !== "object") {
+    return null;
   }
 
-  const document = doc as Record<string, unknown>
+  const document = doc as Record<string, unknown>;
 
   // Garantir estrutura básica com tema padrão
   const sanitized: SiteDocumentV2 = {
     meta: {
-      title: 'Untitled Site',
+      title: "Untitled Site",
     },
     theme: { ...defaultThemeTokens },
     structure: [],
-  }
+  };
 
   // Merge meta
-  if (document.meta && typeof document.meta === 'object') {
-    const meta = document.meta as Record<string, unknown>
-    if (meta.title && typeof meta.title === 'string') {
-      sanitized.meta.title = meta.title
+  if (document.meta && typeof document.meta === "object") {
+    const meta = document.meta as Record<string, unknown>;
+    if (meta.title && typeof meta.title === "string") {
+      sanitized.meta.title = meta.title;
     }
-    if (meta.description && typeof meta.description === 'string') {
-      sanitized.meta.description = meta.description
+    if (meta.description && typeof meta.description === "string") {
+      sanitized.meta.description = meta.description;
     }
-    if (meta.favicon && typeof meta.favicon === 'string') {
-      sanitized.meta.favicon = meta.favicon
+    if (meta.favicon && typeof meta.favicon === "string") {
+      sanitized.meta.favicon = meta.favicon;
     }
-    if (meta.language && typeof meta.language === 'string') {
-      sanitized.meta.language = meta.language
+    if (meta.language && typeof meta.language === "string") {
+      sanitized.meta.language = meta.language;
     }
   }
 
   // Merge theme
-  if (document.theme && typeof document.theme === 'object') {
-    const theme = document.theme as Record<string, unknown>
-    
-    if (theme.colors && typeof theme.colors === 'object') {
+  if (document.theme && typeof document.theme === "object") {
+    const theme = document.theme as Record<string, unknown>;
+
+    if (theme.colors && typeof theme.colors === "object") {
       sanitized.theme.colors = {
         ...sanitized.theme.colors,
-        ...(theme.colors as SimpleThemeTokens['colors']),
-      }
+        ...(theme.colors as SimpleThemeTokens["colors"]),
+      };
     }
-    
-    if (theme.typography && typeof theme.typography === 'object') {
+
+    if (theme.typography && typeof theme.typography === "object") {
       sanitized.theme.typography = {
         ...sanitized.theme.typography,
-        ...(theme.typography as SimpleThemeTokens['typography']),
-      }
+        ...(theme.typography as SimpleThemeTokens["typography"]),
+      };
     }
-    
-    if (theme.spacing && typeof theme.spacing === 'object') {
+
+    if (theme.spacing && typeof theme.spacing === "object") {
       sanitized.theme.spacing = {
         ...sanitized.theme.spacing,
-        ...(theme.spacing as SimpleThemeTokens['spacing']),
-      }
+        ...(theme.spacing as SimpleThemeTokens["spacing"]),
+      };
     }
-    
-    if (theme.effects && typeof theme.effects === 'object') {
+
+    if (theme.effects && typeof theme.effects === "object") {
       sanitized.theme.effects = {
         ...sanitized.theme.effects,
-        ...(theme.effects as SimpleThemeTokens['effects']),
-      }
+        ...(theme.effects as SimpleThemeTokens["effects"]),
+      };
     }
   }
 
   // Sanitize structure
   if (document.structure && Array.isArray(document.structure)) {
-    sanitized.structure = sanitizeBlocks(document.structure)
+    sanitized.structure = sanitizeBlocks(document.structure);
   }
 
-  return sanitized
+  return sanitized;
 }
 
 /**
  * Sanitiza array de blocos
  */
 function sanitizeBlocks(blocks: unknown[]): Block[] {
-  const sanitized: Block[] = []
-  const usedIds = new Set<string>()
-  let idCounter = 1
+  const sanitized: Block[] = [];
+  const usedIds = new Set<string>();
+  let idCounter = 1;
 
   for (const block of blocks) {
-    if (!block || typeof block !== 'object') continue
+    if (!block || typeof block !== "object") continue;
 
-    const b = block as Record<string, unknown>
+    const b = block as Record<string, unknown>;
 
     // Garantir type válido
-    const type = typeof b.type === 'string' && AVAILABLE_BLOCK_TYPES.includes(b.type as typeof AVAILABLE_BLOCK_TYPES[number])
-      ? b.type as BlockType
-      : 'box'
+    const type =
+      typeof b.type === "string" &&
+      AVAILABLE_BLOCK_TYPES.includes(
+        b.type as (typeof AVAILABLE_BLOCK_TYPES)[number],
+      )
+        ? (b.type as BlockType)
+        : "box";
 
     // Garantir id único
-    let id = typeof b.id === 'string' ? b.id : `${type}-${idCounter++}`
+    let id = typeof b.id === "string" ? b.id : `${type}-${idCounter++}`;
     while (usedIds.has(id)) {
-      id = `${type}-${idCounter++}`
+      id = `${type}-${idCounter++}`;
     }
-    usedIds.add(id)
+    usedIds.add(id);
 
     // Sanitizar props
-    const props = (b.props && typeof b.props === 'object') 
-      ? sanitizeProps(b.props as Record<string, unknown>)
-      : {}
+    const props =
+      b.props && typeof b.props === "object"
+        ? sanitizeProps(b.props as Record<string, unknown>)
+        : {};
 
     sanitized.push({
       id,
       type,
       props,
-    } as Block)
+    } as Block);
   }
 
-  return sanitized
+  return sanitized;
 }
 
 /**
  * Sanitiza props de um bloco
  */
-function sanitizeProps(props: Record<string, unknown>): Record<string, unknown> {
-  const sanitized: Record<string, unknown> = {}
+function sanitizeProps(
+  props: Record<string, unknown>,
+): Record<string, unknown> {
+  const sanitized: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(props)) {
-    if (key === 'children' && Array.isArray(value)) {
-      sanitized.children = sanitizeBlocks(value)
+    if (key === "children" && Array.isArray(value)) {
+      sanitized.children = sanitizeBlocks(value);
     } else if (value !== null && value !== undefined) {
-      sanitized[key] = value
+      sanitized[key] = value;
     }
   }
 
-  return sanitized
+  return sanitized;
 }
 
 /**
  * Gera IDs únicos para blocos que não têm
  */
 export function ensureBlockIds(blocks: Block[]): Block[] {
-  const usedIds = new Set<string>()
-  let counter = 1
+  const usedIds = new Set<string>();
+  let counter = 1;
 
   function processBlock(block: Block): Block {
     // Gerar ID se não existir ou se for duplicado
-    let id = block.id
+    let id = block.id;
     if (!id || usedIds.has(id)) {
-      id = `${block.type}-${counter++}`
+      id = `${block.type}-${counter++}`;
       while (usedIds.has(id)) {
-        id = `${block.type}-${counter++}`
+        id = `${block.type}-${counter++}`;
       }
     }
-    usedIds.add(id)
+    usedIds.add(id);
 
     // Processar children
-    const props = { ...block.props } as Record<string, unknown>
+    const props = { ...block.props } as Record<string, unknown>;
     if (props.children && Array.isArray(props.children)) {
-      props.children = (props.children as Block[]).map(processBlock)
+      props.children = (props.children as Block[]).map(processBlock);
     }
 
-    return { ...block, id, props }
+    return { ...block, id, props };
   }
 
-  return blocks.map(processBlock)
+  return blocks.map(processBlock);
 }

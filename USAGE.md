@@ -44,6 +44,10 @@ resolve: {
 }
 ```
 
+### 5. Imagens do preview (Hero, etc.)
+
+Os blocos Hero e outros referenciam imagens em `/site-images/`. Para o preview do editor carregar as imagens, o app consumidor deve servir essa pasta. Copie a pasta `public/site-images/` deste repositório para o `public/` do seu app (ex.: `public/site-images/` no projeto Ensino).
+
 ## Uso Básico
 
 ### Criar/Editar Site
