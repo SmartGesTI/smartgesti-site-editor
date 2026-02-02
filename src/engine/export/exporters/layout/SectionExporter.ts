@@ -4,7 +4,7 @@
 
 import { Block } from "../../../schema/siteDocument";
 import { ThemeTokens } from "../../../schema/themeTokens";
-import { dataBlockIdAttr, escapeHtml } from "../../shared/htmlHelpers";
+import { dataBlockIdAttr, blockIdAttr, escapeHtml } from "../../shared/htmlHelpers";
 
 export function exportSection(
   block: Block,
@@ -13,7 +13,7 @@ export function exportSection(
   theme?: ThemeTokens,
   renderChild?: (block: Block, _depth: number, basePath?: string, theme?: ThemeTokens) => string,
 ): string {
-  const { id, bg, padding = "2rem", children = [] } = (block as any).props;
+  const { bg, padding = "2rem", children = [] } = (block as any).props;
 
   if (!renderChild) {
     throw new Error("exportSection requires renderChild function");
@@ -32,7 +32,5 @@ export function exportSection(
     .map((c: Block) => renderChild(c, depth + 1, basePath, theme))
     .join("");
 
-  const idAttr = id ? `id="${escapeHtml(id)}"` : "";
-
-  return `<section ${dataBlockIdAttr(block.id)} ${idAttr} style="${style}">${childrenHtml}</section>`;
+  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="${style}">${childrenHtml}</section>`;
 }

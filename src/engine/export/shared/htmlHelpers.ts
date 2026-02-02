@@ -51,3 +51,11 @@ export function linkTargetAttr(href: string, basePath?: string): string {
 export function dataBlockIdAttr(blockId: string): string {
   return `data-block-id="${escapeHtml(blockId)}"`;
 }
+
+/**
+ * Gera atributo id para âncoras (scroll suave)
+ * Usa o block.id como ID do elemento HTML para permitir navegação via âncoras
+ */
+export function blockIdAttr(blockId: string): string {
+  return blockId ? `id="${escapeHtml(blockId)}"` : "";
+}

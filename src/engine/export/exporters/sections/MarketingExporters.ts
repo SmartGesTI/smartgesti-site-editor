@@ -5,7 +5,7 @@
 
 import { Block } from "../../../schema/siteDocument";
 import { ThemeTokens } from "../../../schema/themeTokens";
-import { dataBlockIdAttr, escapeHtml, resolveHref, linkTargetAttr } from "../../shared/htmlHelpers";
+import { dataBlockIdAttr, blockIdAttr, escapeHtml, resolveHref, linkTargetAttr } from "../../shared/htmlHelpers";
 
 export function exportFeature(
   block: Block,
@@ -59,7 +59,7 @@ export function exportFeatureGrid(
     })
     .join("");
 
-  return `<section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 2rem;">${featuresHtml}</div></div></section>`;
+  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 2rem;">${featuresHtml}</div></div></section>`;
 }
 
 export function exportCta(
@@ -96,7 +96,7 @@ export function exportCta(
   const secondaryBtnHtml = secondaryButton
     ? `<a href="${escapeHtml(ctaSecondaryHref)}"${linkTargetAttr(ctaSecondaryHref, basePath)} style="padding: 0.75rem 1.5rem; background-color: transparent; color: ${isGradient ? "#fff" : "var(--sg-primary)"}; border: 1px solid ${isGradient ? "#fff" : "var(--sg-primary)"}; border-radius: var(--sg-button-radius); text-decoration: none; font-weight: 500;">${escapeHtml(secondaryButton.text)}</a>`
     : "";
-  return `<section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; ${bgStyle} text-align: center;"><div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;"><h2 style="font-size: var(--sg-heading-h2); margin-bottom: 1rem; color: ${textColor};">${escapeHtml(title)}</h2>${ctaDesc ? `<p style="font-size: 1.125rem; margin-bottom: 2rem; color: ${mutedColor};">${escapeHtml(ctaDesc)}</p>` : ""}<div style="display: flex; gap: 1rem; justify-content: center;">${primaryBtnHtml}${secondaryBtnHtml}</div></div></section>`;
+  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; ${bgStyle} text-align: center;"><div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;"><h2 style="font-size: var(--sg-heading-h2); margin-bottom: 1rem; color: ${textColor};">${escapeHtml(title)}</h2>${ctaDesc ? `<p style="font-size: 1.125rem; margin-bottom: 2rem; color: ${mutedColor};">${escapeHtml(ctaDesc)}</p>` : ""}<div style="display: flex; gap: 1rem; justify-content: center;">${primaryBtnHtml}${secondaryBtnHtml}</div></div></section>`;
 }
 
 export function exportPricingCard(
@@ -160,7 +160,7 @@ export function exportPricing(
     )
     .join("");
 
-  return `<section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${plans.length}, 1fr); gap: 2rem; align-items: start;">${plansHtml}</div></div></section>`;
+  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${plans.length}, 1fr); gap: 2rem; align-items: start;">${plansHtml}</div></div></section>`;
 }
 
 export function exportTestimonial(
@@ -230,7 +230,7 @@ export function exportTestimonialGrid(
     )
     .join("");
 
-  return `<section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 2rem;">${testimonialsHtml}</div></div></section>`;
+  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 2rem;">${testimonialsHtml}</div></div></section>`;
 }
 
 export function exportFaqItem(
@@ -272,7 +272,7 @@ export function exportFaq(
     )
     .join("");
 
-  return `<section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div>${itemsHtml}</div></div></section>`;
+  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div>${itemsHtml}</div></div></section>`;
 }
 
 export function exportStats(
@@ -295,7 +295,7 @@ export function exportStats(
     )
     .join("");
 
-  return `<section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${items.length}, 1fr); gap: 2rem; text-align: center;">${itemsHtml}</div></div></section>`;
+  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${items.length}, 1fr); gap: 2rem; text-align: center;">${itemsHtml}</div></div></section>`;
 }
 
 export function exportStatItem(
@@ -327,7 +327,7 @@ export function exportLogoCloud(
     )
     .join("");
 
-  return `<section ${dataBlockIdAttr(block.id)} style="padding: 2rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem; text-align: center;">${titleHtml}<div style="display: flex; justify-content: center; align-items: center; gap: 3rem; flex-wrap: wrap;">${logosHtml}</div></div></section>`;
+  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 2rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem; text-align: center;">${titleHtml}<div style="display: flex; justify-content: center; align-items: center; gap: 3rem; flex-wrap: wrap;">${logosHtml}</div></div></section>`;
 }
 
 export function exportSocialLinks(

@@ -11,6 +11,7 @@ import {
 } from "../../styleResolver";
 import {
   dataBlockIdAttr,
+  blockIdAttr,
   escapeHtml,
   resolveHref,
   linkTargetAttr,
@@ -250,5 +251,5 @@ export function exportNavbar(
     .join("\n");
   const styleBlock = combinedCss ? `<style>${combinedCss}</style>` : "";
 
-  return `<nav ${dataBlockIdAttr(block.id)} class="${escapeHtml(navClasses)}" data-variation="${escapeHtml(variation)}" style="${navStyle}">${styleBlock}${containerHtml}</nav>`;
+  return `<nav ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${escapeHtml(navClasses)}" data-variation="${escapeHtml(variation)}" style="${navStyle}">${styleBlock}${containerHtml}</nav>`;
 }

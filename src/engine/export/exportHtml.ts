@@ -165,6 +165,9 @@ export function exportPageToHtml(
       padding: 0;
       box-sizing: border-box;
     }
+    html {
+      scroll-behavior: smooth;
+    }
     body {
       font-family: var(--sg-font-body, system-ui, -apple-system, sans-serif);
       line-height: 1.6;
@@ -172,6 +175,40 @@ export function exportPageToHtml(
     }
     ${themeCSS}
   </style>
+  <script>
+    // Smooth scroll para âncoras sem reload
+    document.addEventListener('DOMContentLoaded', function() {
+      // Interceptar cliques em links com âncoras
+      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+        anchor.addEventListener('click', function(e) {
+          const href = this.getAttribute('href');
+
+          // Ignorar # vazio
+          if (!href || href === '#') return;
+
+          // Prevenir comportamento padrão (reload)
+          e.preventDefault();
+
+          // Encontrar o elemento alvo
+          const targetId = href.substring(1); // Remove o #
+          const targetElement = document.getElementById(targetId);
+
+          if (targetElement) {
+            // Scroll suave até o elemento
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+
+            // Atualizar URL sem reload (para manter histórico de navegação)
+            if (history.pushState) {
+              history.pushState(null, '', href);
+            }
+          }
+        });
+      });
+    });
+  </script>
 </head>
 <body>
   ${bodyHtml}
