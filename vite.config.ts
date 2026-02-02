@@ -36,7 +36,8 @@ export default defineConfig({
     dts({
       include: ['src/**/*'],
       exclude: ['**/*.test.ts', '**/*.test.tsx'],
-      rollupTypes: true,
+      rollupTypes: false,
+      insertTypesEntry: true,
     }),
     copyStaticCss(),
   ],
