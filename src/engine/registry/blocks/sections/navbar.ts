@@ -1,0 +1,198 @@
+import { BlockDefinition } from "../../types";
+import { componentRegistry } from "../../registry";
+import {
+  navbarVariations,
+  navbarVariationIds,
+} from "../../../presets/navbarVariations";
+
+export const navbarBlock: BlockDefinition = {
+  type: "navbar",
+  name: "Navbar",
+  description: "Barra de navegação customizável com suporte a dropdowns",
+  category: "sections",
+  canHaveChildren: false,
+  defaultProps: {
+    variation: "navbar-classic",
+    logoText: "Logo",
+    links: [
+      { text: "Início", href: "/site/p/home" },
+      {
+        text: "Serviços",
+        href: "#",
+        submenu: [
+          {
+            text: "Web Design",
+            href: "/site/p/web-design",
+            description: "Criação de sites modernos",
+          },
+          {
+            text: "SEO",
+            href: "/site/p/seo",
+            description: "Otimização para motores de busca",
+          },
+          {
+            text: "Marketing Digital",
+            href: "/site/p/marketing",
+            description: "Estratégias de marketing online",
+          },
+        ],
+      },
+      {
+        text: "Produtos",
+        href: "#",
+        submenu: [
+          { text: "Software", href: "/site/p/software" },
+          { text: "Consultoria", href: "/site/p/consultoria" },
+          { text: "Treinamento", href: "/site/p/treinamento" },
+        ],
+      },
+      { text: "Contato", href: "/site/p/contato" },
+    ] as any, // Estrutura dinâmica com suporte a submenus
+    ctaButton: { text: "Começar", href: "/site/p/contato" },
+    sticky: true,
+    floating: false,
+    layout: "expanded",
+    borderRadius: 0,
+    shadow: "sm",
+    opacity: 100,
+    linkFontSize: "md",
+    buttonVariant: "solid",
+    buttonBorderRadius: 8,
+  },
+  variations: navbarVariationIds.reduce(
+    (acc, id) => {
+      const v = navbarVariations[id];
+      acc[id] = { id: v.id, name: v.name, defaultProps: v.defaultProps };
+      return acc;
+    },
+    {} as Record<
+      string,
+      { id: string; name: string; defaultProps: Record<string, unknown> }
+    >,
+  ),
+  inspectorMeta: {
+    // === GRUPO: 🎨 Aparência ===
+    bg: {
+      label: "Cor de Fundo",
+      inputType: "color-advanced",
+      group: "🎨 Aparência",
+    },
+    opacity: {
+      label: "Opacidade",
+      inputType: "slider",
+      min: 0,
+      max: 100,
+      step: 5,
+      group: "🎨 Aparência",
+    },
+    borderRadius: {
+      label: "Arredondamento",
+      inputType: "slider",
+      min: 0,
+      max: 32,
+      step: 2,
+      group: "🎨 Aparência",
+    },
+    shadow: {
+      label: "Sombra",
+      inputType: "select",
+      options: [
+        { label: "Nenhuma", value: "none" },
+        { label: "Pequena", value: "sm" },
+        { label: "Média", value: "md" },
+        { label: "Grande", value: "lg" },
+        { label: "Extra Grande", value: "xl" },
+      ],
+      group: "🎨 Aparência",
+    },
+
+    // === GRUPO: 📐 Layout ===
+    layout: {
+      label: "Distribuição",
+      inputType: "select",
+      options: [
+        { label: "Expandido", value: "expanded" },
+        { label: "Centralizado", value: "centered" },
+        { label: "Compacto", value: "compact" },
+      ],
+      group: "📐 Layout",
+    },
+    sticky: {
+      label: "Fixo no Topo",
+      inputType: "checkbox",
+      group: "📐 Layout",
+    },
+    floating: {
+      label: "Modo Flutuante",
+      inputType: "checkbox",
+      group: "📐 Layout",
+    },
+
+    // === GRUPO: 🖼️ Logo ===
+    logo: {
+      label: "Logo (Imagem)",
+      inputType: "image-upload",
+      group: "🖼️ Logo",
+    },
+    logoText: {
+      label: "Texto Alternativo",
+      inputType: "text",
+      group: "🖼️ Logo",
+    },
+
+    // === GRUPO: 🔗 Links ===
+    linkColor: {
+      label: "Cor",
+      inputType: "color-advanced",
+      group: "🔗 Links",
+    },
+    linkHoverColor: {
+      label: "Cor (Hover)",
+      inputType: "color-advanced",
+      group: "🔗 Links",
+    },
+    linkFontSize: {
+      label: "Tamanho",
+      inputType: "select",
+      options: [
+        { label: "Pequeno", value: "sm" },
+        { label: "Médio", value: "md" },
+        { label: "Grande", value: "lg" },
+      ],
+      group: "🔗 Links",
+    },
+
+    // === GRUPO: 🎯 Botão CTA ===
+    buttonVariant: {
+      label: "Estilo",
+      inputType: "select",
+      options: [
+        { label: "Sólido", value: "solid" },
+        { label: "Contorno", value: "outline" },
+        { label: "Ghost", value: "ghost" },
+      ],
+      group: "🎯 Botão CTA",
+    },
+    buttonColor: {
+      label: "Cor",
+      inputType: "color-advanced",
+      group: "🎯 Botão CTA",
+    },
+    buttonTextColor: {
+      label: "Cor do Texto",
+      inputType: "color-advanced",
+      group: "🎯 Botão CTA",
+    },
+    buttonBorderRadius: {
+      label: "Arredondamento",
+      inputType: "slider",
+      min: 0,
+      max: 32,
+      step: 2,
+      group: "🎯 Botão CTA",
+    },
+  },
+};
+
+// Auto-registro
+componentRegistry.register(navbarBlock);

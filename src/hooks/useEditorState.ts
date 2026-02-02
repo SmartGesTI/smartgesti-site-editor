@@ -19,6 +19,11 @@ import {
   findBlockInStructure,
   cleanDocumentStructure,
 } from "../utils/blockUtils";
+import {
+  createDefaultPageStructure,
+  generateUniqueSlug,
+} from "../utils/pageTemplateFactory";
+import { useNavbarAutoSync } from "./useNavbarAutoSync";
 
 interface UseEditorStateOptions {
   initialData?: SiteDocumentV2 | null;
@@ -82,6 +87,41 @@ export function useEditorState(
   const [history] = useState<HistoryManager>(() => createHistoryManager(50));
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
 
+  // Aplicar mudanças via patches (precisa ser declarado antes de useNavbarAutoSync)
+  const applyChange = useCallback(
+    (patch: any[], description?: string) => {
+      if (!document) return;
+      if (!patch?.length) return;
+
+      // IMPORTANTE: Capturar histórico ANTES de aplicar patch
+      history.push(document, patch, description || "User edit");
+
+      const result = applyPatch(document, patch);
+      console.log("[applyChange] Patch result:", result);
+      console.log(
+        "[applyChange] Result document structure length:",
+        result.document?.pages[0]?.structure?.length,
+      );
+
+      if (result.success && result.document) {
+        const cleanedDocument = cleanDocumentStructure(result.document);
+        setDocument(cleanedDocument);
+      } else {
+        // Se falhar, reverter histórico
+        if (history.canUndo()) {
+          const undoResult = history.undo(document);
+          if (!undoResult.success) {
+            console.error("[applyChange] Failed to undo after patch error");
+          }
+        }
+      }
+    },
+    [document, history],
+  );
+
+  // Hook de sincronização automática do navbar
+  useNavbarAutoSync(document, applyChange);
+
   // Página atual (derivada de currentPageId; sem navegação, só edição)
   const currentPage = useMemo(() => {
     if (!document?.pages?.length) return null;
@@ -108,28 +148,6 @@ export function useEditorState(
   // Estados derivados
   const isPaletteSelected = selectedBlockId === "palette-selector";
   const isTemplateSelected = selectedBlockId === "template-selector";
-
-  // Aplicar mudanças via patches
-  const applyChange = useCallback(
-    (patch: any[], description?: string) => {
-      if (!document) return;
-      if (!patch?.length) return;
-
-      const result = applyPatch(document, patch);
-      console.log("[applyChange] Patch result:", result);
-      console.log(
-        "[applyChange] Result document structure length:",
-        result.document?.pages[0]?.structure?.length,
-      );
-
-      if (result.success && result.document) {
-        const cleanedDocument = cleanDocumentStructure(result.document);
-        setDocument(cleanedDocument);
-        history.push(patch, description || "User edit");
-      }
-    },
-    [document, history],
-  );
 
   // Undo/Redo
   const handleUndo = useCallback(() => {
@@ -300,13 +318,6 @@ export function useEditorState(
       const existing = document.pages.find((p) => p.id === pageId);
       if (existing) return;
 
-      // Importação dinâmica das funções
-      const {
-        createDefaultPageStructure,
-        generateUniqueSlug
-      } = require("../utils/pageTemplateFactory");
-      const { syncNavbarLinks } = require("../utils/navbarSync");
-
       // Gera slug único se necessário
       const uniqueSlug = generateUniqueSlug(slug, document.pages);
 
@@ -321,14 +332,8 @@ export function useEditorState(
       // Patch para adicionar página
       const addPagePatch = PatchBuilder.addPage(document, newPage);
 
-      // Patch para sincronizar navbars (com nova página incluída)
-      const updatedDoc = { ...document, pages: [...document.pages, newPage] };
-      const navbarSyncPatches = syncNavbarLinks(updatedDoc);
-
-      // Combinar patches
-      const combined = [...addPagePatch, ...navbarSyncPatches];
-
-      applyChange(combined, `Adicionar página ${name}`);
+      // Aplicar mudança - o hook useNavbarAutoSync irá detectar e sincronizar automaticamente
+      applyChange(addPagePatch, `Adicionar página ${name}`);
       setCurrentPageIdState(pageId);
       setSelectedBlockId(null);
     },
@@ -342,22 +347,13 @@ export function useEditorState(
       if (pageId === "home") return;
       if (document.pages.length <= 1) return;
 
-      // Importação dinâmica
-      const { syncNavbarLinks } = require("../utils/navbarSync");
-
       const removePagePatch = PatchBuilder.removePage(document, pageId);
 
-      // Sincronizar navbars (sem a página removida)
-      const updatedPages = document.pages.filter(p => p.id !== pageId);
-      const navbarSyncPatches = syncNavbarLinks({
-        ...document,
-        pages: updatedPages
-      });
-
-      const combined = [...removePagePatch, ...navbarSyncPatches];
-      applyChange(combined, "Remover página");
+      // Aplicar mudança - o hook useNavbarAutoSync irá detectar e sincronizar automaticamente
+      applyChange(removePagePatch, "Remover página");
 
       if (currentPageId === pageId) {
+        const updatedPages = document.pages.filter(p => p.id !== pageId);
         setCurrentPageIdState(updatedPages[0]?.id ?? "home");
       }
       setSelectedBlockId(null);

@@ -67,18 +67,13 @@ export function PreviewV2({
   const isInitializedRef = useRef<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Usar refs para evitar dependências circulares
+  // Usar ref para selectedBlockId (necessário para highlight assíncrono)
   const selectedBlockIdRef = useRef(selectedBlockId);
-  const onBlockClickRef = useRef(onBlockClick);
 
-  // Atualizar refs quando props mudam
+  // Atualizar ref quando prop muda
   useEffect(() => {
     selectedBlockIdRef.current = selectedBlockId;
   }, [selectedBlockId]);
-
-  useEffect(() => {
-    onBlockClickRef.current = onBlockClick;
-  }, [onBlockClick]);
 
   const page = useMemo(() => {
     return pageId
@@ -228,7 +223,7 @@ export function PreviewV2({
         return;
       }
 
-      const blockHtml = exportBlockToHtml(block);
+      const blockHtml = exportBlockToHtml(block, undefined, doc.theme);
 
       requestAnimationFrame(() => {
         const iframe = iframeRef.current;
