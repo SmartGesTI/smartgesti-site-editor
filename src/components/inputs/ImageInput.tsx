@@ -8,6 +8,12 @@ interface ImageInputProps {
   size?: { width: number; height: number }
   showUrlInput?: boolean
   maxSizeMB?: number
+  // Novos: Contexto para upload seguro
+  tenantId?: string
+  schoolId?: string
+  siteId?: string
+  authToken?: string
+  assetType?: 'image' | 'video' | 'icon' | 'logo'
 }
 
 export function ImageInput({
@@ -17,11 +23,17 @@ export function ImageInput({
   size,
   showUrlInput = true,
   maxSizeMB = 5,
+  tenantId,
+  schoolId,
+  siteId,
+  authToken,
+  assetType = 'image',
 }: ImageInputProps) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('[ImageInput] Upload config:', { tenantId, schoolId, siteId, hasAuthToken: !!authToken, assetType })
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -33,8 +45,19 @@ export function ImageInput({
     }
 
     // Validação de tipo
-    if (!file.type.startsWith('image/')) {
-      setError('Apenas imagens são permitidas')
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+      setError('Apenas imagens e vídeos são permitidos')
+      return
+    }
+
+    // Verificar se tem autenticação (novo endpoint requer)
+    if (!authToken) {
+      setError('Autenticação necessária para upload')
+      return
+    }
+
+    if (!tenantId) {
+      setError('Contexto do tenant é necessário')
       return
     }
 
@@ -47,17 +70,29 @@ export function ImageInput({
 
       const apiUrl = (import.meta as any).env.VITE_API_URL || 'http://localhost:3001'
 
-      const res = await fetch(`${apiUrl}/api/sites/upload-image`, {
+      // Construir query parameters
+      const params = new URLSearchParams({ tenantId, assetType })
+      if (schoolId) params.append('schoolId', schoolId)
+      if (siteId) params.append('siteId', siteId)
+
+      const res = await fetch(`${apiUrl}/api/site-assets/upload?${params}`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
         body: formData,
       })
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
+        if (res.status === 401) {
+          throw new Error('Sessão expirada. Faça login novamente.')
+        }
         throw new Error(errorData.message || 'Upload falhou')
       }
 
       const data = await res.json()
+      // Usar a URL pública retornada do Supabase Storage
       onChange(data.url)
       setError(null)
     } catch (err) {

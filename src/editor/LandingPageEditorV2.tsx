@@ -20,12 +20,21 @@ import { isLightColor } from "../utils/colorUtils";
 // Types
 // ============================================================================
 
+export interface UploadConfig {
+  tenantId?: string;
+  schoolId?: string;
+  siteId?: string | null;
+  authToken?: string;
+}
+
 interface LandingPageEditorV2Props {
   initialData?: SiteDocumentV2;
   /** ID do template a carregar quando não houver initialData (ex.: "escola-edvi") */
   defaultTemplateId?: TemplateId;
   onSave?: (data: SiteDocumentV2) => Promise<void>;
   onPublish?: (data: SiteDocumentV2) => Promise<void>;
+  /** Configuração para upload seguro de imagens/vídeos */
+  uploadConfig?: UploadConfig;
 }
 
 // ============================================================================
@@ -37,6 +46,7 @@ export function LandingPageEditorV2({
   defaultTemplateId,
   onSave,
   onPublish,
+  uploadConfig,
 }: LandingPageEditorV2Props) {
   // Hook de estado do editor (edição por páginas; sem navegação)
   const {
@@ -246,6 +256,7 @@ export function LandingPageEditorV2({
           selectedBlock={selectedBlock}
           onPaletteChange={handlePaletteChange}
           onUpdateBlock={handleUpdateBlock}
+          uploadConfig={uploadConfig}
         />
       </div>
     </div>

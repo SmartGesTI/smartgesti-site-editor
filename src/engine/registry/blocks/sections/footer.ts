@@ -24,6 +24,11 @@ export const footerBlock: BlockDefinition = {
     variant: "simple",
   },
   inspectorMeta: {
+    logo: {
+      label: "Logo (Imagem)",
+      inputType: "image-upload",
+      group: "Logo",
+    },
     logoText: {
       label: "Logo (texto)",
       inputType: "text",

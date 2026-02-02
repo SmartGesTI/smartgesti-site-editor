@@ -7,12 +7,14 @@ import { memo, useMemo, useCallback } from "react";
 import { Block, SiteDocumentV2, componentRegistry, InspectorMeta } from "../../engine";
 import { VariationSelector } from "./VariationSelector";
 import { PropertyGroup } from "./PropertyGroup";
+import type { UploadConfig } from "../LandingPageEditorV2";
 
 interface BlockPropertyEditorProps {
   block: Block | null;
   document?: SiteDocumentV2;
   currentPageId?: string;
   onUpdate: (updates: Record<string, any>) => void;
+  uploadConfig?: UploadConfig;
 }
 
 /**
@@ -22,6 +24,7 @@ interface BlockPropertyEditorProps {
 export const BlockPropertyEditor = memo(function BlockPropertyEditor({
   block,
   onUpdate,
+  uploadConfig,
 }: BlockPropertyEditorProps) {
   // Obter definição do bloco do registry
   const blockDefinition = useMemo(() => {
@@ -105,6 +108,7 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
             groupName={groupName}
             props={props}
             onPropChange={handlePropChange}
+            uploadConfig={uploadConfig}
           />
         ))
       )}

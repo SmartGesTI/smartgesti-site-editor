@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
+import type { UploadConfig } from "../LandingPageEditorV2";
 
 // Lazy load componentes pesados do editor
 const BlockPropertyEditor = lazy(() =>
@@ -14,6 +15,7 @@ interface RightPanelProps {
   selectedBlock: any;
   onPaletteChange: (palette: any) => void;
   onUpdateBlock: (updates: Record<string, any>) => void;
+  uploadConfig?: UploadConfig;
 }
 
 export function RightPanel({
@@ -21,6 +23,7 @@ export function RightPanel({
   selectedBlock,
   onPaletteChange,
   onUpdateBlock,
+  uploadConfig,
 }: RightPanelProps) {
   return (
     <div className="w-80 flex-shrink-0 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden flex flex-col">
@@ -37,7 +40,11 @@ export function RightPanel({
           </div>
         ) : selectedBlock ? (
           <div className="overflow-y-auto overflow-x-hidden flex-1">
-            <BlockPropertyEditor block={selectedBlock} onUpdate={onUpdateBlock} />
+            <BlockPropertyEditor
+              block={selectedBlock}
+              onUpdate={onUpdateBlock}
+              uploadConfig={uploadConfig}
+            />
           </div>
         ) : (
           <div className="p-4 text-center text-gray-500 dark:text-gray-400">

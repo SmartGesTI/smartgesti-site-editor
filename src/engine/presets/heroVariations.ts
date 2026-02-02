@@ -48,7 +48,7 @@ export const heroVariations: Record<HeroVariationId, HeroVariationPreset> = {
         "Conteúdo alinhado à Base Nacional Comum Curricular, com foco em competências e habilidades para o mundo atual.",
       primaryButton: { text: "Conhecer cursos", href: "#courses" },
       secondaryButton: { text: "Fale conosco", href: "#contact" },
-      image: PLACEHOLDER_IMAGE_URL,
+      // image removido: não sobrescrever a imagem do usuário ao trocar de variação
       align: "left",
     },
   },
@@ -64,7 +64,7 @@ export const heroVariations: Record<HeroVariationId, HeroVariationPreset> = {
         "Integramos as melhores práticas pedagógicas para formar cidadãos críticos e criativos.",
       primaryButton: { text: "Saiba mais", href: "#about" },
       secondaryButton: { text: "Matricule-se", href: "#enroll" },
-      image: PLACEHOLDER_IMAGE_URL,
+      // image removido: não sobrescrever a imagem do usuário ao trocar de variação
       overlay: true,
       align: "center",
       minHeight: "85vh",
@@ -81,7 +81,7 @@ export const heroVariations: Record<HeroVariationId, HeroVariationPreset> = {
       badge: "Destaque",
       primaryButton: { text: "Ver artigos", href: "#blog" },
       secondaryButton: { text: "Aula grátis", href: "#trial" },
-      image: PLACEHOLDER_IMAGE_URL,
+      // image removido: não sobrescrever a imagem do usuário ao trocar de variação
       overlay: true,
       align: "center",
       minHeight: "100vh",

@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { InspectorMeta } from "../../engine";
 import { renderPropertyInput } from "./renderPropertyInput";
+import type { UploadConfig } from "../LandingPageEditorV2";
 
 interface PropertyGroupProps {
   groupName: string;
@@ -10,6 +11,7 @@ interface PropertyGroupProps {
     value: any;
   }>;
   onPropChange: (propName: string, value: any) => void;
+  uploadConfig?: UploadConfig;
 }
 
 /**
@@ -20,6 +22,7 @@ export const PropertyGroup = memo(function PropertyGroup({
   groupName,
   props,
   onPropChange,
+  uploadConfig,
 }: PropertyGroupProps) {
   if (props.length === 0) {
     return null;
@@ -32,8 +35,12 @@ export const PropertyGroup = memo(function PropertyGroup({
       </h4>
       <div className="space-y-3">
         {props.map(({ propName, meta, value }) =>
-          renderPropertyInput(propName, meta, value, (newValue) =>
-            onPropChange(propName, newValue),
+          renderPropertyInput(
+            propName,
+            meta,
+            value,
+            (newValue) => onPropChange(propName, newValue),
+            uploadConfig,
           ),
         )}
       </div>

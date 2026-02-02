@@ -11,6 +11,7 @@ import {
 } from "./inputs";
 import { ColorInput as AdvancedColorInput } from "../../components/inputs/ColorInput";
 import { ImageInput } from "../../components/inputs/ImageInput";
+import type { UploadConfig } from "../LandingPageEditorV2";
 
 /**
  * Renderiza um input baseado no tipo especificado em inspectorMeta
@@ -20,6 +21,7 @@ export function renderPropertyInput(
   meta: InspectorMeta,
   value: any,
   onChange: (value: any) => void,
+  uploadConfig?: UploadConfig,
 ): React.ReactNode {
   const { label, description, inputType, options, min, max, step } = meta;
 
@@ -83,6 +85,7 @@ export function renderPropertyInput(
           { ...meta, inputType: "text" },
           value,
           onChange,
+          uploadConfig,
         );
       }
       return (
@@ -140,7 +143,12 @@ export function renderPropertyInput(
           label={label}
           size={{ width: 160, height: 80 }}
           showUrlInput={false}
-          maxSizeMB={5}
+          maxSizeMB={10}
+          tenantId={uploadConfig?.tenantId}
+          schoolId={uploadConfig?.schoolId}
+          siteId={uploadConfig?.siteId || undefined}
+          authToken={uploadConfig?.authToken}
+          assetType="image"
         />
       );
 
@@ -163,6 +171,7 @@ export function renderPropertyInput(
         { ...meta, inputType: "text" },
         value,
         onChange,
+        uploadConfig,
       );
   }
 }
