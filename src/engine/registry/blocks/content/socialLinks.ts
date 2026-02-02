@@ -28,7 +28,7 @@ export const socialLinksBlock: BlockDefinition = {
       group: "Estilo",
     },
     variant: {
-      label: "Variante",
+      label: "Estilo",
       inputType: "select",
       options: [
         { label: "Padrão", value: "default" },

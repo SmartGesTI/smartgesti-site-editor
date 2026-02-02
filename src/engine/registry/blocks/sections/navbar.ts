@@ -78,7 +78,7 @@ export const navbarBlock: BlockDefinition = {
       group: "🎨 Aparência",
     },
     opacity: {
-      label: "Opacidade",
+      label: "Transparência",
       inputType: "slider",
       min: 0,
       max: 100,
@@ -86,7 +86,7 @@ export const navbarBlock: BlockDefinition = {
       group: "🎨 Aparência",
     },
     borderRadius: {
-      label: "Arredondamento",
+      label: "Cantos Arredondados",
       inputType: "slider",
       min: 0,
       max: 32,
@@ -108,7 +108,7 @@ export const navbarBlock: BlockDefinition = {
 
     // === GRUPO: 📐 Layout ===
     layout: {
-      label: "Distribuição",
+      label: "Organização dos Itens",
       inputType: "select",
       options: [
         { label: "Expandido", value: "expanded" },
@@ -118,12 +118,12 @@ export const navbarBlock: BlockDefinition = {
       group: "📐 Layout",
     },
     sticky: {
-      label: "Fixo no Topo",
+      label: "Fixar no Topo da Página",
       inputType: "checkbox",
       group: "📐 Layout",
     },
     floating: {
-      label: "Modo Flutuante",
+      label: "Menu Flutuante",
       inputType: "checkbox",
       group: "📐 Layout",
     },
@@ -184,7 +184,7 @@ export const navbarBlock: BlockDefinition = {
       group: "🎯 Botão CTA",
     },
     buttonBorderRadius: {
-      label: "Arredondamento",
+      label: "Cantos Arredondados do Botão",
       inputType: "slider",
       min: 0,
       max: 32,

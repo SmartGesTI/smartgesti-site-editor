@@ -17,12 +17,12 @@ export const sectionBlock: BlockDefinition = {
       group: "Geral",
     },
     bg: {
-      label: "Background",
+      label: "Cor de Fundo",
       inputType: "color",
       group: "Estilo",
     },
     padding: {
-      label: "Padding",
+      label: "Espaçamento Interno",
       inputType: "text",
       group: "Layout",
     },

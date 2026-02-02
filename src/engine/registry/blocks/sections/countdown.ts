@@ -40,7 +40,7 @@ export const countdownBlock: BlockDefinition = {
       group: "Conteúdo",
     },
     variant: {
-      label: "Variante",
+      label: "Estilo",
       inputType: "select",
       options: [
         { label: "Padrão", value: "default" },

@@ -19,8 +19,8 @@ export const containerBlock: BlockDefinition = {
       group: "Layout",
     },
     padding: {
-      label: "Padding",
-      description: "Espaçamento interno",
+      label: "Espaçamento Interno",
+      description: "Distância entre o conteúdo e as bordas",
       inputType: "text",
       group: "Layout",
     },

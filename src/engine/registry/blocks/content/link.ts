@@ -27,7 +27,7 @@ export const linkBlock: BlockDefinition = {
       group: "Conteúdo",
     },
     target: {
-      label: "Target",
+      label: "Onde Abrir o Link",
       inputType: "select",
       options: [
         { label: "Mesma Janela", value: "_self" },

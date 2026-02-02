@@ -27,13 +27,13 @@ export const buttonBlock: BlockDefinition = {
       group: "Conteúdo",
     },
     variant: {
-      label: "Variante",
+      label: "Estilo do Botão",
       inputType: "select",
       options: [
-        { label: "Primary", value: "primary" },
-        { label: "Secondary", value: "secondary" },
-        { label: "Outline", value: "outline" },
-        { label: "Ghost", value: "ghost" },
+        { label: "Principal", value: "primary" },
+        { label: "Secundário", value: "secondary" },
+        { label: "Apenas Contorno", value: "outline" },
+        { label: "Transparente", value: "ghost" },
       ],
       group: "Estilo",
     },

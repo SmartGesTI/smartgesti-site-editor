@@ -29,25 +29,7 @@ export const heroBlock: BlockDefinition = {
     >,
   ),
   inspectorMeta: {
-    variation: {
-      label: "Variação",
-      inputType: "select",
-      options: heroVariationIds.map((id) => ({
-        label: heroVariations[id].name,
-        value: id,
-      })),
-      group: "Layout",
-    },
-    variant: {
-      label: "Variante",
-      inputType: "select",
-      options: [
-        { label: "Centralizado", value: "centered" },
-        { label: "Dividido", value: "split" },
-        { label: "Com Imagem de Fundo", value: "image-bg" },
-      ],
-      group: "Layout",
-    },
+    // variation/variant removidos - os botões de variação são renderizados automaticamente pelo VariationSelector
     title: {
       label: "Título",
       inputType: "text",
@@ -72,25 +54,24 @@ export const heroBlock: BlockDefinition = {
       label: "Imagem de Fundo",
       inputType: "image-upload",
       group: "Mídia",
-      description: "Upload de imagem para o hero (recomendado: 1920x1080px)",
+      description: "Adicione uma imagem ao fundo da seção principal",
     },
     overlay: {
-      label: "Overlay sobre a imagem",
+      label: "Escurecer imagem de fundo",
       inputType: "checkbox",
       group: "Estilo",
     },
     overlayColor: {
-      label: "Cor do Overlay",
-      inputType: "text",
+      label: "Cor da camada",
+      inputType: "color-advanced",
       group: "Estilo",
-      description:
-        "Ex.: linear-gradient(135deg, rgba(37,99,235,0.9), rgba(29,78,216,0.85))",
+      description: "Escolha a cor da camada sobre a imagem",
     },
     background: {
-      label: "Background (cor ou gradiente)",
-      inputType: "text",
+      label: "Cor de fundo",
+      inputType: "color-advanced",
       group: "Estilo",
-      description: "Layout split: cor ou gradiente no lado do conteúdo",
+      description: "Cor de fundo da seção",
     },
     align: {
       label: "Alinhamento",

@@ -40,7 +40,7 @@ export const featureGridBlock: BlockDefinition = {
       group: "Layout",
     },
     variant: {
-      label: "Variante",
+      label: "Estilo",
       inputType: "select",
       options: [
         { label: "Padrão", value: "default" },

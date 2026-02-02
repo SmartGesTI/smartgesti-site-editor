@@ -17,12 +17,12 @@ export const cardBlock: BlockDefinition = {
   ],
   inspectorMeta: {
     padding: {
-      label: "Padding",
+      label: "Espaçamento Interno",
       inputType: "text",
       group: "Layout",
     },
     bg: {
-      label: "Background",
+      label: "Cor de Fundo",
       inputType: "color",
       group: "Estilo",
     },

@@ -12,7 +12,7 @@ export const boxBlock: BlockDefinition = {
   },
   inspectorMeta: {
     bg: {
-      label: "Background",
+      label: "Cor de Fundo",
       inputType: "color",
       group: "Estilo",
     },
@@ -32,7 +32,7 @@ export const boxBlock: BlockDefinition = {
       group: "Estilo",
     },
     padding: {
-      label: "Padding",
+      label: "Espaçamento Interno",
       inputType: "text",
       group: "Layout",
     },

@@ -25,18 +25,18 @@ export const ctaBlock: BlockDefinition = {
       group: "Conteúdo",
     },
     variant: {
-      label: "Variante",
+      label: "Estilo",
       inputType: "select",
       options: [
         { label: "Padrão", value: "default" },
         { label: "Centralizado", value: "centered" },
         { label: "Dividido", value: "split" },
-        { label: "Gradiente", value: "gradient" },
+        { label: "Com Efeito de Cores", value: "gradient" },
       ],
       group: "Estilo",
     },
     bg: {
-      label: "Background",
+      label: "Cor de Fundo",
       inputType: "color",
       group: "Estilo",
     },

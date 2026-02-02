@@ -46,14 +46,21 @@ export function SelectInput({
           onChange(selectedOption ? selectedOption.value : e.target.value);
         }}
         className={cn(
-          "flex h-9 w-full rounded-lg border-2 bg-background px-3 py-2 text-sm",
+          "flex h-9 w-full rounded-lg border-2 px-3 py-2 text-sm",
           "transition-all duration-200",
           "focus:outline-none border-input hover:border-blue-400/50 focus:border-blue-500",
           "cursor-pointer",
+          // Cores explícitas para contraste adequado
+          "bg-white dark:bg-gray-800",
+          "text-gray-900 dark:text-gray-100",
         )}
       >
         {options.map((option) => (
-          <option key={String(option.value)} value={String(option.value)}>
+          <option
+            key={String(option.value)}
+            value={String(option.value)}
+            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          >
             {option.label}
           </option>
         ))}
