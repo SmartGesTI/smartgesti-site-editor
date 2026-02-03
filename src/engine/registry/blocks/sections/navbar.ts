@@ -12,38 +12,10 @@ export const NAVBAR_DEFAULT_PROPS = {
   variation: "navbar-classic",
   links: [
     { text: "Início", href: "/site/p/home" },
-    {
-      text: "Serviços",
-      href: "#",
-      submenu: [
-        {
-          text: "Web Design",
-          href: "/site/p/web-design",
-          description: "Criação de sites modernos",
-        },
-        {
-          text: "SEO",
-          href: "/site/p/seo",
-          description: "Otimização para motores de busca",
-        },
-        {
-          text: "Marketing Digital",
-          href: "/site/p/marketing",
-          description: "Estratégias de marketing online",
-        },
-      ],
-    },
-    {
-      text: "Produtos",
-      href: "#",
-      submenu: [
-        { text: "Software", href: "/site/p/software" },
-        { text: "Consultoria", href: "/site/p/consultoria" },
-        { text: "Treinamento", href: "/site/p/treinamento" },
-      ],
-    },
+    { text: "Serviços", href: "/site/p/servicos" },
+    { text: "Produtos", href: "/site/p/produtos" },
     { text: "Contato", href: "/site/p/contato" },
-  ] as any, // Estrutura dinâmica com suporte a submenus
+  ],
   ctaButton: { text: "Começar", href: "/site/p/contato" },
   sticky: true,
   floating: false,
@@ -61,7 +33,7 @@ export const NAVBAR_DEFAULT_PROPS = {
 export const navbarBlock: BlockDefinition = {
   type: "navbar",
   name: "Navbar",
-  description: "Barra de navegação customizável com suporte a dropdowns",
+  description: "Barra de navegação customizável",
   category: "sections",
   canHaveChildren: false,
   defaultProps: NAVBAR_DEFAULT_PROPS,

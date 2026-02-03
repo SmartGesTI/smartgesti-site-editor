@@ -2630,10 +2630,6 @@
   color: #ffffff;
 }
 
-.lp-navbar-dropdown-examai {
-  position: relative;
-}
-
 .lp-navbar-actions-examai {
   display: flex;
   gap: 1.5rem;

@@ -65,7 +65,7 @@ export interface ColorTokens {
   // Links
   link?: string;
   linkHover?: string;
-  linkColor?: string; // Cor específica para links em geral (dropdowns, etc)
+  linkColor?: string; // Cor específica para links em geral
   menuLinkColor?: string; // Cor específica para links do menu navbar (derivada do primary)
 
   // Inputs

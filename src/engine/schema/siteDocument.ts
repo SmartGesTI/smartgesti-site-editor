@@ -563,9 +563,7 @@ export interface LogoCloudBlock extends BlockBase {
  */
 export type NavbarVariationId =
   | "navbar-classic"
-  | "navbar-centered"
-  | "navbar-dropdown"
-  | "navbar-mega";
+  | "navbar-centered";
 
 /**
  * Navbar - Barra de navegação

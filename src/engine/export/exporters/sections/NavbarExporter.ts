@@ -110,29 +110,10 @@ export function exportNavbar(
     logoHtml = `<a href="${escapeHtml(resolvedLogoHref)}"${logoTargetAttr} class="sg-navbar__brand-link" style="display: flex; align-items: center;">${logoHtml}</a>`;
   }
 
-  // Detectar se é mega menu (tem descrições nos submenus)
-  const isMegaMenu = variation === "navbar-mega";
-  const hasDropdowns = links.some(
-    (l: any) => l.submenu && l.submenu.length > 0,
-  );
-
-  // Extrair cores da navbar para usar nos dropdowns
+  // Extrair cores da navbar para usar no sidebar mobile
   const navbarBg = (block as any).props.bg || "#ffffff";
   const navbarOpacity = (block as any).props.opacity || 100;
-  const navbarBlurOpacity = (block as any).props.blurOpacity || 0;
-
-  // Aplicar opacidade diretamente na cor do background (não no container)
-  // Isso evita que o texto fique transparente
-  const dropdownOpacity =
-    navbarOpacity >= 90 ? navbarOpacity : Math.min(navbarOpacity + 10, 100);
-  const dropdownBgWithOpacity = applyOpacityToColor(
-    navbarBg,
-    dropdownOpacity,
-  );
-
-  // Aplicar desfoque (blur) aos dropdowns igual ao navbar
-  const dropdownBlurValue = navbarBlurOpacity > 0 ? `${navbarBlurOpacity / 10}px` : "0px";
-  const dropdownBackdropFilter = navbarBlurOpacity > 0 ? `backdrop-filter: blur(${dropdownBlurValue}); -webkit-backdrop-filter: blur(${dropdownBlurValue});` : "";
+  const sidebarBg = applyOpacityToColor(navbarBg, navbarOpacity);
 
   // Usar linkColor da paleta se disponível, caso contrário fallback para text
   const linkColor =
@@ -141,47 +122,12 @@ export function exportNavbar(
     theme?.colors?.text ||
     "#1f2937";
 
-  // Links with resolved styles (complete inline styling) + dropdowns
+  // Links with resolved styles (complete inline styling)
   const linksHtml = links
     .map((l: any) => {
       const resolved = resolveHref(l.href || "#", basePath);
       const targetAttr = linkTargetAttr(resolved, basePath);
-
-      // Link sem submenu
-      if (!l.submenu || l.submenu.length === 0) {
-        return `<a href="${escapeHtml(resolved)}"${targetAttr} class="sg-navbar__link" style="${resolvedStyles.link}">${escapeHtml(l.text)}</a>`;
-      }
-
-      // Link com submenu (dropdown)
-      const chevronIcon = `<svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style="margin-left: 4px; transition: transform 0.2s;"><path d="M6 8L2 4h8z"/></svg>`;
-
-      const submenuItems = l.submenu
-        .map((item: any) => {
-          const itemResolved = resolveHref(item.href || "#", basePath);
-          const itemTargetAttr = linkTargetAttr(itemResolved, basePath);
-
-          if (isMegaMenu && item.description) {
-            return `<a href="${escapeHtml(itemResolved)}"${itemTargetAttr} class="sg-navbar__dropdown-item sg-navbar__dropdown-item--mega" style="display: block; padding: 0.875rem 1rem; text-decoration: none; color: ${linkColor}; transition: background-color 0.2s; border-radius: 0.375rem;">
-                <strong style="display: block; font-weight: 600; margin-bottom: 0.25rem;">${escapeHtml(item.text)}</strong>
-                <span style="display: block; font-size: 0.875rem; opacity: 0.7;">${escapeHtml(item.description)}</span>
-              </a>`;
-          }
-
-          return `<a href="${escapeHtml(itemResolved)}"${itemTargetAttr} class="sg-navbar__dropdown-item" style="display: block; padding: 0.625rem 1rem; text-decoration: none; color: ${linkColor}; transition: background-color 0.2s; white-space: nowrap;">${escapeHtml(item.text)}</a>`;
-        })
-        .join("");
-
-      const dropdownClasses = isMegaMenu
-        ? "sg-navbar__dropdown sg-navbar__dropdown--mega"
-        : "sg-navbar__dropdown";
-      const dropdownStyle = isMegaMenu
-        ? `position: absolute; top: 100%; left: 0; background-color: ${dropdownBgWithOpacity}; ${dropdownBackdropFilter} border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 1rem; margin-top: 0.5rem; min-width: 280px; visibility: hidden; transition: opacity 0.2s, visibility 0.2s, transform 0.2s; transform: translateY(-10px); z-index: 1000; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.5rem;`
-        : `position: absolute; top: 100%; left: 0; background-color: ${dropdownBgWithOpacity}; ${dropdownBackdropFilter} border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 0.5rem; margin-top: 0.5rem; min-width: 200px; visibility: hidden; transition: opacity 0.2s, visibility 0.2s, transform 0.2s; transform: translateY(-10px); z-index: 1000;`;
-
-      return `<div class="sg-navbar__link-wrapper" style="position: relative;">
-            <a href="${escapeHtml(resolved)}" class="sg-navbar__link sg-navbar__link--has-dropdown" style="${resolvedStyles.link} cursor: pointer;">${escapeHtml(l.text)}${chevronIcon}</a>
-            <div class="${dropdownClasses}" style="${dropdownStyle}">${submenuItems}</div>
-          </div>`;
+      return `<a href="${escapeHtml(resolved)}"${targetAttr} class="sg-navbar__link" style="${resolvedStyles.link}">${escapeHtml(l.text)}</a>`;
     })
     .join("");
 
@@ -211,50 +157,8 @@ export function exportNavbar(
       : "";
   const containerHtml = `<div class="sg-navbar__container" style="${containerStyle}"><div class="sg-navbar__brand" style="${brandWrapStyle}">${logoHtml}</div>${menuHtml}${actionsHtml}</div>`;
 
-  // CSS para dropdowns
-  const dropdownCss = hasDropdowns
-    ? `
-        /* Dropdown hover activation */
-        ${block.id ? `[data-block-id="${block.id}"]` : ".sg-navbar"} .sg-navbar__link-wrapper:hover .sg-navbar__dropdown {
-          opacity: 1 !important;
-          visibility: visible !important;
-          transform: translateY(0) !important;
-        }
-
-        /* Chevron rotation on hover */
-        ${block.id ? `[data-block-id="${block.id}"]` : ".sg-navbar"} .sg-navbar__link-wrapper:hover .sg-navbar__link--has-dropdown svg {
-          transform: rotate(180deg);
-        }
-
-        /* Dropdown item hover */
-        ${block.id ? `[data-block-id="${block.id}"]` : ".sg-navbar"} .sg-navbar__dropdown-item:hover {
-          background-color: ${theme?.colors?.primary || "#3b82f6"}10 !important;
-        }
-
-        /* Mega menu item hover */
-        ${block.id ? `[data-block-id="${block.id}"]` : ".sg-navbar"} .sg-navbar__dropdown-item--mega:hover {
-          background-color: ${theme?.colors?.primary || "#3b82f6"}08 !important;
-        }
-
-        /* Mobile responsive */
-        @media (max-width: 768px) {
-          ${block.id ? `[data-block-id="${block.id}"]` : ".sg-navbar"} .sg-navbar__dropdown {
-            position: static !important;
-            opacity: ${dropdownOpacity / 100} !important;
-            visibility: visible !important;
-            transform: none !important;
-            box-shadow: none !important;
-            margin-top: 0.5rem !important;
-          }
-        }
-      `
-    : "";
-
-  // Inject dynamic CSS styles (hover effects + dropdowns) if present
-  const combinedCss = [resolvedStyles.css, dropdownCss]
-    .filter(Boolean)
-    .join("\n");
-  const styleBlock = combinedCss ? `<style>${combinedCss}</style>` : "";
+  // Inject dynamic CSS styles (hover effects) if present
+  const styleBlock = resolvedStyles.css ? `<style>${resolvedStyles.css}</style>` : "";
 
   // ========== MOBILE SIDEBAR COMPONENTS ==========
 
@@ -301,105 +205,28 @@ export function exportNavbar(
     ></div>
   `;
 
-  // 3. Mobile links (stack vertical with accordion submenus)
+  // 3. Mobile links (stack vertical)
   const linksMobileHtml = links
-    .map((l: any, index: number) => {
+    .map((l: any) => {
       const resolved = resolveHref(l.href || "#", basePath);
       const targetAttr = linkTargetAttr(resolved, basePath);
-
-      // Link without submenu
-      if (!l.submenu || l.submenu.length === 0) {
-        return `
-          <a
-            href="${escapeHtml(resolved)}"${targetAttr}
-            class="sg-navbar__link-mobile"
-            style="
-              display: block;
-              padding: 1rem 0;
-              color: ${linkColor};
-              text-decoration: none;
-              font-weight: 500;
-              font-size: 1rem;
-              border-bottom: 1px solid rgba(0,0,0,0.05);
-              transition: color 0.2s;
-            "
-          >
-            ${escapeHtml(l.text)}
-          </a>
-        `;
-      }
-
-      // Link with submenu (accordion)
-      const submenuId = `sg-submenu-${block.id}-${index}`;
-      const chevronIcon = `
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" class="sg-submenu-chevron" style="transition: transform 0.2s;">
-          <path d="M6 8L2 4h8z"/>
-        </svg>
-      `;
-
-      const submenuItems = l.submenu
-        .map((item: any) => {
-          const itemResolved = resolveHref(item.href || "#", basePath);
-          const itemTargetAttr = linkTargetAttr(itemResolved, basePath);
-
-          return `
-            <a
-              href="${escapeHtml(itemResolved)}"${itemTargetAttr}
-              class="sg-navbar__submenu-item-mobile"
-              style="
-                display: block;
-                padding: 0.75rem 1rem;
-                color: ${linkColor};
-                opacity: 0.8;
-                text-decoration: none;
-                font-size: 0.9375rem;
-                transition: opacity 0.2s;
-              "
-            >
-              ${escapeHtml(item.text)}
-            </a>
-          `;
-        })
-        .join("");
-
       return `
-        <div class="sg-navbar__dropdown-wrapper-mobile" style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-          <button
-            type="button"
-            class="sg-navbar__dropdown-toggle-mobile"
-            aria-expanded="false"
-            aria-controls="${submenuId}"
-            data-submenu-id="${submenuId}"
-            style="
-              width: 100%;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              padding: 1rem 0;
-              background: transparent;
-              border: none;
-              color: ${linkColor};
-              font-weight: 500;
-              font-size: 1rem;
-              cursor: pointer;
-              text-align: left;
-            "
-          >
-            ${escapeHtml(l.text)}
-            ${chevronIcon}
-          </button>
-          <div
-            id="${submenuId}"
-            class="sg-navbar__submenu-mobile"
-            style="
-              max-height: 0;
-              overflow: hidden;
-              transition: max-height 0.3s ease;
-            "
-          >
-            ${submenuItems}
-          </div>
-        </div>
+        <a
+          href="${escapeHtml(resolved)}"${targetAttr}
+          class="sg-navbar__link-mobile"
+          style="
+            display: block;
+            padding: 1rem 0;
+            color: ${linkColor};
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: color 0.2s;
+          "
+        >
+          ${escapeHtml(l.text)}
+        </a>
       `;
     })
     .join("");
@@ -416,7 +243,7 @@ export function exportNavbar(
         width: 280px;
         max-width: 85vw;
         height: 100vh;
-        background-color: ${dropdownBgWithOpacity};
+        background-color: ${sidebarBg};
         box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
         transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 1001;
@@ -514,17 +341,6 @@ export function exportNavbar(
         background-color: ${theme?.colors?.primary || "#3b82f6"}10;
       }
 
-      /* Submenu chevron rotation */
-      ${block.id ? `[data-block-id="${block.id}"]` : ".sg-navbar"} ~ .sg-navbar__sidebar .sg-navbar__dropdown-toggle-mobile[aria-expanded="true"] .sg-submenu-chevron {
-        transform: rotate(180deg);
-      }
-
-      /* Submenu item hover */
-      ${block.id ? `[data-block-id="${block.id}"]` : ".sg-navbar"} ~ .sg-navbar__sidebar .sg-navbar__submenu-item-mobile:active {
-        opacity: 1 !important;
-        background-color: ${theme?.colors?.primary || "#3b82f6"}08;
-      }
-
       /* CTA button full width in sidebar */
       ${block.id ? `[data-block-id="${block.id}"]` : ".sg-navbar"} ~ .sg-navbar__sidebar .sg-navbar__btn {
         display: block;
@@ -558,7 +374,6 @@ export function exportNavbar(
   var sidebar = document.getElementById('sg-navbar-sidebar-' + navId);
   var overlay = document.getElementById('sg-navbar-overlay-' + navId);
   var closeBtn = document.getElementById('sg-navbar-close-' + navId);
-  var submenuToggles = sidebar.querySelectorAll('.sg-navbar__dropdown-toggle-mobile');
 
   var isOpen = false;
 
@@ -596,22 +411,6 @@ export function exportNavbar(
     if (e.key === 'Escape' && isOpen) {
       closeSidebar();
     }
-  });
-
-  submenuToggles.forEach(function(toggle) {
-    toggle.addEventListener('click', function() {
-      var submenuId = this.getAttribute('data-submenu-id');
-      var submenu = document.getElementById(submenuId);
-      var isExpanded = this.getAttribute('aria-expanded') === 'true';
-
-      if (isExpanded) {
-        this.setAttribute('aria-expanded', 'false');
-        submenu.style.maxHeight = '0';
-      } else {
-        this.setAttribute('aria-expanded', 'true');
-        submenu.style.maxHeight = submenu.scrollHeight + 'px';
-      }
-    });
   });
 
   sidebar.addEventListener('keydown', function(e) {
@@ -658,7 +457,7 @@ export function exportNavbar(
   `;
 
   // Combine all CSS
-  const allCss = [resolvedStyles.css, dropdownCss, mobileCss]
+  const allCss = [resolvedStyles.css, mobileCss]
     .filter(Boolean)
     .join("\n");
   const styleBlockFinal = allCss ? `<style>${allCss}</style>` : "";
