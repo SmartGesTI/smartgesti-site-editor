@@ -1,10 +1,12 @@
 /**
  * Form Block Exporters
+ * Mobile-first responsive forms
  */
 
 import { Block } from "../../../schema/siteDocument";
 import { ThemeTokens } from "../../../schema/themeTokens";
 import { dataBlockIdAttr, escapeHtml } from "../../shared/htmlHelpers";
+import { generateScopedId } from "../../shared/idGenerator";
 
 export function exportForm(
   block: Block,
@@ -24,11 +26,27 @@ export function exportForm(
     throw new Error("exportForm requires renderChild function");
   }
 
+  // Responsive submit button: full-width em mobile
+  const submitBtnId = generateScopedId(block.id || "", "submit-btn");
+  const submitBtnCss = `
+    /* Submit button: full-width em mobile, auto em desktop */
+    #${submitBtnId} {
+      width: 100%;
+    }
+
+    @media (min-width: 640px) {
+      #${submitBtnId} {
+        width: auto;
+        min-width: 150px;
+      }
+    }
+  `;
+
   const childrenHtml = children
     .map((c: Block) => renderChild(c, depth + 1, basePath, theme))
     .join("");
 
-  return `<form ${dataBlockIdAttr(block.id)} action="${escapeHtml(action || "")}" method="${method}" style="display: flex; flex-direction: column; gap: 1rem;">${childrenHtml}<button type="submit" style="padding: 0.625rem 1.25rem; background-color: var(--sg-primary); color: var(--sg-primary-text); border-radius: var(--sg-button-radius); border: none; font-weight: 500; cursor: pointer;">${escapeHtml(submitText)}</button></form>`;
+  return `<style>${submitBtnCss}</style><form ${dataBlockIdAttr(block.id)} action="${escapeHtml(action || "")}" method="${method}" style="display: flex; flex-direction: column; gap: 1rem;">${childrenHtml}<button id="${submitBtnId}" type="submit" style="padding: 0.625rem 1.25rem; background-color: var(--sg-primary); color: var(--sg-primary-text); border-radius: var(--sg-button-radius); border: none; font-weight: 500; cursor: pointer;">${escapeHtml(submitText)}</button></form>`;
 }
 
 export function exportInput(
