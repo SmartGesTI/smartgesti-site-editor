@@ -79,7 +79,7 @@ export function exportNavbar(
 
   // Navbar flutuante: centralizado com margin auto e próximo ao topo
   const floatingCompactStyle = floating
-    ? "max-width: 1200px; width: calc(100% - 4rem); margin: 0.5rem auto 0; left: auto; right: auto;"
+    ? "max-width: 1200px; width: calc(100% - 4rem); margin: 0.5rem auto 0; left: 0; right: 0;"
     : "";
 
   // Merge all nav styles (resolvedStyles.nav contains bg, opacity, position for floating, border-radius, shadow)
@@ -474,8 +474,8 @@ export function exportNavbar(
       ${block.id && floating ? `[data-block-id="${block.id}"]` : ".sg-navbar--floating"} {
         max-width: calc(100% - 2rem) !important;
         width: calc(100% - 2rem) !important;
-        left: auto !important;
-        right: auto !important;
+        left: 0 !important;
+        right: 0 !important;
         margin: 0.5rem auto 0 !important;
       }
 
