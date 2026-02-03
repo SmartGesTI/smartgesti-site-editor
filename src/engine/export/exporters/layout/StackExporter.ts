@@ -1,10 +1,13 @@
 /**
  * Stack Block Exporter
+ * Responsive direction: column (mobile) → row (desktop) when direction="row"
  */
 
 import { Block } from "../../../schema/siteDocument";
 import { ThemeTokens } from "../../../schema/themeTokens";
 import { dataBlockIdAttr } from "../../shared/htmlHelpers";
+import { generateScopedId } from "../../shared/idGenerator";
+import { generateFlexDirectionMediaQueries, BREAKPOINTS } from "../../shared/responsiveGridHelper";
 
 export function exportStack(
   block: Block,
@@ -26,7 +29,13 @@ export function exportStack(
     throw new Error("exportStack requires renderChild function");
   }
 
-  const flexDirection = direction === "row" ? "row" : "column";
+  const stackId = generateScopedId(block.id || "", "stack");
+
+  // Mobile-first: se direction="row", começa column em mobile e vira row em desktop
+  const isMobileFirst = direction === "row";
+  const mobileDirection = isMobileFirst ? "column" : "column";
+  const desktopDirection = direction === "row" ? "row" : "column";
+
   const alignItems =
     align === "start"
       ? "flex-start"
@@ -46,9 +55,18 @@ export function exportStack(
             ? "space-between"
             : "space-around";
 
+  // Media queries apenas se for responsivo (row em desktop)
+  const mediaQueries = isMobileFirst
+    ? generateFlexDirectionMediaQueries(stackId, mobileDirection as any, desktopDirection as any)
+    : "";
+
   const childrenHtml = children
     .map((c: Block) => renderChild(c, depth + 1, basePath, theme))
     .join("");
 
-  return `<div ${dataBlockIdAttr(block.id)} style="display: flex; flex-direction: ${flexDirection}; gap: ${gap}; align-items: ${alignItems}; justify-content: ${justifyContent}; flex-wrap: ${wrap ? "wrap" : "nowrap"};">${childrenHtml}</div>`;
+  const inlineStyles = `display: flex; flex-direction: ${mobileDirection}; gap: ${gap}; align-items: ${alignItems}; justify-content: ${justifyContent}; flex-wrap: ${wrap ? "wrap" : "nowrap"};`;
+
+  return mediaQueries
+    ? `<style>${mediaQueries}</style><div id="${stackId}" ${dataBlockIdAttr(block.id)} style="${inlineStyles}">${childrenHtml}</div>`
+    : `<div ${dataBlockIdAttr(block.id)} style="${inlineStyles}">${childrenHtml}</div>`;
 }
