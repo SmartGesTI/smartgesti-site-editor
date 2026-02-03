@@ -66,8 +66,6 @@ export const escolaPremiumTemplate: SiteDocumentV2 = {
       type: "navbar",
       props: {
         variation: "navbar-glass",
-        logo: { src: "/logo.svg", alt: "Colégio Vanguarda", href: "#escola-hero" },
-        logoText: "Colégio Vanguarda",
         links: [
           { text: "Início", href: "#escola-hero" },
           { text: "Sobre Nós", href: "#escola-video-section" },
@@ -529,7 +527,6 @@ export const escolaPremiumTemplate: SiteDocumentV2 = {
       id: "escola-footer",
       type: "footer",
       props: {
-        logo: { src: "/logo.svg", alt: "Colégio Vanguarda" },
         description: "Há mais de 30 anos formando líderes, pensadores e cidadãos globais. O Colégio Vanguarda é referência em educação de qualidade, unindo tradição e inovação para preparar alunos para os desafios do futuro.",
         columns: [
           {

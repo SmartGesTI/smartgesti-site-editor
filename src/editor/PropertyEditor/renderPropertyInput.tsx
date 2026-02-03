@@ -149,6 +149,7 @@ export function renderPropertyInput(
           siteId={uploadConfig?.siteId || undefined}
           authToken={uploadConfig?.authToken}
           assetType="image"
+          deferUpload={true}
         />
       );
 

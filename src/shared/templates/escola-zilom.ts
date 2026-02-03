@@ -65,7 +65,6 @@ export const escolaZilomTemplate: SiteDocumentV2 = {
       type: "navbar",
       props: {
         variation: "navbar-classic",
-        logoText: "Zilom",
         links: [
           { text: "Home", href: "/site/p/home" },
           { text: "About", href: "/site/p/sobre" },

@@ -54,21 +54,6 @@ export const navbarVariations: Record<
       sticky: true,
     },
   },
-  "navbar-minimal": {
-    id: "navbar-minimal",
-    name: "Minimal",
-    defaultProps: {
-      variation: "navbar-minimal",
-      logoText: "Logo",
-      links: [
-        { text: "Cursos", href: "/site/p/cursos" },
-        { text: "Avisos", href: "/site/p/avisos" },
-        { text: "Contato", href: "/site/p/contato" },
-      ],
-      ctaButton: { text: "Entrar", href: "/site/p/contato" },
-      sticky: true,
-    },
-  },
   "navbar-dropdown": {
     id: "navbar-dropdown",
     name: "Com Dropdowns",
@@ -142,7 +127,6 @@ export const navbarVariations: Record<
 export const navbarVariationIds: NavbarVariationId[] = [
   "navbar-classic",
   "navbar-centered",
-  "navbar-minimal",
   "navbar-dropdown",
   "navbar-mega",
 ];

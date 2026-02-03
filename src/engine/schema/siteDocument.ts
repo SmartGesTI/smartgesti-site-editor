@@ -564,7 +564,6 @@ export interface LogoCloudBlock extends BlockBase {
 export type NavbarVariationId =
   | "navbar-classic"
   | "navbar-centered"
-  | "navbar-minimal"
   | "navbar-dropdown"
   | "navbar-mega";
 
@@ -600,6 +599,10 @@ export interface NavbarBlock extends BlockBase {
     shadow?: "none" | "sm" | "md" | "lg" | "xl";
     /** Opacidade do navbar (0-100) */
     opacity?: number;
+    /** Intensidade do desfoque/blur (0-100) para efeito de vidro fosco */
+    blurOpacity?: number;
+    /** Altura do logo em pixels (30-120) */
+    logoHeight?: number;
 
     // Link Styling
     /** Cor dos links */

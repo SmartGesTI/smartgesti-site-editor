@@ -14,6 +14,9 @@ interface ImageInputProps {
   siteId?: string
   authToken?: string
   assetType?: 'image' | 'video' | 'icon' | 'logo'
+  // Novo: Modo de preview (Data URL) sem upload imediato
+  deferUpload?: boolean
+  onPendingFile?: (file: File | null) => void
 }
 
 export function ImageInput({
@@ -28,6 +31,8 @@ export function ImageInput({
   siteId,
   authToken,
   assetType = 'image',
+  deferUpload = false,
+  onPendingFile,
 }: ImageInputProps) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -50,6 +55,31 @@ export function ImageInput({
       return
     }
 
+    setError(null)
+
+    // MODO PREVIEW: Usar Data URL sem fazer upload imediato
+    if (deferUpload) {
+      try {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          const dataUrl = e.target?.result as string
+          onChange(dataUrl) // Passa Data URL para preview
+          if (onPendingFile) {
+            onPendingFile(file) // Notifica que há upload pendente
+          }
+        }
+        reader.onerror = () => {
+          setError('Erro ao ler o arquivo')
+        }
+        reader.readAsDataURL(file)
+      } catch (err) {
+        console.error("Erro ao criar preview:", err)
+        setError(err instanceof Error ? err.message : "Erro ao processar imagem")
+      }
+      return
+    }
+
+    // MODO NORMAL: Upload imediato (comportamento original)
     // Verificar se tem autenticação (novo endpoint requer)
     if (!authToken) {
       setError('Autenticação necessária para upload')
@@ -61,7 +91,6 @@ export function ImageInput({
       return
     }
 
-    setError(null)
     setUploading(true)
 
     try {
@@ -112,29 +141,75 @@ export function ImageInput({
         </label>
       )}
 
-      {/* Preview - Sempre visível se houver imagem */}
-      {value && (
-        <div
-          className={cn(
-            'rounded-lg overflow-hidden border-2',
-            'border-blue-400 dark:border-blue-500',
-            'flex items-center justify-center',
-            'bg-gray-50 dark:bg-gray-800',
-            'w-full max-w-[200px]'
-          )}
-          style={{
-            height: size?.height || 80,
-          }}
-        >
+      {/* Input file oculto */}
+      <input
+        ref={(el) => {
+          if (el) (window as any).__imageInputRef = el;
+        }}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        disabled={uploading}
+        className="hidden"
+        id={`image-input-${Math.random()}`}
+      />
+
+      {/* Preview clicável - Funciona como botão */}
+      <button
+        type="button"
+        onClick={() => {
+          const input = document.querySelector('input[type="file"][accept="image/*"]') as HTMLInputElement;
+          if (input) {
+            input.value = ''; // Limpar valor para permitir selecionar o mesmo arquivo novamente
+            input.click();
+          }
+        }}
+        disabled={uploading}
+        className={cn(
+          'rounded-lg overflow-hidden border-2 transition-all duration-200',
+          'flex items-center justify-center w-full',
+          'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700',
+          value
+            ? 'border-blue-400 dark:border-blue-500 hover:border-blue-500'
+            : 'border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-400',
+          uploading && 'opacity-50 cursor-not-allowed',
+          !uploading && 'cursor-pointer'
+        )}
+        style={{
+          height: size?.height || 120,
+          maxWidth: size?.width || 200,
+        }}
+      >
+        {value ? (
           <img
             src={value}
             alt="preview"
             className="w-full h-full object-contain"
             onError={(e) => {
-              e.currentTarget.style.display = 'none'
+              e.currentTarget.style.display = 'none';
             }}
           />
-        </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 p-4 text-center">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {uploading ? 'Enviando...' : 'Clique para selecionar'}
+            </span>
+          </div>
+        )}
+      </button>
+
+      {/* Botão remover - APENAS SE HOUVER IMAGEM */}
+      {value && !uploading && (
+        <button
+          onClick={() => onChange(undefined)}
+          type="button"
+          className="text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-left transition-colors font-medium"
+        >
+          Remover imagem
+        </button>
       )}
 
       {/* Campo URL manual - CONDICIONAL */}
@@ -152,42 +227,6 @@ export function ImageInput({
             'text-gray-900 dark:text-gray-100'
           )}
         />
-      )}
-
-      {/* Botão de upload */}
-      <div className="relative">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          disabled={uploading}
-          className={cn(
-            'text-sm w-full',
-            'file:mr-4 file:py-2 file:px-4',
-            'file:rounded-lg file:border-0',
-            'file:text-sm file:font-medium',
-            'file:bg-blue-500 file:text-white file:hover:bg-blue-600',
-            'file:cursor-pointer file:transition-all',
-            'file:hover:scale-[1.02] file:active:scale-[0.98]',
-            uploading && 'opacity-50 cursor-not-allowed'
-          )}
-        />
-        {uploading && (
-          <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center rounded-lg pointer-events-none">
-            <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">Enviando...</span>
-          </div>
-        )}
-      </div>
-
-      {/* Botão remover - APENAS SE HOUVER IMAGEM */}
-      {value && !uploading && (
-        <button
-          onClick={() => onChange(undefined)}
-          type="button"
-          className="text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-left transition-colors font-medium"
-        >
-          Remover imagem
-        </button>
       )}
 
       {/* Mensagem de erro */}

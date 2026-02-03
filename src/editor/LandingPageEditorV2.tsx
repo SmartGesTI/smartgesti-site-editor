@@ -96,14 +96,128 @@ export function LandingPageEditorV2({
     }
   }, [defaultTemplateId]); // eslint-disable-line react-hooks/exhaustive-deps -- carregar só uma vez quando defaultTemplateId existe
 
+  // Função auxiliar: Detectar se é Data URL
+  const isDataURL = (str: string): boolean => {
+    return str?.startsWith('data:image/') || str?.startsWith('data:video/');
+  };
+
+  // Função auxiliar: Converter Data URL para Blob
+  const dataURLtoBlob = (dataURL: string): Blob => {
+    const arr = dataURL.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  };
+
+  // Função auxiliar: Fazer upload de um Data URL
+  const uploadDataURL = async (dataURL: string): Promise<string> => {
+    if (!uploadConfig?.tenantId) throw new Error('Upload config não disponível');
+
+    const blob = dataURLtoBlob(dataURL);
+    const file = new File([blob], 'image.png', { type: blob.type });
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const apiUrl = (import.meta as any).env.VITE_API_URL || 'http://localhost:3001';
+    const params = new URLSearchParams();
+    params.append('tenantId', uploadConfig.tenantId);
+    params.append('assetType', 'image');
+    if (uploadConfig.schoolId) params.append('schoolId', uploadConfig.schoolId);
+    if (uploadConfig.siteId) params.append('siteId', uploadConfig.siteId);
+
+    const res = await fetch(`${apiUrl}/api/site-assets/upload?${params}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${uploadConfig.authToken}`,
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Upload falhou');
+    }
+
+    const data = await res.json();
+    return data.url;
+  };
+
+  // Função auxiliar: Processar um bloco recursivamente para upload de Data URLs
+  const processBlockDataURLs = async (block: any): Promise<any> => {
+    const newBlock = { ...block };
+
+    // Processar props que podem ter imagens
+    if (newBlock.props) {
+      const newProps = { ...newBlock.props };
+
+      // Processar logo (pode ser string ou objeto)
+      if (newProps.logo) {
+        if (typeof newProps.logo === 'string' && isDataURL(newProps.logo)) {
+          console.log('[Save] Uploading logo Data URL...');
+          newProps.logo = await uploadDataURL(newProps.logo);
+        } else if (typeof newProps.logo === 'object' && newProps.logo.src && isDataURL(newProps.logo.src)) {
+          console.log('[Save] Uploading logo.src Data URL...');
+          newProps.logo = { ...newProps.logo, src: await uploadDataURL(newProps.logo.src) };
+        }
+      }
+
+      // Processar image prop (hero, etc)
+      if (newProps.image && typeof newProps.image === 'string' && isDataURL(newProps.image)) {
+        console.log('[Save] Uploading image Data URL...');
+        newProps.image = await uploadDataURL(newProps.image);
+      }
+
+      // Processar backgroundImage
+      if (newProps.backgroundImage && typeof newProps.backgroundImage === 'string' && isDataURL(newProps.backgroundImage)) {
+        console.log('[Save] Uploading backgroundImage Data URL...');
+        newProps.backgroundImage = await uploadDataURL(newProps.backgroundImage);
+      }
+
+      // Processar children recursivamente
+      if (newProps.children && Array.isArray(newProps.children)) {
+        newProps.children = await Promise.all(
+          newProps.children.map((child: any) => processBlockDataURLs(child))
+        );
+      }
+
+      newBlock.props = newProps;
+    }
+
+    return newBlock;
+  };
+
   // Handlers de save/publish
   const handleSave = async () => {
     if (!document || !onSave) return;
     setIsSaving(true);
     try {
-      await onSave(document);
+      // Processar o documento para fazer upload de todos os Data URLs
+      console.log('[Save] Processando Data URLs antes de salvar...');
+      const processedPages = await Promise.all(
+        (document.pages || []).map(async (page) => ({
+          ...page,
+          structure: await Promise.all(
+            (page.structure || []).map((block) => processBlockDataURLs(block))
+          ),
+        }))
+      );
+
+      const processedDocument = {
+        ...document,
+        pages: processedPages,
+      };
+
+      console.log('[Save] Data URLs processados, salvando documento...');
+      await onSave(processedDocument);
     } catch (error) {
       console.error("Error saving:", error);
+      throw error;
     } finally {
       setIsSaving(false);
     }

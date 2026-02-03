@@ -89,6 +89,11 @@
   pointer-events: none;
 }
 
+/* When sticky but not floating, make background semi-transparent for glass effect with blur */
+.sg-navbar--sticky:not(.sg-navbar--floating)::before {
+  opacity: var(--navbar-blur-opacity, 0.15); /* Use custom blur opacity or default to 0.15 */
+}
+
 .sg-navbar__container {
   display: flex;
   align-items: center;
@@ -97,7 +102,7 @@
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 1rem;
   position: relative;
   z-index: 1;
 }
@@ -127,9 +132,10 @@
 }
 
 .sg-navbar--sticky {
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  /* position: fixed is now applied via inline styles by styleResolver */
+  /* Removed to avoid conflicts with inline styles */
+  backdrop-filter: blur(var(--navbar-blur-amount, 10px));
+  -webkit-backdrop-filter: blur(var(--navbar-blur-amount, 10px));
 }
 
 /* Floating mode */
@@ -219,6 +225,10 @@
 
 /* Variação: Classic */
 .sg-navbar--classic {
+  /* Padding e border removidos por padrão para modo sticky */
+}
+
+.sg-navbar--classic.sg-navbar--floating {
   padding: 1rem 0;
   border-bottom: 1px solid var(--sg-border, #e5e7eb);
 }
@@ -229,6 +239,10 @@
 
 /* Variação: Centered - links centralizados */
 .sg-navbar--centered {
+  /* Padding e border removidos por padrão para modo sticky */
+}
+
+.sg-navbar--centered.sg-navbar--floating {
   padding: 1rem 0;
   border-bottom: 1px solid var(--sg-border, #e5e7eb);
 }
@@ -249,23 +263,6 @@
 
 .sg-navbar--centered .sg-navbar__actions {
   justify-self: end;
-}
-
-/* Variação: Minimal - compacto, borda sutil */
-.sg-navbar--minimal {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--sg-border, #e5e7eb);
-  box-shadow: none;
-}
-
-.sg-navbar--minimal .sg-navbar__menu {
-  gap: 1.25rem;
-}
-
-.sg-navbar--minimal .sg-navbar__btn--primary,
-.sg-navbar--minimal .sg-navbar__btn--solid {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.875rem;
 }
 
 /* Variação: Glass - backdrop blur, fundo semitransparente */

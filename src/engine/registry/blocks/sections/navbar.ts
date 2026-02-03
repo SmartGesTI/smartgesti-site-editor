@@ -13,7 +13,6 @@ export const navbarBlock: BlockDefinition = {
   canHaveChildren: false,
   defaultProps: {
     variation: "navbar-classic",
-    logoText: "Logo",
     links: [
       { text: "Início", href: "/site/p/home" },
       {
@@ -55,6 +54,8 @@ export const navbarBlock: BlockDefinition = {
     borderRadius: 0,
     shadow: "sm",
     opacity: 100,
+    blurOpacity: 10,
+    logoHeight: 70,
     linkFontSize: "md",
     buttonVariant: "solid",
     buttonBorderRadius: 8,
@@ -79,6 +80,14 @@ export const navbarBlock: BlockDefinition = {
     },
     opacity: {
       label: "Transparência",
+      inputType: "slider",
+      min: 0,
+      max: 100,
+      step: 5,
+      group: "🎨 Aparência",
+    },
+    blurOpacity: {
+      label: "Intensidade do Desfoque",
       inputType: "slider",
       min: 0,
       max: 100,
@@ -132,6 +141,14 @@ export const navbarBlock: BlockDefinition = {
     logo: {
       label: "Logo (Imagem)",
       inputType: "image-upload",
+      group: "🖼️ Logo",
+    },
+    logoHeight: {
+      label: "Tamanho do Logo (px)",
+      inputType: "slider",
+      min: 40,
+      max: 130,
+      step: 5,
       group: "🖼️ Logo",
     },
     logoText: {

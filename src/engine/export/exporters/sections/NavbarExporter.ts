@@ -33,6 +33,7 @@ export function exportNavbar(
     transparent = false,
     floating = false,
     layout,
+    logoHeight = 70,
   } = (block as any).props;
 
   // Use Style Resolver to get complete inline styles
@@ -69,8 +70,9 @@ export function exportNavbar(
 
   // Build nav style from resolved styles + layout modifiers
   // Note: floating mode already includes position: fixed in resolvedStyles.nav
+  // Changed from sticky to fixed to avoid navbar occupying space
   const stickyStyle =
-    sticky && !floating ? "position: sticky; top: 0; z-index: 100" : "";
+    sticky && !floating ? "position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 1000" : "";
   const baseStyle =
     !transparent && !floating ? "border-bottom: 1px solid #e5e7eb" : "";
   const paddingStyle = "";
@@ -99,11 +101,9 @@ export function exportNavbar(
 
   // Brand with resolved styles
   let logoHtml =
-    logoUrl || logoAlt
-      ? `<img src="${escapeHtml(logoUrl)}" alt="${escapeHtml(logoAlt)}" style="height: 5rem; object-fit: contain;" class="sg-navbar__brand-img" />`
-      : logoText
-        ? `<span class="sg-navbar__brand-text" style="${resolvedStyles.brandText}">${escapeHtml(logoText)}</span>`
-        : "";
+    logoUrl
+      ? `<img src="${escapeHtml(logoUrl)}" alt="${escapeHtml(logoAlt)}" style="height: ${logoHeight}px; max-height: ${logoHeight}px; object-fit: contain;" class="sg-navbar__brand-img" />`
+      : `<div style="display: flex; align-items: center; justify-content: center; height: 40px; width: 100px; background-color: #e5e7eb; border: 2px solid #d1d5db; border-radius: 4px; font-size: 16px; font-weight: 600; color: #6b7280;">Logo</div>`;
   if (logoHref && logoHtml) {
     const resolvedLogoHref = resolveHref(logoHref, basePath);
     const logoTargetAttr = linkTargetAttr(resolvedLogoHref, basePath);

@@ -65,7 +65,6 @@ export const escolaEdviTemplate: SiteDocumentV2 = {
       type: "navbar",
       props: {
         variation: "navbar-classic",
-        logoText: "Edvi",
         links: [
           { text: "Home", href: "/site/p/home" },
           { text: "About", href: "/site/p/sobre" },

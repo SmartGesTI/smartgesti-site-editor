@@ -10,6 +10,189 @@ import { hashDocument } from "../../utils/documentHash";
 import { htmlExportRegistry, initializeExporters } from "./exporters";
 
 /**
+ * Landing Page CSS crítico para navbar e outros componentes
+ * Incluído inline para garantir que sempre esteja disponível
+ */
+const landingPageCSS = `
+/* Navbar engine (sg-navbar) - base e variações */
+.sg-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 4.5rem;
+  color: var(--sg-text, #1f2937);
+  position: relative;
+  transition: all 0.2s ease;
+  background-color: var(--navbar-bg, var(--sg-bg, #fff));
+  border-radius: var(--navbar-border-radius, 0);
+  box-shadow: var(--navbar-shadow, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+}
+
+.sg-navbar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  opacity: var(--navbar-opacity, 1);
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.sg-navbar--sticky:not(.sg-navbar--floating)::before {
+  opacity: var(--navbar-blur-opacity, 0.15);
+}
+
+.sg-navbar--sticky {
+  backdrop-filter: blur(var(--navbar-blur-amount, 10px));
+  -webkit-backdrop-filter: blur(var(--navbar-blur-amount, 10px));
+}
+
+.sg-navbar--floating {
+  margin: 1rem;
+  max-width: calc(100% - 2rem);
+  border-radius: var(--navbar-border-radius, 12px);
+  box-shadow: var(--navbar-shadow, 0 10px 40px rgba(0, 0, 0, 0.15));
+  border-bottom: none !important;
+}
+
+.sg-navbar__container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  max-width: 1200px;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.sg-navbar__brand {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+}
+
+.sg-navbar__brand a {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  text-decoration: none;
+  color: var(--sg-primary, #3b82f6);
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.sg-navbar__brand img {
+  object-fit: contain;
+  object-position: left center;
+}
+
+.sg-navbar__brand-text {
+  color: var(--sg-primary, #3b82f6);
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.sg-navbar__menu {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.sg-navbar__link {
+  color: var(--navbar-link-color, var(--sg-text, #1f2937));
+  font-size: var(--navbar-link-size, 1rem);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.sg-navbar__link:hover {
+  color: var(--navbar-link-hover-color, var(--sg-primary, #3b82f6));
+}
+
+.sg-navbar__btn {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s ease;
+  border-radius: var(--navbar-btn-radius, 0.5rem);
+}
+
+.sg-navbar__btn--solid {
+  background-color: var(--navbar-btn-bg, var(--sg-primary, #3b82f6));
+  color: var(--navbar-btn-text, var(--sg-primary-text, #fff));
+  border: none;
+}
+
+.sg-navbar__btn--solid:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.sg-navbar__btn--outline {
+  background-color: transparent;
+  color: var(--navbar-btn-bg, var(--sg-primary, #3b82f6));
+  border: 2px solid var(--navbar-btn-bg, var(--sg-primary, #3b82f6));
+}
+
+.sg-navbar__btn--outline:hover {
+  background-color: var(--navbar-btn-bg, var(--sg-primary, #3b82f6));
+  color: var(--navbar-btn-text, var(--sg-primary-text, #fff));
+}
+
+.sg-navbar__btn--ghost {
+  background-color: transparent;
+  color: var(--navbar-btn-bg, var(--sg-primary, #3b82f6));
+  border: none;
+}
+
+.sg-navbar__btn--ghost:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.sg-navbar--classic.sg-navbar--floating {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--sg-border, #e5e7eb);
+}
+
+.sg-navbar--centered.sg-navbar--floating {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--sg-border, #e5e7eb);
+}
+
+.sg-navbar--centered .sg-navbar__container {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.sg-navbar--centered .sg-navbar__brand {
+  justify-self: start;
+}
+
+.sg-navbar--centered .sg-navbar__menu {
+  justify-self: center;
+}
+
+.sg-navbar--centered .sg-navbar__actions {
+  justify-self: end;
+}
+`;
+
+/**
  * Cache de HTML com limite LRU (Last Recently Used)
  * Limite de 50 entradas para evitar memory leak
  */
@@ -174,6 +357,9 @@ export function exportPageToHtml(
       color: var(--sg-text, #1f2937);
     }
     ${themeCSS}
+
+    /* Landing Page Styles */
+    ${landingPageCSS}
   </style>
   <script>
     // Smooth scroll para âncoras sem reload

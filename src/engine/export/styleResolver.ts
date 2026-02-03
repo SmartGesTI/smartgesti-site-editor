@@ -139,6 +139,7 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
     // Merge props with defaults (theme-aware)
     const {
         opacity = navbarDefaults.opacity,
+        blurOpacity = 15,
         borderRadius = navbarDefaults.borderRadius,
         shadow = navbarDefaults.shadow,
         linkColor = safeLinkColor,
@@ -148,6 +149,7 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
         buttonBorderRadius = navbarDefaults.buttonBorderRadius,
         buttonVariant = navbarDefaults.buttonVariant,
         floating = false,
+        sticky = true,
         transparent = false,
         variation = "navbar-classic",
     } = props;
@@ -157,6 +159,9 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
     // Resolve nav styles
     const navStyles: string[] = [];
     const cssRules: string[] = [];
+
+    // Fixed navbar height - all navbars should have the same height
+    navStyles.push("height: 4.5rem");
 
     // Determine effective background
     const rawBg = props.bg;
@@ -176,14 +181,24 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
                 navStyles.push(`opacity: ${opacity / 100}`);
             }
         } else {
+            // Apply background with user-chosen opacity
             const bgWithOpacity = applyOpacityToColor(effectiveBg, opacity);
             navStyles.push(`background-color: ${bgWithOpacity}`);
         }
     }
 
+    // Apply blur intensity as CSS variable for glass effect
+    // Convert 0-100 to 0px-30px blur amount
+    if (sticky && !floating) {
+        const blurAmount = Math.round((blurOpacity / 100) * 30); // 0-30px
+        const blurBgOpacity = (blurOpacity / 100) * 0.3; // 0-0.3 additional opacity for frosted glass effect
+        navStyles.push(`--navbar-blur-amount: ${blurAmount}px`);
+        navStyles.push(`--navbar-blur-opacity: ${blurBgOpacity}`);
+    }
+
     // Layout specific logic
     if (floating) {
-        // Normal floating (full width minus margins)
+        // Floating navbar - fixed with margins
         navStyles.push("position: fixed");
         navStyles.push("top: 20px");
         navStyles.push("left: 20px");
@@ -195,8 +210,30 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
         if (effectiveRadius > 0) {
             navStyles.push(`border-radius: ${effectiveRadius}px`);
         }
+    } else if (sticky) {
+        // Sticky navbar - fixed at top, scrolls content only
+        console.log('[NavbarStyles] Applying fixed position: sticky=true, floating=false');
+        navStyles.push("position: fixed");
+        navStyles.push("top: 0");
+        navStyles.push("left: 0");
+        navStyles.push("right: 0");
+        navStyles.push("width: 100%");
+        navStyles.push("z-index: 1000");
+
+        if (borderRadius > 0) {
+            navStyles.push(`border-bottom-left-radius: ${borderRadius}px`);
+            navStyles.push(`border-bottom-right-radius: ${borderRadius}px`);
+        }
     } else {
-        // Standard static navbar
+        // Non-sticky navbar - absolute position, scrolls with page but stays on top of hero
+        console.log('[NavbarStyles] Applying absolute position: sticky=false, floating=false');
+        navStyles.push("position: absolute");
+        navStyles.push("top: 0");
+        navStyles.push("left: 0");
+        navStyles.push("right: 0");
+        navStyles.push("width: 100%");
+        navStyles.push("z-index: 1000");
+
         if (borderRadius > 0) {
             navStyles.push(`border-bottom-left-radius: ${borderRadius}px`);
             navStyles.push(`border-bottom-right-radius: ${borderRadius}px`);

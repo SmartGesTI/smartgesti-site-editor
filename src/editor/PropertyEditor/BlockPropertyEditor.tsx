@@ -45,6 +45,11 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
     for (const [propName, meta] of Object.entries(
       blockDefinition.inspectorMeta,
     )) {
+      // Lógica condicional: só mostrar logoHeight se houver logo
+      if (propName === "logoHeight" && !props.logo) {
+        continue; // Pular este campo
+      }
+
       const group = meta.group || "Geral";
       if (!groups[group]) {
         groups[group] = [];
@@ -76,7 +81,12 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
   }
 
   const handlePropChange = useCallback((propName: string, value: any) => {
-    onUpdate({ [propName]: value });
+    // Se remover o logo (definir como undefined), resetar logoHeight para padrão
+    if (propName === "logo" && (value === undefined || value === "")) {
+      onUpdate({ [propName]: value, logoHeight: 70 });
+    } else {
+      onUpdate({ [propName]: value });
+    }
   }, [onUpdate]);
 
   return (

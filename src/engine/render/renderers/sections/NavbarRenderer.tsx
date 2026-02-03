@@ -21,6 +21,7 @@ export function renderNavbar(block: any): React.ReactNode {
     sticky,
     layout,
     floating = false,
+    logoHeight = 70,
   } = navbarBlock.props;
 
   // Use Style Resolver
@@ -47,8 +48,8 @@ export function renderNavbar(block: any): React.ReactNode {
     typeof logo === "object" && logo?.href != null ? logo.href : "";
 
   const variationClass =
-    variation === "navbar-minimal"
-      ? "sg-navbar--minimal"
+    variation === "navbar-centered"
+      ? "sg-navbar--centered"
       : "sg-navbar--classic";
 
   // Determine layout (use custom layout or fallback)
@@ -76,12 +77,26 @@ export function renderNavbar(block: any): React.ReactNode {
       src={logoUrl}
       alt={logoAlt}
       className="sg-navbar__brand-img"
-      style={{ height: "2rem", objectFit: "contain" }}
+      style={{ height: `${logoHeight}px`, maxHeight: `${logoHeight}px`, objectFit: "contain" }}
     />
   ) : (
-    <span className="sg-navbar__brand-text" style={brandTextStyle}>
-      {logoText || "Logo"}
-    </span>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "40px",
+        width: "100px",
+        backgroundColor: "#e5e7eb",
+        border: "2px solid #d1d5db",
+        borderRadius: "4px",
+        fontSize: "16px",
+        fontWeight: "600",
+        color: "#6b7280",
+      }}
+    >
+      Logo
+    </div>
   );
 
   const brandEl = logoHref ? (
