@@ -4,6 +4,7 @@
  */
 
 import { Block, NavbarBlock, SitePage } from "@/engine/schema/siteDocument";
+import { NAVBAR_DEFAULT_PROPS } from "@/engine/registry/blocks/sections/navbar";
 
 /**
  * Gera ID único para blocos
@@ -37,32 +38,24 @@ export function generateUniqueSlug(
 
 /**
  * Cria um bloco navbar com links para todas as páginas
- * Com sincronização automática ativada
+ * Com sincronização automática ativada e todos os valores padrão aplicados
  */
 export function createNavbarBlock(pages: SitePage[]): NavbarBlock {
   return {
     id: `navbar-${generateId()}`,
     type: "navbar",
     props: {
-      variation: "navbar-classic",
+      // Usar todos os valores padrão da navbar
+      ...NAVBAR_DEFAULT_PROPS,
+
+      // Sobrescrever apenas o que é específico desta navbar
       logoText: "Logo",
       links: pages.map((page) => ({
         text: page.name,
         href: page.slug === "home" ? "/" : `/p/${page.slug}`,
       })),
       ctaButton: { text: "Contato", href: "/p/contato" },
-      sticky: true,
       _autoSync: true, // Ativar sincronização automática
-
-      // Default styling
-      floating: false,
-      layout: "expanded",
-      borderRadius: 0,
-      shadow: "sm",
-      opacity: 100,
-      linkFontSize: "md",
-      buttonVariant: "solid",
-      buttonBorderRadius: 8,
     } as any,
   };
 }

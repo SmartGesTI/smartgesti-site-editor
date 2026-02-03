@@ -18,6 +18,7 @@
  */
 
 import type { SiteDocumentV2 } from "../schema";
+import { NAVBAR_DEFAULT_PROPS } from "../../engine/registry/blocks/sections/navbar";
 
 export const escolaEdviTemplate: SiteDocumentV2 = {
   meta: {
@@ -64,7 +65,8 @@ export const escolaEdviTemplate: SiteDocumentV2 = {
       id: "edvi-navbar",
       type: "navbar",
       props: {
-        variation: "navbar-classic",
+        ...NAVBAR_DEFAULT_PROPS,
+        // Sobrescrever apenas valores específicos do template
         links: [
           { text: "Home", href: "/site/p/home" },
           { text: "About", href: "/site/p/sobre" },
@@ -76,7 +78,6 @@ export const escolaEdviTemplate: SiteDocumentV2 = {
           { text: "Contact", href: "/site/p/contato" },
         ],
         ctaButton: { text: "Enroll Now", href: "/site/p/contato" },
-        sticky: true,
         bg: "#ffffff",
       },
     },
