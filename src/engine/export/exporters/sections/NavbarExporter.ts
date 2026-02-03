@@ -77,9 +77,9 @@ export function exportNavbar(
     !transparent && !floating ? "border-bottom: 1px solid #e5e7eb" : "";
   const paddingStyle = "";
 
-  // Navbar flutuante: mesma largura do conteúdo principal
+  // Navbar flutuante: centralizado com margin auto e próximo ao topo
   const floatingCompactStyle = floating
-    ? "max-width: 1200px; width: calc(100% - 4rem); left: 50%; transform: translateX(-50%);"
+    ? "max-width: 1200px; width: calc(100% - 4rem); margin: 0.5rem auto 0; left: auto; right: auto;"
     : "";
 
   // Merge all nav styles (resolvedStyles.nav contains bg, opacity, position for floating, border-radius, shadow)
@@ -474,9 +474,9 @@ export function exportNavbar(
       ${block.id && floating ? `[data-block-id="${block.id}"]` : ".sg-navbar--floating"} {
         max-width: calc(100% - 2rem) !important;
         width: calc(100% - 2rem) !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        margin: 1rem auto 0 !important;
+        left: auto !important;
+        right: auto !important;
+        margin: 0.5rem auto 0 !important;
       }
 
       /* Hamburger animation to X */
