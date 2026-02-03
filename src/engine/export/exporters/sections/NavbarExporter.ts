@@ -119,6 +119,7 @@ export function exportNavbar(
   // Extrair cores da navbar para usar nos dropdowns
   const navbarBg = (block as any).props.bg || "#ffffff";
   const navbarOpacity = (block as any).props.opacity || 100;
+  const navbarBlurOpacity = (block as any).props.blurOpacity || 0;
 
   // Aplicar opacidade diretamente na cor do background (não no container)
   // Isso evita que o texto fique transparente
@@ -128,6 +129,10 @@ export function exportNavbar(
     navbarBg,
     dropdownOpacity,
   );
+
+  // Aplicar desfoque (blur) aos dropdowns igual ao navbar
+  const dropdownBlurValue = navbarBlurOpacity > 0 ? `${navbarBlurOpacity / 10}px` : "0px";
+  const dropdownBackdropFilter = navbarBlurOpacity > 0 ? `backdrop-filter: blur(${dropdownBlurValue}); -webkit-backdrop-filter: blur(${dropdownBlurValue});` : "";
 
   // Usar linkColor da paleta se disponível, caso contrário fallback para text
   const linkColor =
@@ -170,8 +175,8 @@ export function exportNavbar(
         ? "sg-navbar__dropdown sg-navbar__dropdown--mega"
         : "sg-navbar__dropdown";
       const dropdownStyle = isMegaMenu
-        ? `position: absolute; top: 100%; left: 0; background-color: ${dropdownBgWithOpacity}; border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 1rem; margin-top: 0.5rem; min-width: 280px; visibility: hidden; transition: opacity 0.2s, visibility 0.2s, transform 0.2s; transform: translateY(-10px); z-index: 1000; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.5rem;`
-        : `position: absolute; top: 100%; left: 0; background-color: ${dropdownBgWithOpacity}; border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 0.5rem; margin-top: 0.5rem; min-width: 200px; visibility: hidden; transition: opacity 0.2s, visibility 0.2s, transform 0.2s; transform: translateY(-10px); z-index: 1000;`;
+        ? `position: absolute; top: 100%; left: 0; background-color: ${dropdownBgWithOpacity}; ${dropdownBackdropFilter} border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 1rem; margin-top: 0.5rem; min-width: 280px; visibility: hidden; transition: opacity 0.2s, visibility 0.2s, transform 0.2s; transform: translateY(-10px); z-index: 1000; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.5rem;`
+        : `position: absolute; top: 100%; left: 0; background-color: ${dropdownBgWithOpacity}; ${dropdownBackdropFilter} border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 0.5rem; margin-top: 0.5rem; min-width: 200px; visibility: hidden; transition: opacity 0.2s, visibility 0.2s, transform 0.2s; transform: translateY(-10px); z-index: 1000;`;
 
       return `<div class="sg-navbar__link-wrapper" style="position: relative;">
             <a href="${escapeHtml(resolved)}" class="sg-navbar__link sg-navbar__link--has-dropdown" style="${resolvedStyles.link} cursor: pointer;">${escapeHtml(l.text)}${chevronIcon}</a>
