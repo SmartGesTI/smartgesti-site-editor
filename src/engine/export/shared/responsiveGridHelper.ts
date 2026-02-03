@@ -227,6 +227,9 @@ export function generateFlexDirectionMediaQueries(
  *
  * Helper que combina baseStyle inline + media queries em um só lugar
  *
+ * IMPORTANTE: grid-template-columns é definido APENAS no CSS (não inline)
+ * para permitir que media queries funcionem corretamente
+ *
  * @param elementId - ID único do grid
  * @param config - Configuração de colunas
  * @param gap - Gap do grid
@@ -239,9 +242,30 @@ export function generateResponsiveGridStyles(
   gap: string = "1rem",
   additionalInlineStyles?: string,
 ): { inlineStyles: string; mediaQueries: string } {
-  const inlineStyles = `display: grid; grid-template-columns: repeat(${config.sm}, 1fr); gap: ${gap};${additionalInlineStyles ? ` ${additionalInlineStyles}` : ""}`;
+  // IMPORTANTE: Não incluir grid-template-columns aqui - vai no CSS
+  const inlineStyles = `display: grid; gap: ${gap};${additionalInlineStyles ? ` ${additionalInlineStyles}` : ""}`;
 
-  const mediaQueries = generateGridMediaQueries(elementId, config);
+  // Gerar CSS completo com base mobile + media queries
+  const mediaQueries = `
+    /* Base: Mobile ${config.sm} coluna(s) */
+    #${elementId} {
+      grid-template-columns: repeat(${config.sm}, 1fr);
+    }
+
+    /* Tablet: ${config.md} colunas */
+    @media (min-width: ${BREAKPOINTS.sm}) {
+      #${elementId} {
+        grid-template-columns: repeat(${config.md}, 1fr);
+      }
+    }
+
+    /* Desktop: ${config.lg} colunas */
+    @media (min-width: ${BREAKPOINTS.lg}) {
+      #${elementId} {
+        grid-template-columns: repeat(${config.lg}, 1fr);
+      }
+    }
+  `.trim();
 
   return {
     inlineStyles,

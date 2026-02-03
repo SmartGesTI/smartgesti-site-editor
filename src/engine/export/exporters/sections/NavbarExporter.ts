@@ -470,6 +470,15 @@ export function exportNavbar(
         display: none !important;
       }
 
+      /* Navbar flutuante: ajuste responsivo mobile */
+      ${block.id && floating ? `[data-block-id="${block.id}"]` : ".sg-navbar--floating"} {
+        max-width: calc(100% - 2rem) !important;
+        width: calc(100% - 2rem) !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        margin: 1rem auto 0 !important;
+      }
+
       /* Hamburger animation to X */
       ${block.id ? `[data-block-id="${block.id}"]` : ".sg-navbar"} .sg-navbar__hamburger[aria-expanded="true"] .sg-hamburger-top {
         transform: translateY(6px) rotate(45deg);
