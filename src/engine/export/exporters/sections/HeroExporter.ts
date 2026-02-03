@@ -1,5 +1,6 @@
 /**
  * Hero Section Exporter
+ * Mobile-first responsive: split layout collapses to stack in mobile
  */
 
 import { Block } from "../../../schema/siteDocument";
@@ -7,6 +8,7 @@ import { ThemeTokens } from "../../../schema/themeTokens";
 import { PLACEHOLDER_IMAGE_URL } from "../../../presets/heroVariations";
 import { resolveHeroButtonStyles } from "../../styleResolver";
 import { dataBlockIdAttr, blockIdAttr, escapeHtml, resolveHref, linkTargetAttr } from "../../shared/htmlHelpers";
+import { generateScopedId } from "../../shared/idGenerator";
 
 export function exportHero(
   block: Block,
@@ -118,8 +120,22 @@ export function exportHero(
 
   const imgFallback = `this.onerror=null;this.src='${escapeHtml(PLACEHOLDER_IMAGE_URL)}';`;
   if (isSplit && heroImage) {
+    // Responsive split layout: stack in mobile, 2 columns in desktop
+    const splitId = generateScopedId(block.id || "", "hero-split");
+    const splitCss = `
+      @media (max-width: 1023px) {
+        #${splitId} {
+          grid-template-columns: 1fr !important;
+          gap: 2rem !important;
+          padding: 0 1rem !important;
+        }
+        #${splitId} .sg-hero__split-image {
+          order: -1;
+        }
+      }
+    `;
     const splitContentStyle = `text-align: ${align}; position: relative; z-index: 1;${background ? ` background: ${background};` : ""}`;
-    const innerHtml = `<div class="sg-hero__split-inner" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; max-width: 1200px; width: 100%; padding: 0 2rem;"><div class="sg-hero__split-content" style="${splitContentStyle}">${contentBlock}</div><div class="sg-hero__split-image" style="position: relative;"><img src="${escapeHtml(heroImage)}" alt="${escapeHtml(title || "")}" class="sg-hero__img" style="width: 100%; height: auto; border-radius: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1);" onerror="${imgFallback}" /></div></div>`;
+    const innerHtml = `<style>${splitCss}</style><div id="${splitId}" class="sg-hero__split-inner" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; max-width: 1200px; width: 100%; padding: 0 2rem;"><div class="sg-hero__split-content" style="${splitContentStyle}">${contentBlock}</div><div class="sg-hero__split-image" style="position: relative;"><img src="${escapeHtml(heroImage)}" alt="${escapeHtml(title || "")}" class="sg-hero__img" style="width: 100%; height: auto; border-radius: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1);" onerror="${imgFallback}" /></div></div>`;
     return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; padding: 8rem 0; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${innerHtml}</section>`;
   }
 

@@ -1,11 +1,14 @@
 /**
  * Marketing Sections Exporters
  * Feature, FeatureGrid, Pricing, Testimonials, FAQ, CTA, Stats, Logo Cloud, etc.
+ * Mobile-first responsive grids with media queries
  */
 
 import { Block } from "../../../schema/siteDocument";
 import { ThemeTokens } from "../../../schema/themeTokens";
 import { dataBlockIdAttr, blockIdAttr, escapeHtml, resolveHref, linkTargetAttr } from "../../shared/htmlHelpers";
+import { generateScopedId } from "../../shared/idGenerator";
+import { resolveResponsiveColumns, generateResponsiveGridStyles } from "../../shared/responsiveGridHelper";
 
 export function exportFeature(
   block: Block,
@@ -35,6 +38,11 @@ export function exportFeatureGrid(
     features = [],
   } = (block as any).props;
 
+  // Responsive grid: 1 col (mobile) → 2 cols (tablet) → N cols (desktop)
+  const gridId = generateScopedId(block.id || "", "feature-grid");
+  const responsiveConfig = resolveResponsiveColumns(columns, 1, 2, columns);
+  const { inlineStyles, mediaQueries } = generateResponsiveGridStyles(gridId, responsiveConfig, "2rem");
+
   const isImageCards = variant === "image-cards";
   const headerHtml =
     title || subtitle
@@ -59,7 +67,7 @@ export function exportFeatureGrid(
     })
     .join("");
 
-  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 2rem;">${featuresHtml}</div></div></section>`;
+  return `<style>${mediaQueries}</style><section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div id="${gridId}" style="${inlineStyles}">${featuresHtml}</div></div></section>`;
 }
 
 export function exportCta(
@@ -75,6 +83,21 @@ export function exportCta(
     secondaryButton,
     variant = "centered",
   } = (block as any).props;
+
+  // Responsive buttons: column (mobile) → row (desktop)
+  const ctaId = generateScopedId(block.id || "", "cta-actions");
+  const buttonsCss = `
+    @media (max-width: 640px) {
+      #${ctaId} {
+        flex-direction: column !important;
+        width: 100%;
+      }
+      #${ctaId} a {
+        width: 100% !important;
+        text-align: center;
+      }
+    }
+  `;
 
   const isGradient = variant === "gradient";
   const bgStyle = isGradient
@@ -96,7 +119,7 @@ export function exportCta(
   const secondaryBtnHtml = secondaryButton
     ? `<a href="${escapeHtml(ctaSecondaryHref)}"${linkTargetAttr(ctaSecondaryHref, basePath)} style="padding: 0.75rem 1.5rem; background-color: transparent; color: ${isGradient ? "#fff" : "var(--sg-primary)"}; border: 1px solid ${isGradient ? "#fff" : "var(--sg-primary)"}; border-radius: var(--sg-button-radius); text-decoration: none; font-weight: 500;">${escapeHtml(secondaryButton.text)}</a>`
     : "";
-  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; ${bgStyle} text-align: center;"><div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;"><h2 style="font-size: var(--sg-heading-h2); margin-bottom: 1rem; color: ${textColor};">${escapeHtml(title)}</h2>${ctaDesc ? `<p style="font-size: 1.125rem; margin-bottom: 2rem; color: ${mutedColor};">${escapeHtml(ctaDesc)}</p>` : ""}<div style="display: flex; gap: 1rem; justify-content: center;">${primaryBtnHtml}${secondaryBtnHtml}</div></div></section>`;
+  return `<style>${buttonsCss}</style><section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; ${bgStyle} text-align: center;"><div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;"><h2 style="font-size: var(--sg-heading-h2); margin-bottom: 1rem; color: ${textColor};">${escapeHtml(title)}</h2>${ctaDesc ? `<p style="font-size: 1.125rem; margin-bottom: 2rem; color: ${mutedColor};">${escapeHtml(ctaDesc)}</p>` : ""}<div id="${ctaId}" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">${primaryBtnHtml}${secondaryBtnHtml}</div></div></section>`;
 }
 
 export function exportPricingCard(
@@ -140,6 +163,12 @@ export function exportPricing(
 ): string {
   const { title, subtitle, plans = [] } = (block as any).props;
 
+  // Responsive grid: 1 col (mobile) → 2 cols (tablet) → N cols (desktop, max 4)
+  const gridId = generateScopedId(block.id || "", "pricing-grid");
+  const maxCols = Math.min(plans.length, 4);
+  const responsiveConfig = resolveResponsiveColumns({ lg: maxCols }, 1, 2, maxCols);
+  const { inlineStyles, mediaQueries } = generateResponsiveGridStyles(gridId, responsiveConfig, "2rem", "align-items: start;");
+
   const headerHtml =
     title || subtitle
       ? `<div style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text); font-size: 1.125rem;">${escapeHtml(subtitle)}</p>` : ""}</div>`
@@ -160,7 +189,7 @@ export function exportPricing(
     )
     .join("");
 
-  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${plans.length}, 1fr); gap: 2rem; align-items: start;">${plansHtml}</div></div></section>`;
+  return `<style>${mediaQueries}</style><section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div id="${gridId}" style="${inlineStyles}">${plansHtml}</div></div></section>`;
 }
 
 export function exportTestimonial(
@@ -210,6 +239,11 @@ export function exportTestimonialGrid(
     testimonials = [],
   } = (block as any).props;
 
+  // Responsive grid: 1 col (mobile) → 2 cols (tablet) → N cols (desktop)
+  const gridId = generateScopedId(block.id || "", "testimonial-grid");
+  const responsiveConfig = resolveResponsiveColumns(columns, 1, 2, columns);
+  const { inlineStyles, mediaQueries } = generateResponsiveGridStyles(gridId, responsiveConfig, "2rem");
+
   const headerHtml =
     title || subtitle
       ? `<div style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text); font-size: 1.125rem;">${escapeHtml(subtitle)}</p>` : ""}</div>`
@@ -230,7 +264,7 @@ export function exportTestimonialGrid(
     )
     .join("");
 
-  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 2rem;">${testimonialsHtml}</div></div></section>`;
+  return `<style>${mediaQueries}</style><section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div id="${gridId}" style="${inlineStyles}">${testimonialsHtml}</div></div></section>`;
 }
 
 export function exportFaqItem(
@@ -283,6 +317,11 @@ export function exportStats(
 ): string {
   const { title, subtitle, items = [] } = (block as any).props;
 
+  // Responsive grid: 1 col (mobile) → 2 cols (tablet) → N cols (desktop)
+  const gridId = generateScopedId(block.id || "", "stats-grid");
+  const responsiveConfig = resolveResponsiveColumns({ lg: items.length }, 1, 2, items.length);
+  const { inlineStyles, mediaQueries } = generateResponsiveGridStyles(gridId, responsiveConfig, "2rem", "text-align: center;");
+
   const headerHtml =
     title || subtitle
       ? `<div style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text); font-size: 1.125rem;">${escapeHtml(subtitle)}</p>` : ""}</div>`
@@ -295,7 +334,7 @@ export function exportStats(
     )
     .join("");
 
-  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${items.length}, 1fr); gap: 2rem; text-align: center;">${itemsHtml}</div></div></section>`;
+  return `<style>${mediaQueries}</style><section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div id="${gridId}" style="${inlineStyles}">${itemsHtml}</div></div></section>`;
 }
 
 export function exportStatItem(

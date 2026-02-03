@@ -18,6 +18,7 @@
  */
 
 import type { SiteDocumentV2 } from "../schema";
+import { NAVBAR_DEFAULT_PROPS } from "../../engine/registry/blocks/sections/navbar";
 
 export const escolaPremiumTemplate: SiteDocumentV2 = {
   meta: {
@@ -65,6 +66,8 @@ export const escolaPremiumTemplate: SiteDocumentV2 = {
       id: "escola-navbar",
       type: "navbar",
       props: {
+        ...NAVBAR_DEFAULT_PROPS,
+        // Sobrescrever apenas valores específicos do template
         variation: "navbar-glass",
         links: [
           { text: "Início", href: "#escola-hero" },
@@ -75,7 +78,6 @@ export const escolaPremiumTemplate: SiteDocumentV2 = {
           { text: "Valores", href: "#escola-pricing" },
         ],
         ctaButton: { text: "Agende uma Visita", href: "#escola-cta" },
-        sticky: true,
         transparent: true,
         bg: "rgba(255, 255, 255, 0.9)",
       },

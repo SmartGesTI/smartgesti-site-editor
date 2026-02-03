@@ -1,11 +1,17 @@
 /**
  * Content Grid Exporters
  * Blog Cards, Team Cards, Course Cards, Countdown, Carousel
+ * Mobile-first responsive grids
  */
 
 import { Block } from "../../../schema/siteDocument";
 import { ThemeTokens } from "../../../schema/themeTokens";
 import { dataBlockIdAttr, escapeHtml } from "../../shared/htmlHelpers";
+import { generateScopedId } from "../../shared/idGenerator";
+import {
+  resolveResponsiveColumns,
+  generateResponsiveGridStyles,
+} from "../../shared/responsiveGridHelper";
 
 export function exportBlogCard(
   block: Block,
@@ -42,6 +48,15 @@ export function exportBlogCardGrid(
 ): string {
   const { title, subtitle, columns = 3, cards = [] } = (block as any).props;
 
+  // Responsive grid: 1 col (mobile) → 2 cols (tablet) → N cols (desktop)
+  const gridId = generateScopedId(block.id || "", "blog-grid");
+  const responsiveConfig = resolveResponsiveColumns(columns, 1, 2, columns);
+  const { inlineStyles, mediaQueries } = generateResponsiveGridStyles(
+    gridId,
+    responsiveConfig,
+    "2rem",
+  );
+
   const headerHtml =
     title || subtitle
       ? `<div style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text);">${escapeHtml(subtitle)}</p>` : ""}</div>`
@@ -66,7 +81,7 @@ export function exportBlogCardGrid(
     )
     .join("");
 
-  return `<section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 2rem;">${cardsHtml}</div></div></section>`;
+  return `<style>${mediaQueries}</style><section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div id="${gridId}" style="${inlineStyles}">${cardsHtml}</div></div></section>`;
 }
 
 export function exportTeamCard(
@@ -98,6 +113,15 @@ export function exportTeamGrid(
     members = [],
   } = (block as any).props;
 
+  // Responsive grid: 1 col (mobile) → 2 cols (tablet) → N cols (desktop)
+  const gridId = generateScopedId(block.id || "", "team-grid");
+  const responsiveConfig = resolveResponsiveColumns(columns, 1, 2, columns);
+  const { inlineStyles, mediaQueries } = generateResponsiveGridStyles(
+    gridId,
+    responsiveConfig,
+    "2rem",
+  );
+
   const headerHtml =
     title || subtitle
       ? `<div style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text);">${escapeHtml(subtitle)}</p>` : ""}</div>`
@@ -122,7 +146,7 @@ export function exportTeamGrid(
     )
     .join("");
 
-  return `<section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div style="display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: 2rem;">${membersHtml}</div></div></section>`;
+  return `<style>${mediaQueries}</style><section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div id="${gridId}" style="${inlineStyles}">${membersHtml}</div></div></section>`;
 }
 
 export function exportCourseCardGrid(
@@ -137,6 +161,15 @@ export function exportCourseCardGrid(
     columns: courseCols = 3,
     cards = [],
   } = (block as any).props;
+
+  // Responsive grid: 1 col (mobile) → 2 cols (tablet) → N cols (desktop)
+  const gridId = generateScopedId(block.id || "", "course-grid");
+  const responsiveConfig = resolveResponsiveColumns(courseCols, 1, 2, courseCols);
+  const { inlineStyles, mediaQueries } = generateResponsiveGridStyles(
+    gridId,
+    responsiveConfig,
+    "2rem",
+  );
 
   const courseHeaderHtml =
     courseTitle || courseSubtitle
@@ -167,7 +200,7 @@ export function exportCourseCardGrid(
     })
     .join("");
 
-  return `<section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${courseHeaderHtml}<div style="display: grid; grid-template-columns: repeat(${courseCols}, 1fr); gap: 2rem;">${courseCardsHtml}</div></div></section>`;
+  return `<style>${mediaQueries}</style><section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${courseHeaderHtml}<div id="${gridId}" style="${inlineStyles}">${courseCardsHtml}</div></div></section>`;
 }
 
 export function exportCountdown(
@@ -190,20 +223,39 @@ export function exportCountdown(
   const isBanner = variant === "banner";
   const sectionStyle = `padding: 4rem 2rem; background-color: ${bg || "var(--sg-primary)"}; color: #fff;`;
 
+  // Responsive countdown grid
+  const countdownId = generateScopedId(block.id || "", "countdown-numbers");
+  const countdownCss = `
+    /* Countdown numbers: 2×2 grid em mobile, 1 linha em desktop */
+    #${countdownId} {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (min-width: 640px) {
+      #${countdownId} {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+      }
+    }
+  `;
+
   const badgeCircle =
     isBanner && badgeText
       ? `<div style="width: 140px; height: 140px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; flex-shrink: 0; text-align: center; padding: 1rem; font-weight: 600; font-size: 0.875rem;">${escapeHtml(badgeText)}</div>`
       : "";
 
   const placeholdersHtml = showPlaceholders
-    ? `<div style="display: flex; gap: 1rem; margin-bottom: 1rem;">${["Days", "Hours", "Minutes", "Seconds"].map((label) => `<div style="text-align: center;"><div style="font-size: 1.75rem; font-weight: 700;">00</div><div style="font-size: 0.75rem; opacity: 0.9;">${label}</div></div>`).join("")}</div>`
+    ? `<style>${countdownCss}</style><div id="${countdownId}">${["Days", "Hours", "Minutes", "Seconds"].map((label) => `<div style="text-align: center;"><div style="font-size: 1.75rem; font-weight: 700;">00</div><div style="font-size: 0.75rem; opacity: 0.9;">${label}</div></div>`).join("")}</div>`
     : "";
 
   const btnHtml = buttonText
     ? `<a href="${escapeHtml(buttonHref || "#")}" style="display: inline-block; padding: 0.75rem 1.5rem; background-color: #fff; color: var(--sg-primary); font-weight: 600; border-radius: var(--sg-button-radius); text-decoration: none;">${escapeHtml(buttonText)}</a>`
     : "";
 
-  const inner = `<div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">${badgeCircle}<div style="flex: 1; min-width: 200px;">${title ? `<h2 style="margin-bottom: 0.5rem; font-size: 1.5rem;">${escapeHtml(title)}</h2>` : ""}${description ? `<p style="opacity: 0.9; margin-bottom: 1rem;">${escapeHtml(description)}</p>` : ""}${placeholdersHtml}${btnHtml}</div></div>`;
+  const inner = `<div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; justify-content: center;">${badgeCircle}<div style="flex: 1; min-width: 200px;">${title ? `<h2 style="margin-bottom: 0.5rem; font-size: 1.5rem;">${escapeHtml(title)}</h2>` : ""}${description ? `<p style="opacity: 0.9; margin-bottom: 1rem;">${escapeHtml(description)}</p>` : ""}${placeholdersHtml}${btnHtml}</div></div>`;
 
   return `<section ${dataBlockIdAttr(block.id)} class="sg-countdown" style="${sectionStyle}" data-variant="${escapeHtml(variant)}">${inner}</section>`;
 }
@@ -220,6 +272,26 @@ export function exportCarousel(
   if (!slide)
     return `<section ${dataBlockIdAttr(block.id)} class="sg-carousel"></section>`;
 
+  // Responsive carousel: 1 col (mobile) → 2 cols split (desktop)
+  const carouselId = generateScopedId(block.id || "", "carousel");
+  const carouselCss = `
+    /* Base: Mobile - 1 coluna (stack) */
+    #${carouselId} {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+      align-items: center;
+    }
+
+    /* Desktop: 2 colunas (split) */
+    @media (min-width: 1024px) {
+      #${carouselId} {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+      }
+    }
+  `;
+
   const slideImg = slide.image
     ? `<div style="min-height: 300px; background-image: url(${escapeHtml(slide.image)}); background-size: cover; background-position: center;"></div>`
     : "";
@@ -234,7 +306,7 @@ export function exportCarousel(
 
   const slideContent = `<div style="padding: 2rem; color: #fff;">${slide.title ? `<h2 style="margin-bottom: 1rem;">${escapeHtml(slide.title)}</h2>` : ""}${slide.description ? `<p style="margin-bottom: 1.5rem; opacity: 0.9;">${escapeHtml(slide.description)}</p>` : ""}<div style="display: flex; gap: 1rem; flex-wrap: wrap;">${primaryBtn}${secondaryBtn}</div></div>`;
 
-  const slideHtml = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; background-color: var(--sg-primary); border-radius: var(--sg-card-radius); overflow: hidden;">${slideImg}${slideContent}</div>`;
+  const slideHtml = `<style>${carouselCss}</style><div id="${carouselId}" style="background-color: var(--sg-primary); border-radius: var(--sg-card-radius); overflow: hidden;">${slideImg}${slideContent}</div>`;
 
   return `<section ${dataBlockIdAttr(block.id)} class="sg-carousel" style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${slideHtml}</div></section>`;
 }
