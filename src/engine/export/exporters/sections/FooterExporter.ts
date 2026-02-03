@@ -1,10 +1,12 @@
 /**
  * Footer Section Exporter
+ * Mobile-first responsive: multi-column collapses to stack in mobile
  */
 
 import { Block } from "../../../schema/siteDocument";
 import { ThemeTokens } from "../../../schema/themeTokens";
 import { dataBlockIdAttr, escapeHtml } from "../../shared/htmlHelpers";
+import { generateScopedId } from "../../shared/idGenerator";
 
 const socialIcons: Record<string, string> = {
   facebook:
@@ -63,6 +65,26 @@ export function exportFooter(
 
   let contentHtml = "";
   if (isMultiColumn) {
+    // Responsive footer grid: 1 col (mobile) → 2 cols (tablet) → 2fr + N×1fr (desktop)
+    const footerId = generateScopedId(block.id || "", "footer-grid");
+    const footerCss = `
+      #${footerId} {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      @media (min-width: 640px) {
+        #${footerId} {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (min-width: 1024px) {
+        #${footerId} {
+          grid-template-columns: 2fr repeat(${columns.length}, 1fr);
+        }
+      }
+    `;
+
     const columnsHtml = columns
       .map((col: any) => {
         const linksHtml = (col.links || [])
@@ -75,7 +97,7 @@ export function exportFooter(
       })
       .join("");
 
-    contentHtml = `<div style="display: grid; grid-template-columns: 2fr repeat(${columns.length}, 1fr); gap: 2rem; margin-bottom: 2rem;"><div>${logoHtml}${descHtml}${socialContainerHtml}</div>${columnsHtml}</div>`;
+    contentHtml = `<style>${footerCss}</style><div id="${footerId}" style="margin-bottom: 2rem;"><div>${logoHtml}${descHtml}${socialContainerHtml}</div>${columnsHtml}</div>`;
   } else {
     contentHtml = `<div style="text-align: center; margin-bottom: 1.5rem;">${logoHtml}${descHtml ? `<p style="color: var(--sg-muted-text, #64748b); font-size: 0.875rem; max-width: 400px; margin: 0 auto 1rem;">${escapeHtml(description || "")}</p>` : ""}${social.length > 0 ? `<div style="display: flex; justify-content: center; gap: 1rem;">${socialHtml}</div>` : ""}</div>`;
   }
