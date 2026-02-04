@@ -26,6 +26,8 @@ export interface InspectorMeta {
   min?: number;
   max?: number;
   step?: number;
+  /** Tamanho do input (para checkbox/toggle) */
+  size?: "sm" | "md";
 }
 
 /**

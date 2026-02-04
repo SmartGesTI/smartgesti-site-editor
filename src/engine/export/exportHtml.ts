@@ -50,7 +50,6 @@ const landingPageCSS = `
   max-width: calc(100% - 2rem);
   border-radius: var(--navbar-border-radius, 12px);
   box-shadow: var(--navbar-shadow, 0 10px 40px rgba(0, 0, 0, 0.15));
-  border-bottom: none !important;
 }
 
 .sg-navbar__container {

@@ -79,7 +79,7 @@ export function VariationSelector({ block, onUpdate }: VariationSelectorProps) {
     return (
       <div className="space-y-2">
         <h4 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-          Estilo
+          Variações
         </h4>
         <div className="grid grid-cols-2 gap-2">
           {navbarVariationIds.map((id) => {
@@ -90,19 +90,47 @@ export function VariationSelector({ block, onUpdate }: VariationSelectorProps) {
                 key={id}
                 type="button"
                 onClick={() => {
-                  // Preservar TODAS as props customizadas ao mudar variação
-                  // As variações só definem: variation, logoText, links, ctaButton, sticky
+                  // Variações definem apenas estrutura visual (layout, sombra, bordas)
+                  // Preservar: conteúdo, cores da paleta e customizações do logo
                   const {
-                    variation: _,
-                    logoText: __,
-                    links: ___,
-                    ctaButton: ____,
-                    sticky: _____,
-                    ...customProps
+                    // Conteúdo
+                    logo,
+                    logoText,
+                    logoHeight,
+                    logoPosition,
+                    links,
+                    ctaButton,
+                    // Cores (vêm da paleta, não da variação)
+                    bg,
+                    linkColor,
+                    linkHoverColor,
+                    buttonColor,
+                    buttonTextColor,
+                    // Bordas customizadas
+                    borderPosition,
+                    borderWidth,
+                    borderColor,
                   } = block.props as any;
+
                   onUpdate({
-                    ...v.defaultProps, // Aplica estrutura da nova variação PRIMEIRO
-                    ...customProps, // DEPOIS preserva customizações (cores, etc.) - OVERRIDE
+                    ...v.defaultProps, // Aplica estrutura visual da variação
+                    // Preserva conteúdo e customizações do logo
+                    ...(logo ? { logo } : {}),
+                    ...(logoText ? { logoText } : {}),
+                    ...(logoHeight ? { logoHeight } : {}),
+                    ...(logoPosition ? { logoPosition } : {}),
+                    ...(links ? { links } : {}),
+                    ...(ctaButton ? { ctaButton } : {}),
+                    // Preserva cores da paleta
+                    ...(bg ? { bg } : {}),
+                    ...(linkColor ? { linkColor } : {}),
+                    ...(linkHoverColor ? { linkHoverColor } : {}),
+                    ...(buttonColor ? { buttonColor } : {}),
+                    ...(buttonTextColor ? { buttonTextColor } : {}),
+                    // Preserva bordas customizadas
+                    ...(borderPosition ? { borderPosition } : {}),
+                    ...(borderWidth ? { borderWidth } : {}),
+                    ...(borderColor ? { borderColor } : {}),
                   });
                 }}
                 className={cn(

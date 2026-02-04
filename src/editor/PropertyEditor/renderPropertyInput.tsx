@@ -23,7 +23,7 @@ export function renderPropertyInput(
   onChange: (value: any) => void,
   uploadConfig?: UploadConfig,
 ): React.ReactNode {
-  const { label, description, inputType, options, min, max, step } = meta;
+  const { label, description, inputType, options, min, max, step, size } = meta;
 
   switch (inputType) {
     case "text":
@@ -175,6 +175,7 @@ export function renderPropertyInput(
           onChange={onChange}
           label={label}
           description={description}
+          size={size}
         />
       );
 

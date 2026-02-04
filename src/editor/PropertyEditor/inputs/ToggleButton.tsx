@@ -5,6 +5,7 @@ interface ToggleButtonProps {
   onChange: (value: boolean) => void;
   label: string;
   description?: string;
+  size?: "sm" | "md";
 }
 
 /**
@@ -17,14 +18,20 @@ export function ToggleButton({
   onChange,
   label,
   description,
+  size = "md",
 }: ToggleButtonProps) {
+  const sizeClasses = size === "sm"
+    ? "px-3 py-1.5 text-xs rounded-md"
+    : "px-4 py-2.5 text-sm rounded-lg";
+
   return (
     <div className="space-y-1">
       <button
         type="button"
         onClick={() => onChange(!value)}
         className={cn(
-          "w-full px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-all",
+          "w-full border-2 font-medium transition-all",
+          sizeClasses,
           "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
           value
             ? "bg-blue-500 border-blue-500 text-white hover:bg-blue-600 hover:border-blue-600"

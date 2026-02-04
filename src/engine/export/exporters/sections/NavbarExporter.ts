@@ -24,16 +24,19 @@ export function exportNavbar(
   theme?: ThemeTokens,
 ): string {
   const {
-    variation = "navbar-classic",
+    variation = "navbar-moderno",
     logo,
     logoText,
     links = [],
     ctaButton,
     sticky,
-    transparent = false,
     floating = false,
     layout,
     logoHeight = 70,
+    logoPosition = "left",
+    borderPosition = "none",
+    borderWidth = 1,
+    borderColor = "#e5e7eb",
   } = (block as any).props;
 
   // Use Style Resolver to get complete inline styles
@@ -43,18 +46,19 @@ export function exportNavbar(
     theme,
   );
 
-  const variationClass =
-    variation === "navbar-centered"
-      ? "sg-navbar--centered"
-      : variation === "navbar-minimal"
-        ? "sg-navbar--minimal"
-        : variation === "navbar-glass"
-          ? "sg-navbar--glass"
-          : "sg-navbar--classic";
+  // Classe CSS baseada na variação
+  const variationClassMap: Record<string, string> = {
+    "navbar-simples": "sg-navbar--simples",
+    "navbar-moderno": "sg-navbar--moderno",
+    "navbar-glass": "sg-navbar--glass",
+    "navbar-elegante": "sg-navbar--elegante",
+    "navbar-pill": "sg-navbar--pill",
+  };
+  const variationClass = variationClassMap[variation] || "sg-navbar--moderno";
 
   // Determine effective layout
-  const effectiveLayout =
-    layout || (variation === "navbar-centered" ? "centered" : "expanded");
+  const effectiveLayout = layout || "expanded";
+  const isExpanded = effectiveLayout === "expanded";
   const isCentered = effectiveLayout === "centered";
   const isCompact = effectiveLayout === "compact";
 
@@ -68,13 +72,35 @@ export function exportNavbar(
     .filter(Boolean)
     .join(" ");
 
+  // Logo centralizado usa layout de 3 colunas
+  const isLogoCentered = logoPosition === "center";
+
   // Build nav style from resolved styles + layout modifiers
   // Note: floating mode already includes position: fixed in resolvedStyles.nav
   // Changed from sticky to fixed to avoid navbar occupying space
   const stickyStyle =
     sticky && !floating ? "position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 1000" : "";
-  const baseStyle =
-    !transparent && !floating ? "border-bottom: 1px solid #e5e7eb" : "";
+  // Borda baseada na posição selecionada
+  const getBorderStyle = (): string => {
+    if (borderPosition === "none") return "";
+    const borderValue = `${borderWidth}px solid ${borderColor}`;
+
+    switch (borderPosition) {
+      case "all":
+        return `border: ${borderValue}`;
+      case "top":
+        return `border-top: ${borderValue}`;
+      case "bottom":
+        return `border-bottom: ${borderValue}`;
+      case "left":
+        return `border-left: ${borderValue}`;
+      case "right":
+        return `border-right: ${borderValue}`;
+      default:
+        return "";
+    }
+  };
+  const baseStyle = getBorderStyle();
   const paddingStyle = "";
 
   // Navbar flutuante: centralizado com margin auto e próximo ao topo
@@ -165,20 +191,34 @@ export function exportNavbar(
     ? `<a href="${escapeHtml(ctaResolved)}"${ctaTargetAttr} class="sg-navbar__btn" style="${resolvedStyles.button}">${escapeHtml(ctaButton.text)}</a>`
     : "";
 
-  const containerStyle = isCentered
-    ? `max-width: 1200px; margin: 0 auto; padding: 0 ${isCompact ? "0.5rem" : "1rem"}; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: ${isCompact ? "1rem" : "1.5rem"};`
-    : `max-width: 1200px; margin: 0 auto; padding: 0 ${isCompact ? "0.5rem" : "1rem"}; display: flex; justify-content: space-between; align-items: center; gap: ${isCompact ? "1rem" : "1.5rem"};`;
+  // Container style baseado no layout
+  const useGridLayout = isCentered || isLogoCentered;
+  const containerStyle = useGridLayout
+    ? `max-width: ${isCompact ? "900px" : "1200px"}; margin: 0 auto; padding: 0 ${isCompact ? "1rem" : "1.5rem"}; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: ${isCompact ? "0.75rem" : "1.5rem"};`
+    : isExpanded
+      ? `width: 100%; max-width: 100%; padding: 0 ${floating ? "2rem" : "1.5rem"}; display: flex; justify-content: space-between; align-items: center; gap: 2rem;`
+      : `max-width: 900px; margin: 0 auto; padding: 0 1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;`;
   const menuStyle = `display: flex; align-items: center; gap: ${isCompact ? "1rem" : "1.5rem"}; flex-wrap: wrap;${isCentered ? " justify-self: center;" : ""}`;
+  const linksLeftStyle = `display: flex; align-items: center; gap: ${isCompact ? "1rem" : "1.5rem"}; justify-self: start;`;
+  const ctaRightStyle = `display: flex; align-items: center; justify-self: end;`;
   const brandWrapStyle = isCentered
     ? "flex-shrink: 0; justify-self: start;"
-    : "flex-shrink: 0;";
+    : isLogoCentered
+      ? "flex-shrink: 0; justify-self: center;"
+      : "flex-shrink: 0;";
 
-  const menuHtml = `<div class="sg-navbar__menu" style="${menuStyle}">${linksHtml}${!isCentered ? ctaBtnHtml : ""}</div>`;
+  const menuHtml = `<div class="sg-navbar__menu" style="${menuStyle}">${linksHtml}${!isCentered && !isLogoCentered ? ctaBtnHtml : ""}</div>`;
+  const linksLeftHtml = `<div class="sg-navbar__menu" style="${linksLeftStyle}">${linksHtml}</div>`;
+  const ctaRightHtml = ctaBtnHtml ? `<div class="sg-navbar__actions" style="${ctaRightStyle}">${ctaBtnHtml}</div>` : `<div></div>`;
   const actionsHtml =
-    isCentered && ctaButton
+    (isCentered || isLogoCentered) && ctaButton
       ? `<div class="sg-navbar__actions" style="flex-shrink: 0; justify-self: end;">${ctaBtnHtml}</div>`
       : "";
-  const containerHtml = `<div class="sg-navbar__container" style="${containerStyle}"><div class="sg-navbar__brand" style="${brandWrapStyle}">${logoHtml}</div>${menuHtml}${actionsHtml}</div>`;
+
+  // Container HTML - layout diferente para logo centralizado
+  const containerHtml = isLogoCentered
+    ? `<div class="sg-navbar__container" style="${containerStyle}">${linksLeftHtml}<div class="sg-navbar__brand" style="${brandWrapStyle}">${logoHtml}</div>${ctaRightHtml}</div>`
+    : `<div class="sg-navbar__container" style="${containerStyle}"><div class="sg-navbar__brand" style="${brandWrapStyle}">${logoHtml}</div>${menuHtml}${actionsHtml}</div>`;
 
   // Inject dynamic CSS styles (hover effects) if present
   const styleBlock = resolvedStyles.css ? `<style>${resolvedStyles.css}</style>` : "";

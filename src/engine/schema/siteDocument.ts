@@ -571,10 +571,11 @@ export type NavbarLink = {
  * IDs das variações visuais do bloco Navbar
  */
 export type NavbarVariationId =
-  | "navbar-classic"
-  | "navbar-centered"
-  | "navbar-dropdown-classic"
-  | "navbar-dropdown-centered";
+  | "navbar-simples"
+  | "navbar-moderno"
+  | "navbar-glass"
+  | "navbar-elegante"
+  | "navbar-pill";
 
 /**
  * Navbar - Barra de navegação
@@ -595,6 +596,8 @@ export interface NavbarBlock extends BlockBase {
     // Layout Options
     /** Distribuição do navbar: expandido, centralizado ou compacto */
     layout?: "expanded" | "centered" | "compact";
+    /** Posição do logo: esquerda ou centro */
+    logoPosition?: "left" | "center";
     /** Modo flutuante: navbar com margem lateral e mais destaque */
     floating?: boolean;
 
@@ -609,6 +612,12 @@ export interface NavbarBlock extends BlockBase {
     blurOpacity?: number;
     /** Altura do logo em pixels (30-120) */
     logoHeight?: number;
+    /** Posição da borda: nenhuma, completa, superior, inferior, esquerda, direita */
+    borderPosition?: "none" | "all" | "top" | "bottom" | "left" | "right";
+    /** Espessura da borda em pixels (1-4) */
+    borderWidth?: number;
+    /** Cor da borda */
+    borderColor?: string;
 
     // Link Styling
     /** Cor dos links */

@@ -9,7 +9,7 @@ import {
  * Valores padrão da Navbar - Use para garantir consistência em templates e factories
  */
 export const NAVBAR_DEFAULT_PROPS = {
-  variation: "navbar-classic",
+  variation: "navbar-moderno",
   links: [
     { text: "Início", href: "/site/p/home" },
     { text: "Serviços", href: "/site/p/servicos" },
@@ -20,6 +20,7 @@ export const NAVBAR_DEFAULT_PROPS = {
   sticky: true,
   floating: false,
   layout: "expanded",
+  logoPosition: "left",
   borderRadius: 0,
   shadow: "sm",
   opacity: 100,
@@ -28,6 +29,10 @@ export const NAVBAR_DEFAULT_PROPS = {
   linkFontSize: "md",
   buttonVariant: "solid",
   buttonBorderRadius: 8,
+  // Borda
+  borderPosition: "none",
+  borderWidth: 1,
+  borderColor: "#e5e7eb",
   // Cores padrão
   bg: "#ffffff",
   linkColor: "#374151",
@@ -69,11 +74,13 @@ export const navbarBlock: BlockDefinition = {
     sticky: {
       label: "Fixar no Topo",
       inputType: "checkbox",
+      size: "sm",
       group: "📐 Posicionamento",
     },
     floating: {
       label: "Menu Flutuante",
       inputType: "checkbox",
+      size: "sm",
       group: "📐 Posicionamento",
     },
 
@@ -119,6 +126,32 @@ export const navbarBlock: BlockDefinition = {
       ],
       group: "🎨 Aparência",
     },
+    borderPosition: {
+      label: "Borda",
+      inputType: "select",
+      options: [
+        { label: "Nenhuma", value: "none" },
+        { label: "Completa", value: "all" },
+        { label: "Superior", value: "top" },
+        { label: "Inferior", value: "bottom" },
+        { label: "Esquerda", value: "left" },
+        { label: "Direita", value: "right" },
+      ],
+      group: "🎨 Aparência",
+    },
+    borderWidth: {
+      label: "Espessura da Borda",
+      inputType: "slider",
+      min: 1,
+      max: 4,
+      step: 1,
+      group: "🎨 Aparência",
+    },
+    borderColor: {
+      label: "Cor da Borda",
+      inputType: "color-advanced",
+      group: "🎨 Aparência",
+    },
 
     // === GRUPO: 🖼️ Logo e Marca ===
     logo: {
@@ -132,6 +165,15 @@ export const navbarBlock: BlockDefinition = {
       min: 40,
       max: 130,
       step: 5,
+      group: "🖼️ Logo e Marca",
+    },
+    logoPosition: {
+      label: "Posição do Logo",
+      inputType: "select",
+      options: [
+        { label: "Esquerda", value: "left" },
+        { label: "Centro", value: "center" },
+      ],
       group: "🖼️ Logo e Marca",
     },
     logoText: {
