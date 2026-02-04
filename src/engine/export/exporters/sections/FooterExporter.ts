@@ -7,6 +7,10 @@ import { Block } from "../../../schema/siteDocument";
 import { ThemeTokens } from "../../../schema/themeTokens";
 import { dataBlockIdAttr, escapeHtml } from "../../shared/htmlHelpers";
 import { generateScopedId } from "../../shared/idGenerator";
+import {
+  generateLinkHoverStyles,
+  type LinkHoverEffect,
+} from "../../../shared/hoverEffects";
 
 const socialIcons: Record<string, string> = {
   facebook:
@@ -36,7 +40,43 @@ export function exportFooter(
     social = [],
     copyright,
     variant = "simple",
+    // Hover effects
+    linkHoverEffect = "underline",
+    linkHoverIntensity = 50,
+    linkHoverColor,
   } = (block as any).props;
+
+  // Determinar cor do hover (usa primary do tema se não definido)
+  const hoverColor = linkHoverColor || theme?.colors?.primary || "#3b82f6";
+
+  // Gerar estilos de hover para links
+  const linkHoverStyles = generateLinkHoverStyles({
+    effect: linkHoverEffect as LinkHoverEffect,
+    intensity: linkHoverIntensity,
+    hoverColor,
+  });
+
+  // Gerar CSS de hover com escopo do bloco
+  const scope = `[data-block-id="${block.id}"]`;
+  let hoverCss = "";
+
+  if (linkHoverEffect !== "none") {
+    // Estilos base se necessários
+    if (linkHoverStyles.base) {
+      hoverCss += `
+        ${scope} .sg-footer__link {
+          ${linkHoverStyles.base}
+          transition: all 0.3s ease;
+        }
+      `;
+    }
+    // Estilos de hover
+    hoverCss += `
+      ${scope} .sg-footer__link:hover {
+        ${linkHoverStyles.hover}
+      }
+    `;
+  }
 
   const logoUrl = typeof logo === "string" ? logo : (logo?.src ?? "");
   const logoAlt = typeof logo === "string" ? "Logo" : (logo?.alt ?? "Logo");
@@ -90,14 +130,14 @@ export function exportFooter(
         const linksHtml = (col.links || [])
           .map(
             (link: any) =>
-              `<li><a href="${escapeHtml(link.href)}" style="color: var(--sg-muted-text, #64748b); text-decoration: none; font-size: 0.875rem;">${escapeHtml(link.text)}</a></li>`,
+              `<li><a href="${escapeHtml(link.href)}" class="sg-footer__link" style="color: var(--sg-muted-text, #64748b); text-decoration: none; font-size: 0.875rem; display: inline-block; padding: 0.25rem 0; transition: all 0.3s ease;">${escapeHtml(link.text)}</a></li>`,
           )
           .join("");
         return `<div><h4 style="font-weight: 600; margin-bottom: 1rem; color: var(--sg-text, #0f172a);">${escapeHtml(col.title)}</h4><ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">${linksHtml}</ul></div>`;
       })
       .join("");
 
-    contentHtml = `<style>${footerCss}</style><div id="${footerId}" style="margin-bottom: 2rem;"><div>${logoHtml}${descHtml}${socialContainerHtml}</div>${columnsHtml}</div>`;
+    contentHtml = `<style>${footerCss}${hoverCss}</style><div id="${footerId}" style="margin-bottom: 2rem;"><div>${logoHtml}${descHtml}${socialContainerHtml}</div>${columnsHtml}</div>`;
   } else {
     contentHtml = `<div style="text-align: center; margin-bottom: 1.5rem;">${logoHtml}${descHtml ? `<p style="color: var(--sg-muted-text, #64748b); font-size: 0.875rem; max-width: 400px; margin: 0 auto 1rem;">${escapeHtml(description || "")}</p>` : ""}${social.length > 0 ? `<div style="display: flex; justify-content: center; gap: 1rem;">${socialHtml}</div>` : ""}</div>`;
   }

@@ -22,6 +22,9 @@ export const footerBlock: BlockDefinition = {
     social: [],
     copyright: "© 2025. Todos os direitos reservados.",
     variant: "simple",
+    // Hover effects defaults
+    linkHoverEffect: "underline",
+    linkHoverIntensity: 50,
   },
   inspectorMeta: {
     logo: {
@@ -52,6 +55,33 @@ export const footerBlock: BlockDefinition = {
         { label: "Multi-colunas", value: "multi-column" },
       ],
       group: "Layout",
+    },
+    // Hover effects
+    linkHoverEffect: {
+      label: "Efeito Hover",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "none" },
+        { label: "Fundo", value: "background" },
+        { label: "Sublinhado →", value: "underline" },
+        { label: "Sublinhado ←→", value: "underline-center" },
+        { label: "Escala", value: "scale" },
+        { label: "Brilho Neon", value: "glow" },
+      ],
+      group: "🔗 Links",
+    },
+    linkHoverIntensity: {
+      label: "Intensidade",
+      inputType: "slider",
+      min: 10,
+      max: 100,
+      step: 10,
+      group: "🔗 Links",
+    },
+    linkHoverColor: {
+      label: "Cor no Hover",
+      inputType: "color-advanced",
+      group: "🔗 Links",
     },
   },
 };

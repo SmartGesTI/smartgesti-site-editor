@@ -1,10 +1,26 @@
 /**
  * Style Resolver
- * 
+ *
  * Sistema centralizado de resolução de estilos que combina
  * valores default com customizações do usuário, gerando
  * estilos inline completos para HTML export.
  */
+
+// Import hover effects from shared module
+import {
+    generateLinkHoverStyles,
+    generateButtonHoverStyles,
+    getButtonHoverKeyframes,
+    getShineEffectCSS,
+    hexToRgb,
+    hexToRgba,
+    adjustColor,
+    type LinkHoverConfig,
+    type ButtonHoverConfig,
+} from "../shared/hoverEffects";
+
+// Re-export for backwards compatibility
+export { hexToRgb, hexToRgba, adjustColor };
 
 // ============================================================================
 // CONSTANTS
@@ -29,284 +45,6 @@ export const fontSizes: Record<string, string> = {
     md: "1rem",
     lg: "1.125rem",
 };
-
-// ============================================================================
-// HOVER EFFECT GENERATORS
-// ============================================================================
-
-/**
- * Converte cor hex para RGB
- */
-function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-    if (!hex.startsWith('#')) return null;
-    let cleanHex = hex.replace('#', '');
-
-    // Handle 3-char hex
-    if (cleanHex.length === 3) {
-        cleanHex = cleanHex[0] + cleanHex[0] + cleanHex[1] + cleanHex[1] + cleanHex[2] + cleanHex[2];
-    }
-
-    const r = parseInt(cleanHex.substring(0, 2), 16);
-    const g = parseInt(cleanHex.substring(2, 4), 16);
-    const b = parseInt(cleanHex.substring(4, 6), 16);
-
-    if (isNaN(r) || isNaN(g) || isNaN(b)) return null;
-    return { r, g, b };
-}
-
-/**
- * Cria cor rgba a partir de hex e opacidade
- */
-function hexToRgba(hex: string, alpha: number): string {
-    const rgb = hexToRgb(hex);
-    if (!rgb) return hex;
-    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha.toFixed(2)})`;
-}
-
-/**
- * Ajusta cor (escurecer ou clarear)
- */
-function adjustColor(color: string, amount: number, lighten: boolean): string {
-    const rgb = hexToRgb(color);
-    if (!rgb) return color;
-
-    const adjust = (val: number) => {
-        if (lighten) {
-            return Math.min(255, Math.round(val + (255 - val) * amount));
-        } else {
-            return Math.max(0, Math.round(val * (1 - amount)));
-        }
-    };
-
-    const newR = adjust(rgb.r).toString(16).padStart(2, '0');
-    const newG = adjust(rgb.g).toString(16).padStart(2, '0');
-    const newB = adjust(rgb.b).toString(16).padStart(2, '0');
-    return `#${newR}${newG}${newB}`;
-}
-
-/**
- * Interface para estilos de hover que precisam de base + hover
- */
-interface HoverStyleResult {
-    /** Estilos CSS adicionais para o estado base (normal) */
-    base: string;
-    /** Estilos CSS para o estado hover */
-    hover: string;
-}
-
-/**
- * Gera estilos CSS para hover de links baseado no efeito selecionado
- * intensity: 0.15-1 (mapeado de 10-100 do slider)
- *
- * Efeitos disponíveis:
- * - background: Fundo colorido que aparece
- * - underline: Sublinhado que desliza da esquerda para direita
- * - underline-center: Sublinhado que cresce do centro
- * - scale: Aumenta de tamanho
- * - glow: Brilho neon ao redor do texto
- * - slide-bg: Fundo que desliza de baixo para cima
- */
-function generateLinkHoverStyles(
-    effect: string,
-    hoverColor: string,
-    intensity: number
-): HoverStyleResult {
-    const baseStyles: string[] = [];
-    const hoverStyles: string[] = [];
-
-    // Cor do texto sempre muda no hover
-    hoverStyles.push(`color: ${hoverColor} !important`);
-
-    switch (effect) {
-        case "background": {
-            // Fundo com opacidade que aparece suavemente
-            const bgOpacity = 0.10 + (intensity * 0.25);
-            hoverStyles.push(`background-color: ${hexToRgba(hoverColor, bgOpacity)} !important`);
-            // Leve elevação baseada na intensidade
-            const translateY = Math.round(intensity * 3);
-            if (translateY > 0) {
-                hoverStyles.push(`transform: translateY(-${translateY}px) !important`);
-            }
-            break;
-        }
-        case "underline": {
-            // Sublinhado animado que desliza da esquerda para direita
-            const thickness = Math.max(2, Math.round(2 + intensity * 2));
-            // Estilos base para preparar a animação
-            baseStyles.push(`background-image: linear-gradient(${hoverColor}, ${hoverColor}) !important`);
-            baseStyles.push(`background-size: 0% ${thickness}px !important`);
-            baseStyles.push(`background-position: 0% 100% !important`);
-            baseStyles.push(`background-repeat: no-repeat !important`);
-            baseStyles.push(`text-decoration: none !important`);
-            // Hover expande o background
-            hoverStyles.push(`background-size: 100% ${thickness}px !important`);
-            break;
-        }
-        case "underline-center": {
-            // Sublinhado que cresce do centro para as bordas
-            const thickness = Math.max(2, Math.round(2 + intensity * 2));
-            baseStyles.push(`background-image: linear-gradient(${hoverColor}, ${hoverColor}) !important`);
-            baseStyles.push(`background-size: 0% ${thickness}px !important`);
-            baseStyles.push(`background-position: 50% 100% !important`);
-            baseStyles.push(`background-repeat: no-repeat !important`);
-            baseStyles.push(`text-decoration: none !important`);
-            hoverStyles.push(`background-size: 100% ${thickness}px !important`);
-            break;
-        }
-        case "scale": {
-            // Escala suave
-            const scale = 1.05 + (intensity * 0.10);
-            hoverStyles.push(`transform: scale(${scale.toFixed(2)}) !important`);
-            hoverStyles.push(`position: relative !important`);
-            hoverStyles.push(`z-index: 10 !important`);
-            break;
-        }
-        case "glow": {
-            // Brilho neon com múltiplas camadas para efeito mais intenso
-            const glowSize1 = Math.round(4 + (intensity * 8));
-            const glowSize2 = Math.round(8 + (intensity * 16));
-            const glowSize3 = Math.round(16 + (intensity * 24));
-            const glowOpacity1 = 0.9;
-            const glowOpacity2 = 0.6;
-            const glowOpacity3 = 0.3;
-            const shadow1 = `0 0 ${glowSize1}px ${hexToRgba(hoverColor, glowOpacity1)}`;
-            const shadow2 = `0 0 ${glowSize2}px ${hexToRgba(hoverColor, glowOpacity2)}`;
-            const shadow3 = `0 0 ${glowSize3}px ${hexToRgba(hoverColor, glowOpacity3)}`;
-            hoverStyles.push(`text-shadow: ${shadow1}, ${shadow2}, ${shadow3} !important`);
-            break;
-        }
-        case "slide-bg": {
-            // Fundo que desliza de baixo para cima
-            const bgOpacity = 0.15 + (intensity * 0.20);
-            baseStyles.push(`background-image: linear-gradient(${hexToRgba(hoverColor, bgOpacity)}, ${hexToRgba(hoverColor, bgOpacity)}) !important`);
-            baseStyles.push(`background-size: 100% 0% !important`);
-            baseStyles.push(`background-position: 0% 100% !important`);
-            baseStyles.push(`background-repeat: no-repeat !important`);
-            hoverStyles.push(`background-size: 100% 100% !important`);
-            break;
-        }
-        default:
-            // Fallback para background
-            hoverStyles.push(`background-color: ${hexToRgba(hoverColor, 0.15)} !important`);
-    }
-
-    return {
-        base: baseStyles.join("; "),
-        hover: hoverStyles.join("; "),
-    };
-}
-
-/**
- * Gera estilos CSS para hover do botão CTA baseado no efeito selecionado
- * intensity: 0.15-1 (mapeado de 10-100 do slider)
- *
- * Efeitos disponíveis:
- * - darken: Escurece o botão e eleva
- * - lighten: Clareia o botão e eleva
- * - scale: Aumenta de tamanho
- * - glow: Brilho neon ao redor
- * - shadow: Sombra elevada
- * - pulse: Animação de pulso
- * - shine: Brilho que passa por cima
- */
-function generateButtonHoverStyles(
-    effect: string,
-    buttonColor: string,
-    buttonTextColor: string,
-    buttonVariant: string,
-    intensity: number
-): HoverStyleResult {
-    const baseStyles: string[] = [];
-    const hoverStyles: string[] = [];
-
-    switch (effect) {
-        case "darken": {
-            // Escurecer com elevação suave
-            const darkenAmount = 0.10 + (intensity * 0.25);
-            const darkerColor = adjustColor(buttonColor, darkenAmount, false);
-            if (buttonVariant === "solid") {
-                hoverStyles.push(`background-color: ${darkerColor} !important`);
-            } else {
-                hoverStyles.push(`border-color: ${darkerColor} !important`);
-                hoverStyles.push(`color: ${darkerColor} !important`);
-            }
-            const translateY = Math.round(1 + intensity * 3);
-            hoverStyles.push(`transform: translateY(-${translateY}px) !important`);
-            break;
-        }
-        case "lighten": {
-            // Clarear com elevação
-            const lightenAmount = 0.10 + (intensity * 0.25);
-            const lighterColor = adjustColor(buttonColor, lightenAmount, true);
-            if (buttonVariant === "solid") {
-                hoverStyles.push(`background-color: ${lighterColor} !important`);
-            } else {
-                hoverStyles.push(`border-color: ${lighterColor} !important`);
-                hoverStyles.push(`color: ${lighterColor} !important`);
-            }
-            const translateY = Math.round(1 + intensity * 2);
-            hoverStyles.push(`transform: translateY(-${translateY}px) !important`);
-            break;
-        }
-        case "scale": {
-            // Escala suave
-            const scale = 1.05 + (intensity * 0.07);
-            hoverStyles.push(`transform: scale(${scale.toFixed(2)}) !important`);
-            hoverStyles.push(`position: relative !important`);
-            hoverStyles.push(`z-index: 10 !important`);
-            break;
-        }
-        case "glow": {
-            // Brilho neon com múltiplas camadas
-            const glowSize1 = Math.round(6 + (intensity * 10));
-            const glowSize2 = Math.round(12 + (intensity * 20));
-            const glowSize3 = Math.round(24 + (intensity * 30));
-            const shadow1 = `0 0 ${glowSize1}px ${hexToRgba(buttonColor, 0.8)}`;
-            const shadow2 = `0 0 ${glowSize2}px ${hexToRgba(buttonColor, 0.5)}`;
-            const shadow3 = `0 0 ${glowSize3}px ${hexToRgba(buttonColor, 0.3)}`;
-            hoverStyles.push(`box-shadow: ${shadow1}, ${shadow2}, ${shadow3} !important`);
-            break;
-        }
-        case "shadow": {
-            // Sombra elevada dramática
-            const shadowY = Math.round(4 + (intensity * 8));
-            const shadowBlur = Math.round(12 + (intensity * 16));
-            const shadowOpacity = 0.25 + (intensity * 0.30);
-            hoverStyles.push(`box-shadow: 0 ${shadowY}px ${shadowBlur}px -2px ${hexToRgba(buttonColor, shadowOpacity)} !important`);
-            const translateY = Math.round(2 + intensity * 3);
-            hoverStyles.push(`transform: translateY(-${translateY}px) !important`);
-            break;
-        }
-        case "pulse": {
-            // Efeito de pulso com sombra animada
-            const pulseSize = Math.round(8 + (intensity * 12));
-            baseStyles.push(`animation: none !important`);
-            hoverStyles.push(`animation: sg-btn-pulse 1s ease-in-out infinite !important`);
-            hoverStyles.push(`--pulse-color: ${hexToRgba(buttonColor, 0.5)} !important`);
-            hoverStyles.push(`--pulse-size: ${pulseSize}px !important`);
-            break;
-        }
-        case "shine": {
-            // Brilho que passa por cima do botão
-            baseStyles.push(`position: relative !important`);
-            baseStyles.push(`overflow: hidden !important`);
-            // O pseudo-elemento ::before será adicionado via CSS global
-            hoverStyles.push(`--shine-active: 1 !important`);
-            break;
-        }
-        default: {
-            // Fallback para darken
-            const darkerColor = adjustColor(buttonColor, 0.15, false);
-            hoverStyles.push(`background-color: ${darkerColor} !important`);
-            hoverStyles.push(`transform: translateY(-2px) !important`);
-        }
-    }
-
-    return {
-        base: baseStyles.join("; "),
-        hover: hoverStyles.join("; "),
-    };
-}
 
 // ============================================================================
 // NAVBAR STYLE RESOLVER
@@ -563,18 +301,13 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
     // Get linkHoverColor from props (default to buttonColor for backwards compatibility)
     const linkHoverColor = props.linkHoverColor || buttonColor;
 
-    // Calcular intensidade normalizada (0.15-1)
-    // Mapeia 10-100 para 0.15-1 (sempre ter pelo menos 15% de intensidade para efeito visível)
-    // Fórmula: 0.15 + ((value - 10) / 90) * 0.85
-    const linkIntensity = 0.15 + Math.max(0, (linkHoverIntensity - 10) / 90) * 0.85;
-    const btnIntensity = 0.15 + Math.max(0, (buttonHoverIntensity - 10) / 90) * 0.85;
-
     // Link Hover - gerar CSS baseado no efeito selecionado
-    const linkHoverResult = generateLinkHoverStyles(
-        linkHoverEffect,
-        linkHoverColor,
-        linkIntensity
-    );
+    // Nota: normalização de intensidade é feita internamente pelo módulo hoverEffects
+    const linkHoverResult = generateLinkHoverStyles({
+        effect: linkHoverEffect as any,
+        intensity: linkHoverIntensity,
+        hoverColor: linkHoverColor,
+    });
 
     // Adicionar estilos base se necessário (para animações como underline)
     if (linkHoverResult.base) {
@@ -592,13 +325,13 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
   `);
 
     // Button Hover - gerar CSS baseado no efeito selecionado
-    const buttonHoverResult = generateButtonHoverStyles(
-        buttonHoverEffect,
+    const buttonHoverResult = generateButtonHoverStyles({
+        effect: buttonHoverEffect as any,
+        intensity: buttonHoverIntensity,
         buttonColor,
         buttonTextColor,
-        buttonVariant,
-        btnIntensity
-    );
+        variant: buttonVariant as any,
+    });
 
     // Adicionar estilos base se necessário (para animações como pulse, shine)
     if (buttonHoverResult.base) {
@@ -615,39 +348,11 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
     }
   `);
 
-    // Adicionar keyframes para animações (pulse, shine)
-    cssRules.push(`
-    @keyframes sg-btn-pulse {
-      0%, 100% {
-        box-shadow: 0 0 0 0 var(--pulse-color, rgba(59, 130, 246, 0.5));
-      }
-      50% {
-        box-shadow: 0 0 0 var(--pulse-size, 10px) transparent;
-      }
-    }
+    // Adicionar keyframes para animações (pulse)
+    cssRules.push(getButtonHoverKeyframes());
 
-    /* Shine effect pseudo-element */
-    ${scope} .sg-navbar__btn::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-      );
-      transition: left 0.5s ease;
-      pointer-events: none;
-    }
-
-    ${scope} .sg-navbar__btn:hover::before {
-      left: 100%;
-    }
-  `);
+    // Adicionar CSS para efeito shine
+    cssRules.push(getShineEffectCSS(`${scope} .sg-navbar__btn`));
 
     // Resolve button styles
     // Minimal forces small button look if not customized? 

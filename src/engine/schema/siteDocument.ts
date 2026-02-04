@@ -669,6 +669,13 @@ export interface FooterBlock extends BlockBase {
     }>;
     copyright?: string;
     variant?: "simple" | "multi-column";
+    // Link Hover Effects
+    /** Efeito de hover nos links */
+    linkHoverEffect?: "none" | "background" | "underline" | "underline-center" | "scale" | "glow";
+    /** Intensidade do efeito (10-100) */
+    linkHoverIntensity?: number;
+    /** Cor do link no hover */
+    linkHoverColor?: string;
   };
 }
 
