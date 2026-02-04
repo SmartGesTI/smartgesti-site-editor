@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { BlockType, BlockDefinition } from "../engine";
 import { componentRegistry } from "../engine";
 import { cn } from "../utils/cn";
+import { getBlockIcon } from "../utils/blockIcons";
 
 interface BlockPaletteProps {
   onAddBlock: (
@@ -15,62 +16,6 @@ interface BlockPaletteProps {
     position?: number,
   ) => void;
   selectedParentBlockId?: string | null;
-}
-
-/**
- * Ícones simples para cada tipo de bloco
- */
-function getBlockIcon(type: BlockType): string {
-  const icons: Record<string, string> = {
-    // Layout
-    container: "📦",
-    stack: "📚",
-    grid: "⊞",
-    box: "☐",
-    section: "▦",
-    spacer: "↕",
-
-    // Conteúdo
-    heading: "H",
-    text: "T",
-    image: "🖼️",
-    video: "🎥",
-    icon: "★",
-    badge: "🎟️",
-    avatar: "👤",
-    socialLinks: "🌐",
-
-    // Interativos
-    button: "🔘",
-    link: "🔗",
-    divider: "─",
-    card: "🃏",
-
-    // Seções
-    hero: "🏆",
-    feature: "✨",
-    featureGrid: "⭐",
-    pricing: "💰",
-    pricingCard: "💳",
-    testimonial: "💬",
-    testimonialGrid: "🗨️",
-    courseCardGrid: "📚",
-    categoryCardGrid: "📂",
-    faq: "❓",
-    faqItem: "📝",
-    cta: "📣",
-    stats: "📊",
-    statItem: "#",
-    logoCloud: "🏂",
-    navbar: "☰",
-
-    // Formulários
-    form: "📋",
-    input: "✏️",
-    textarea: "📑",
-    formSelect: "👇",
-  };
-  return icons[type] || "•";
 }
 
 export function BlockPalette({

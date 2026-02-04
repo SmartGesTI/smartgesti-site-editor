@@ -272,15 +272,18 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
     // Generate a unique selector based on blockId
     const scope = `[data-block-id="${blockId}"]`;
 
-    // Link Hover - usar cor primária com opacity baixa para seguir a paleta
-    const primaryWithOpacity = buttonColor.startsWith('#')
-        ? `${buttonColor}15` // Adiciona 15 no final (opacity ~8%)
-        : buttonColor.replace('rgb(', 'rgba(').replace(')', ', 0.08)');
+    // Get linkHoverColor from props (default to buttonColor for backwards compatibility)
+    const linkHoverColor = props.linkHoverColor || buttonColor;
+
+    // Link Hover - usar linkHoverColor definido pelo usuário
+    const hoverColorWithOpacity = linkHoverColor.startsWith('#')
+        ? `${linkHoverColor}15` // Adiciona 15 no final (opacity ~8%)
+        : linkHoverColor.replace('rgb(', 'rgba(').replace(')', ', 0.08)');
 
     cssRules.push(`
     ${scope} .sg-navbar__link:hover {
-      background-color: ${primaryWithOpacity};
-      color: ${buttonColor};
+      background-color: ${hoverColorWithOpacity};
+      color: ${linkHoverColor};
       transform: translateY(-1px);
       transition: all 0.2s ease;
     }
@@ -367,8 +370,8 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
     // Dropdown item hover CSS
     cssRules.push(`
     ${scope} .sg-navbar-dropdown__item:hover {
-      background-color: ${primaryWithOpacity};
-      color: ${buttonColor};
+      background-color: ${hoverColorWithOpacity};
+      color: ${linkHoverColor};
       transition: background-color 0.2s ease, color 0.2s ease;
     }
   `);

@@ -6,7 +6,8 @@
 import { memo, useMemo, useCallback } from "react";
 import { Block, SiteDocumentV2, componentRegistry, InspectorMeta } from "../../engine";
 import { VariationSelector } from "./VariationSelector";
-import { PropertyGroup } from "./PropertyGroup";
+import { BlockHeader } from "./BlockHeader";
+import { CollapsiblePropertyGroup } from "./CollapsiblePropertyGroup";
 import type { UploadConfig } from "../LandingPageEditorV2";
 
 interface BlockPropertyEditorProps {
@@ -37,6 +38,7 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
     if (!block || !blockDefinition?.inspectorMeta) return {};
 
     const props = block.props as Record<string, any>;
+    const defaultProps = (blockDefinition.defaultProps || {}) as Record<string, any>;
     const groups: Record<
       string,
       Array<{ propName: string; meta: InspectorMeta; value: any }>
@@ -54,10 +56,18 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
       if (!groups[group]) {
         groups[group] = [];
       }
+
+      // Usar valor atual ou fallback para defaultProps
+      const currentValue = props[propName];
+      // Para campos de cor, também fazer fallback se o valor for string vazia
+      const isColorInput = meta.inputType === "color" || meta.inputType === "color-advanced";
+      const shouldUseFallback = currentValue === undefined || (isColorInput && currentValue === "");
+      const value = shouldUseFallback ? defaultProps[propName] : currentValue;
+
       groups[group].push({
         propName,
         meta,
-        value: props[propName],
+        value,
       });
     }
 
@@ -91,29 +101,26 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
 
   return (
     <div className="p-3 space-y-4">
-      {/* Header com nome do bloco */}
-      <div className="pb-2 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-          {blockDefinition.name}
-        </h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          {blockDefinition.description}
-        </p>
-      </div>
+      {/* Header com ícone centralizado */}
+      <BlockHeader
+        type={block.type}
+        name={blockDefinition.name}
+        description={blockDefinition.description}
+      />
 
       {/* Seletor de variações (Hero/Navbar) */}
       {blockDefinition.variations && (
         <VariationSelector block={block} onUpdate={onUpdate} />
       )}
 
-      {/* Propriedades agrupadas */}
+      {/* Propriedades agrupadas com collapse */}
       {Object.keys(groupedProps).length === 0 ? (
         <div className="text-center text-gray-500 dark:text-gray-400 text-xs py-4">
           Nenhuma propriedade configurável
         </div>
       ) : (
         Object.entries(groupedProps).map(([groupName, props]) => (
-          <PropertyGroup
+          <CollapsiblePropertyGroup
             key={groupName}
             groupName={groupName}
             props={props}

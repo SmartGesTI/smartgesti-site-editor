@@ -5,3 +5,5 @@ export { NumberInput } from "./NumberInput";
 export { SelectInput } from "./SelectInput";
 export { SliderInput } from "./SliderInput";
 export { CheckboxInput } from "./CheckboxInput";
+export { ToggleButton } from "./ToggleButton";
+export { ButtonGroupInput } from "./ButtonGroupInput";

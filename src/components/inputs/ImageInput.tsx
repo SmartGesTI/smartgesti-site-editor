@@ -133,10 +133,10 @@ export function ImageInput({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 flex flex-col items-center">
       {/* Label */}
       {label && (
-        <label className="block text-xs font-medium text-gray-800 dark:text-gray-100">
+        <label className="block text-xs font-medium text-gray-800 dark:text-gray-100 text-center">
           {label}
         </label>
       )}
@@ -167,7 +167,7 @@ export function ImageInput({
         disabled={uploading}
         className={cn(
           'rounded-lg overflow-hidden border-2 transition-all duration-200',
-          'flex items-center justify-center w-full',
+          'flex items-center justify-center',
           'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700',
           value
             ? 'border-blue-400 dark:border-blue-500 hover:border-blue-500'
@@ -177,7 +177,7 @@ export function ImageInput({
         )}
         style={{
           height: size?.height || 120,
-          maxWidth: size?.width || 200,
+          width: size?.width || 200,
         }}
       >
         {value ? (

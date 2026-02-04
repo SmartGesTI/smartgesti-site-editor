@@ -8,12 +8,20 @@ interface ColorInputProps extends ColorInputConfig {
   onClear?: () => void
 }
 
-const QUICK_COLORS = [
-  '#ffffff', '#f3f4f6', '#d1d5db', '#9ca3af',
-  '#6b7280', '#374151', '#1f2937', '#000000',
-  '#ef4444', '#f97316', '#eab308', '#22c55e',
-  '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899',
-]
+/**
+ * Normaliza uma cor para garantir que é um hex válido
+ */
+function normalizeColor(color: string | undefined, fallback: string): string {
+  if (!color || color === '') return fallback
+  // Se já é um hex válido, retorna
+  if (/^#[0-9A-Fa-f]{6}$/i.test(color)) return color
+  // Se é hex curto, expande
+  if (/^#[0-9A-Fa-f]{3}$/i.test(color)) {
+    const hex = color.slice(1)
+    return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`
+  }
+  return fallback
+}
 
 export function ColorInput({
   value,
@@ -25,18 +33,28 @@ export function ColorInput({
 }: ColorInputProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
-  const buttonRef = useRef<HTMLButtonElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<number | null>(null)
 
-  const currentColor = value || placeholder
+  // Cor efetiva - sempre normalizada
+  const effectiveColor = normalizeColor(value, placeholder)
+
+  // Estado local para feedback visual imediato durante drag
+  const [localColor, setLocalColor] = useState(effectiveColor)
+
+  // Sincronizar estado local quando o value externo mudar
+  useEffect(() => {
+    const normalized = normalizeColor(value, placeholder)
+    setLocalColor(normalized)
+  }, [value, placeholder])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         pickerRef.current &&
         !pickerRef.current.contains(event.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false)
       }
@@ -48,20 +66,12 @@ export function ColorInput({
     }
   }, [])
 
-  const sizeConfig = {
-    small: { width: 32, height: 24, pickerSize: 180 },
-    medium: { width: 48, height: 32, pickerSize: 200 },
-    large: { width: 64, height: 40, pickerSize: 220 },
-  }
-
-  const config = sizeConfig[size]
-
   const computePickerPosition = () => {
-    if (!buttonRef.current) return { top: 0, left: 0 }
-    const rect = buttonRef.current.getBoundingClientRect()
+    if (!containerRef.current) return { top: 0, left: 0 }
+    const rect = containerRef.current.getBoundingClientRect()
     return {
       top: rect.bottom + window.scrollY + 8,
-      left: rect.left + window.scrollX,
+      left: Math.max(8, rect.left + window.scrollX),
     }
   }
 
@@ -79,126 +89,149 @@ export function ColorInput({
     }
   }, [isOpen])
 
-  return (
-    <div className="relative flex items-center gap-2">
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label={label || 'Selecionar cor'}
-        className={cn(
-          'relative cursor-pointer transition-all rounded-lg border-2',
-          'hover:scale-105 active:scale-95',
-          isOpen
-            ? 'ring-2 ring-blue-500 ring-offset-2'
-            : 'border-gray-300 dark:border-gray-600',
-          size === 'small' && 'w-8 h-6',
-          size === 'medium' && 'w-12 h-8',
-          size === 'large' && 'w-16 h-10'
-        )}
-        style={{ backgroundColor: currentColor }}
-      >
-        {/* Checkerboard pattern for transparency */}
-        <div
-          className="absolute inset-0.5 rounded-md"
-          style={{
-            background: `linear-gradient(45deg, #ccc 25%, transparent 25%), 
-                         linear-gradient(-45deg, #ccc 25%, transparent 25%), 
-                         linear-gradient(45deg, transparent 75%, #ccc 75%), 
-                         linear-gradient(-45deg, transparent 75%, #ccc 75%)`,
-            backgroundSize: '8px 8px',
-            backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0px',
-          }}
-        />
-        <div
-          className="absolute inset-0.5 rounded-md"
-          style={{ backgroundColor: currentColor }}
-        />
-      </button>
+  const handleColorChange = (color: string) => {
+    // Atualizar o estado local imediatamente para feedback visual
+    setLocalColor(color)
 
+    // Debounce para chamar o onChange
+    if (debounceRef.current) {
+      window.clearTimeout(debounceRef.current)
+    }
+    debounceRef.current = window.setTimeout(() => {
+      onChange(color)
+    }, 50) as unknown as number
+  }
+
+  const handleTextChange = (val: string) => {
+    // Permitir digitação parcial
+    if (/^#[0-9A-Fa-f]{0,6}$/.test(val) || val === '#' || val === '') {
+      setLocalColor(val || '#')
+      // Só chamar onChange quando for um hex completo
+      if (/^#[0-9A-Fa-f]{6}$/i.test(val)) {
+        onChange(val)
+      }
+    }
+  }
+
+  // Cor a ser exibida (usa localColor para feedback imediato)
+  const displayColor = localColor
+
+  return (
+    <div className="space-y-1.5" ref={containerRef}>
+      {/* Label */}
+      {label && (
+        <label className="block text-xs font-medium text-gray-800 dark:text-gray-100">
+          {label}
+        </label>
+      )}
+
+      {/* Color swatch com hex */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label={label || 'Selecionar cor'}
+          className={cn(
+            'relative cursor-pointer transition-all rounded-lg border-2 flex-shrink-0',
+            'hover:scale-[1.02] active:scale-[0.98]',
+            isOpen
+              ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900'
+              : 'border-gray-300 dark:border-gray-600',
+            size === 'small' && 'w-10 h-8',
+            size === 'medium' && 'w-12 h-9',
+            size === 'large' && 'w-16 h-10'
+          )}
+        >
+          {/* Checkerboard pattern for transparency */}
+          <div
+            className="absolute inset-0.5 rounded-md"
+            style={{
+              background: `linear-gradient(45deg, #ccc 25%, transparent 25%),
+                           linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                           linear-gradient(45deg, transparent 75%, #ccc 75%),
+                           linear-gradient(-45deg, transparent 75%, #ccc 75%)`,
+              backgroundSize: '8px 8px',
+              backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0px',
+            }}
+          />
+          <div
+            className="absolute inset-0.5 rounded-md"
+            style={{ backgroundColor: displayColor }}
+          />
+        </button>
+
+        {/* Hex value display */}
+        <span className="text-xs font-mono text-gray-600 dark:text-gray-400 uppercase">
+          {displayColor}
+        </span>
+
+        {onClear && (
+          <button
+            type="button"
+            onClick={() => {
+              onClear()
+              setIsOpen(false)
+            }}
+            className="ml-auto text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+          >
+            Limpar
+          </button>
+        )}
+      </div>
+
+      {/* Color picker portal - z-index muito alto para ficar acima de tudo */}
       {isOpen &&
         createPortal(
           <div
             ref={pickerRef}
-            className="fixed z-[2147483000] bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-3"
+            className="fixed bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4"
             style={{
               top: pickerPos.top,
               left: pickerPos.left,
+              zIndex: 2147483647, // Máximo z-index possível
             }}
           >
             <style>{`
               .react-colorful {
-                width: ${config.pickerSize}px !important;
-                height: ${config.pickerSize * 0.75}px !important;
+                width: 220px !important;
+                height: 160px !important;
               }
               .react-colorful__saturation {
                 border-radius: 8px 8px 0 0;
               }
               .react-colorful__hue {
-                height: 24px;
+                height: 20px;
                 border-radius: 0 0 8px 8px;
               }
               .react-colorful__pointer {
-                width: 20px;
-                height: 20px;
+                width: 18px;
+                height: 18px;
                 border: 2px solid #ffffff;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
               }
             `}</style>
             <HexColorPicker
-              color={currentColor}
-              onChange={(c) => {
-                if (debounceRef.current) {
-                  window.clearTimeout(debounceRef.current)
-                }
-                debounceRef.current = window.setTimeout(() => {
-                  onChange(c)
-                }, 50) as unknown as number
-              }}
+              color={displayColor}
+              onChange={handleColorChange}
             />
-            <div className="mt-2.5 px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 text-center">
-              <span className="text-xs font-mono font-semibold text-gray-700 dark:text-gray-300">
-                {currentColor.toUpperCase()}
-              </span>
-            </div>
-            <div className="mt-2.5">
-              <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
-                Cores Rápidas
-              </div>
-              <div className="grid grid-cols-8 gap-1">
-                {QUICK_COLORS.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => onChange(color)}
-                    className={cn(
-                      'w-5 h-5 rounded border transition-all cursor-pointer',
-                      'hover:scale-110',
-                      currentColor === color
-                        ? 'border-2 border-blue-500'
-                        : 'border border-gray-300 dark:border-gray-600'
-                    )}
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
-              </div>
+
+            {/* Hex value input */}
+            <div className="mt-3 flex items-center gap-2">
+              <div
+                className="w-8 h-8 rounded-lg border-2 border-gray-200 dark:border-gray-700 flex-shrink-0"
+                style={{ backgroundColor: displayColor }}
+              />
+              <input
+                type="text"
+                value={displayColor.toUpperCase()}
+                onChange={(e) => handleTextChange(e.target.value)}
+                className="flex-1 px-2 py-1.5 text-xs font-mono bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="#000000"
+              />
             </div>
           </div>,
           document.body
         )}
-
-      {onClear && (
-        <button
-          type="button"
-          onClick={() => {
-            onClear()
-            setIsOpen(false)
-          }}
-          className="h-8 rounded-md px-3 text-xs font-medium border border-input bg-background text-gray-600 dark:text-gray-300 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer"
-        >
-          Limpar
-        </button>
-      )}
     </div>
   )
 }

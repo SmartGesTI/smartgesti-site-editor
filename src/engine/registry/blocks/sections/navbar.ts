@@ -28,6 +28,12 @@ export const NAVBAR_DEFAULT_PROPS = {
   linkFontSize: "md",
   buttonVariant: "solid",
   buttonBorderRadius: 8,
+  // Cores padrão
+  bg: "#ffffff",
+  linkColor: "#374151",
+  linkHoverColor: "#2563eb",
+  buttonColor: "#2563eb",
+  buttonTextColor: "#ffffff",
 } as const;
 
 export const navbarBlock: BlockDefinition = {
@@ -49,6 +55,28 @@ export const navbarBlock: BlockDefinition = {
     >,
   ),
   inspectorMeta: {
+    // === GRUPO: 📐 Posicionamento ===
+    layout: {
+      label: "Organização",
+      inputType: "select",
+      options: [
+        { label: "Expandido", value: "expanded" },
+        { label: "Centralizado", value: "centered" },
+        { label: "Compacto", value: "compact" },
+      ],
+      group: "📐 Posicionamento",
+    },
+    sticky: {
+      label: "Fixar no Topo",
+      inputType: "checkbox",
+      group: "📐 Posicionamento",
+    },
+    floating: {
+      label: "Menu Flutuante",
+      inputType: "checkbox",
+      group: "📐 Posicionamento",
+    },
+
     // === GRUPO: 🎨 Aparência ===
     bg: {
       label: "Cor de Fundo",
@@ -64,7 +92,7 @@ export const navbarBlock: BlockDefinition = {
       group: "🎨 Aparência",
     },
     blurOpacity: {
-      label: "Intensidade do Desfoque",
+      label: "Desfoque",
       inputType: "slider",
       min: 0,
       max: 100,
@@ -72,7 +100,7 @@ export const navbarBlock: BlockDefinition = {
       group: "🎨 Aparência",
     },
     borderRadius: {
-      label: "Cantos Arredondados",
+      label: "Cantos",
       inputType: "slider",
       min: 0,
       max: 32,
@@ -92,46 +120,24 @@ export const navbarBlock: BlockDefinition = {
       group: "🎨 Aparência",
     },
 
-    // === GRUPO: 📐 Layout ===
-    layout: {
-      label: "Organização dos Itens",
-      inputType: "select",
-      options: [
-        { label: "Expandido", value: "expanded" },
-        { label: "Centralizado", value: "centered" },
-        { label: "Compacto", value: "compact" },
-      ],
-      group: "📐 Layout",
-    },
-    sticky: {
-      label: "Fixar no Topo da Página",
-      inputType: "checkbox",
-      group: "📐 Layout",
-    },
-    floating: {
-      label: "Menu Flutuante",
-      inputType: "checkbox",
-      group: "📐 Layout",
-    },
-
-    // === GRUPO: 🖼️ Logo ===
+    // === GRUPO: 🖼️ Logo e Marca ===
     logo: {
       label: "Logo (Imagem)",
       inputType: "image-upload",
-      group: "🖼️ Logo",
+      group: "🖼️ Logo e Marca",
     },
     logoHeight: {
-      label: "Tamanho do Logo (px)",
+      label: "Tamanho do Logo",
       inputType: "slider",
       min: 40,
       max: 130,
       step: 5,
-      group: "🖼️ Logo",
+      group: "🖼️ Logo e Marca",
     },
     logoText: {
       label: "Texto Alternativo",
       inputType: "text",
-      group: "🖼️ Logo",
+      group: "🖼️ Logo e Marca",
     },
 
     // === GRUPO: 🔗 Links ===
@@ -178,7 +184,7 @@ export const navbarBlock: BlockDefinition = {
       group: "🎯 Botão CTA",
     },
     buttonBorderRadius: {
-      label: "Cantos Arredondados do Botão",
+      label: "Cantos do Botão",
       inputType: "slider",
       min: 0,
       max: 32,

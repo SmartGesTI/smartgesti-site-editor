@@ -7,9 +7,9 @@ import {
   NumberInput,
   SelectInput,
   SliderInput,
-  CheckboxInput,
+  ToggleButton,
+  ButtonGroupInput,
 } from "./inputs";
-import { ColorInput as AdvancedColorInput } from "../../components/inputs/ColorInput";
 import { ImageInput } from "../../components/inputs/ImageInput";
 import type { UploadConfig } from "../LandingPageEditorV2";
 
@@ -70,7 +70,7 @@ export function renderPropertyInput(
       return (
         <ColorInput
           key={propName}
-          value={value || "#000000"}
+          value={value}
           onChange={onChange}
           label={label}
           description={description}
@@ -86,6 +86,19 @@ export function renderPropertyInput(
           value,
           onChange,
           uploadConfig,
+        );
+      }
+      // Usar ButtonGroup para 2-3 opções, Select para 4+
+      if (options.length <= 3) {
+        return (
+          <ButtonGroupInput
+            key={propName}
+            value={value}
+            onChange={onChange}
+            label={label}
+            description={description}
+            options={options}
+          />
         );
       }
       return (
@@ -124,13 +137,14 @@ export function renderPropertyInput(
       );
 
     case "color-advanced":
+      // Usar o mesmo ColorInput simples - funciona melhor que o picker avançado
       return (
-        <AdvancedColorInput
+        <ColorInput
           key={propName}
-          value={value || "#000000"}
+          value={value || ""}
           onChange={onChange}
           label={label}
-          size="medium"
+          description={description}
         />
       );
 
@@ -155,13 +169,12 @@ export function renderPropertyInput(
 
     case "checkbox":
       return (
-        <CheckboxInput
+        <ToggleButton
           key={propName}
           value={!!value}
           onChange={onChange}
           label={label}
           description={description}
-          propName={propName}
         />
       );
 

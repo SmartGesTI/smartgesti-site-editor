@@ -79,7 +79,8 @@ export const escolaPremiumTemplate: SiteDocumentV2 = {
         ],
         ctaButton: { text: "Agende uma Visita", href: "#escola-cta" },
         transparent: true,
-        bg: "rgba(255, 255, 255, 0.9)",
+        bg: "#ffffff",
+        opacity: 90,
       },
     },
 
