@@ -190,6 +190,17 @@ const landingPageCSS = `
   display: inline-block;
 }
 
+/* Hover bridge invisível - conecta o botão ao dropdown (16px gap + overlap) */
+.sg-navbar__dropdown-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: -1rem;
+  right: -1rem;
+  height: 20px;
+  background: transparent;
+}
+
 .sg-navbar__link--has-dropdown {
   display: inline-flex;
   align-items: center;
@@ -229,16 +240,17 @@ const landingPageCSS = `
   display: none;
   opacity: 0;
   position: absolute;
-  top: 100%;
+  top: calc(100% + 16px); /* Pequeno gap visual abaixo do navbar */
   left: 0;
   z-index: 1000;
-  margin-top: 0.5rem;
-  transform: translateY(-10px);
+  min-width: 200px;
+  padding: 0.5rem 0;
+  transform: translateY(-5px);
   transition: opacity 0.2s ease, transform 0.2s ease;
-  overflow: hidden;
+  overflow: visible;
 }
 
-/* Frost layer do dropdown (igual ao navbar) */
+/* Frost layer do dropdown - cobre todo o dropdown */
 .sg-navbar-dropdown::before {
   content: "";
   position: absolute;
@@ -246,9 +258,9 @@ const landingPageCSS = `
   left: 0;
   right: 0;
   bottom: 0;
-  background: inherit;
-  opacity: var(--navbar-blur-opacity, 0);
-  border-radius: inherit;
+  background-color: var(--dropdown-bg, rgba(255, 255, 255, 0.9));
+  border-radius: var(--dropdown-radius, 25px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   pointer-events: none;
   z-index: 0;
   backdrop-filter: blur(var(--navbar-blur-amount, 0px));

@@ -23,7 +23,7 @@ export const NAVBAR_DEFAULT_PROPS = {
   borderRadius: 0,
   shadow: "sm",
   opacity: 100,
-  blurOpacity: 10,
+  blurOpacity: 0,
   logoHeight: 70,
   linkFontSize: "md",
   buttonVariant: "solid",

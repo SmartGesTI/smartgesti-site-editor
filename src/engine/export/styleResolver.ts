@@ -343,9 +343,10 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
     const dropdownBg = applyOpacityToColor(effectiveBg === "transparent" ? navbarDefaults.bg : effectiveBg, opacity);
 
     const dropdownStyles = [
-        `background-color: ${dropdownBg}`,
+        // Background via CSS variable - o ::before usa essa variável e começa após o hover bridge
+        `--dropdown-bg: ${dropdownBg}`,
+        `--dropdown-radius: ${borderRadius}px`,
         `border-radius: ${borderRadius}px`,
-        "box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15)",
         "min-width: 220px",
         "padding: 0.5rem 0",
     ];
