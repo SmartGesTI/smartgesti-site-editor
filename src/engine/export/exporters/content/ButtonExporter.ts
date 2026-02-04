@@ -7,9 +7,10 @@ import { ThemeTokens } from "../../../schema/themeTokens";
 import { dataBlockIdAttr, escapeHtml, resolveHref, linkTargetAttr } from "../../shared/htmlHelpers";
 import {
   generateButtonHoverStyles,
+  generateButtonOverlayCSS,
   getButtonHoverKeyframes,
-  getShineEffectCSS,
   type ButtonHoverEffect,
+  type ButtonHoverOverlay,
 } from "../../../shared/hoverEffects";
 
 export function exportButton(
@@ -23,9 +24,11 @@ export function exportButton(
     href,
     variant = "primary",
     size = "md",
-    // Hover effects
+    // Hover effects (principal)
     hoverEffect = "darken",
     hoverIntensity = 50,
+    // Hover overlay (adicional)
+    hoverOverlay = "none",
   } = (block as any).props;
 
   const padding =
@@ -84,6 +87,7 @@ export function exportButton(
   const scope = `[data-block-id="${block.id}"]`;
   let hoverCss = "";
 
+  // Efeito principal
   if (hoverEffect !== "none") {
     const hoverResult = generateButtonHoverStyles({
       effect: hoverEffect as ButtonHoverEffect,
@@ -111,9 +115,14 @@ export function exportButton(
 
     // Add keyframes for pulse animation
     hoverCss += getButtonHoverKeyframes();
+  }
 
-    // Add shine effect CSS
-    hoverCss += getShineEffectCSS(`${scope} .sg-btn`);
+  // Efeito overlay (adicional)
+  if (hoverOverlay && hoverOverlay !== "none") {
+    hoverCss += generateButtonOverlayCSS(`${scope} .sg-btn`, {
+      overlay: hoverOverlay as ButtonHoverOverlay,
+      primaryColor,
+    });
   }
 
   const styleTag = hoverCss ? `<style>${hoverCss}</style>` : "";

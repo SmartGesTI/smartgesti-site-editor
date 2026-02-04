@@ -19,6 +19,7 @@ export const heroBlock: BlockDefinition = {
     // Button hover defaults
     buttonHoverEffect: "scale",
     buttonHoverIntensity: 50,
+    buttonHoverOverlay: "none",
   },
   variations: heroVariationIds.reduce(
     (acc, id) => {
@@ -86,9 +87,9 @@ export const heroBlock: BlockDefinition = {
       ],
       group: "Estilo",
     },
-    // Button hover effects
+    // Button hover effects (principal)
     buttonHoverEffect: {
-      label: "Efeito Hover Botões",
+      label: "Efeito Principal",
       inputType: "select",
       options: [
         { label: "Nenhum", value: "none" },
@@ -98,16 +99,29 @@ export const heroBlock: BlockDefinition = {
         { label: "Brilho Neon", value: "glow" },
         { label: "Sombra", value: "shadow" },
         { label: "Pulso", value: "pulse" },
-        { label: "Brilho ✨", value: "shine" },
       ],
       group: "🎯 Botões",
     },
     buttonHoverIntensity: {
-      label: "Intensidade Hover",
+      label: "Intensidade",
       inputType: "slider",
       min: 10,
       max: 100,
       step: 10,
+      group: "🎯 Botões",
+    },
+    // Button hover overlay (adicional)
+    buttonHoverOverlay: {
+      label: "Efeito Extra",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "none" },
+        { label: "✨ Brilho", value: "shine" },
+        { label: "🌊 Ondas", value: "ripple" },
+        { label: "🌈 Gradiente", value: "gradient" },
+        { label: "⭐ Faíscas", value: "sparkle" },
+        { label: "💫 Borda Glow", value: "border-glow" },
+      ],
       group: "🎯 Botões",
     },
   },

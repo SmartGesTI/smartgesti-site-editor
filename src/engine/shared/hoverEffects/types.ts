@@ -21,7 +21,7 @@ export type LinkHoverEffect =
     | "glow";            // Brilho neon ao redor do texto
 
 /**
- * Efeitos disponíveis para botões
+ * Efeitos disponíveis para botões (principal)
  */
 export type ButtonHoverEffect =
     | "none"
@@ -30,8 +30,19 @@ export type ButtonHoverEffect =
     | "scale"    // Aumenta de tamanho
     | "glow"     // Brilho neon ao redor
     | "shadow"   // Sombra elevada dramática
-    | "pulse"    // Animação de pulso infinita
-    | "shine";   // Luz que desliza sobre o botão
+    | "pulse";   // Animação de pulso infinita
+
+/**
+ * Efeitos de overlay para botões (combina com o principal)
+ * Esses efeitos são animações visuais que ocorrem sobre o botão
+ */
+export type ButtonHoverOverlay =
+    | "none"
+    | "shine"        // ✨ Luz branca que desliza sobre o botão
+    | "ripple"       // 🌊 Ondas/círculos se expandindo do centro
+    | "gradient"     // 🌈 Gradiente colorido passando pelo botão
+    | "sparkle"      // ⭐ Pequenas faíscas/partículas brilhantes
+    | "border-glow"; // 💫 Borda que brilha e pulsa
 
 // ============================================================================
 // CONFIGURATION INTERFACES
@@ -55,7 +66,7 @@ export interface LinkHoverConfig {
  * Configuração para gerar estilos de hover de botões
  */
 export interface ButtonHoverConfig {
-    /** Tipo de efeito */
+    /** Tipo de efeito principal */
     effect: ButtonHoverEffect;
     /** Intensidade do efeito (10-100) */
     intensity: number;
@@ -67,6 +78,18 @@ export interface ButtonHoverConfig {
     variant?: "solid" | "outline" | "ghost";
     /** Duração da transição (default: "0.2s") */
     transitionDuration?: string;
+}
+
+/**
+ * Configuração para gerar estilos de overlay de botões
+ */
+export interface ButtonOverlayConfig {
+    /** Tipo de overlay */
+    overlay: ButtonHoverOverlay;
+    /** Cor do overlay (se aplicável) */
+    overlayColor?: string;
+    /** Cor primária do tema (para gradientes) */
+    primaryColor?: string;
 }
 
 // ============================================================================

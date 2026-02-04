@@ -174,11 +174,14 @@ export interface ButtonBlock extends BlockBase {
     href?: string;
     variant?: "primary" | "secondary" | "outline" | "ghost";
     size?: "sm" | "md" | "lg";
-    // Hover effects
+    // Hover effects (principal)
     /** Efeito de hover no botão */
-    hoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse" | "shine";
+    hoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse";
     /** Intensidade do efeito (10-100) */
     hoverIntensity?: number;
+    // Hover overlay (adicional - combina com o principal)
+    /** Efeito visual adicional no hover */
+    hoverOverlay?: "none" | "shine" | "ripple" | "gradient" | "sparkle" | "border-glow";
   };
 }
 
@@ -371,11 +374,14 @@ export interface HeroBlock extends BlockBase {
     overlayColor?: string;
     /** Cor ou gradiente no layout split (lado do conteúdo). */
     background?: string;
-    // Button Hover Effects
+    // Button Hover Effects (principal)
     /** Efeito de hover nos botões */
-    buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse" | "shine";
+    buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse";
     /** Intensidade do efeito (10-100) */
     buttonHoverIntensity?: number;
+    // Button Hover Overlay (adicional)
+    /** Efeito visual adicional nos botões */
+    buttonHoverOverlay?: "none" | "shine" | "ripple" | "gradient" | "sparkle" | "border-glow";
   };
 }
 
@@ -526,11 +532,14 @@ export interface CtaBlock extends BlockBase {
     secondaryButton?: { text: string; href?: string };
     variant?: "default" | "centered" | "split" | "gradient";
     bg?: string;
-    // Button Hover Effects
+    // Button Hover Effects (principal)
     /** Efeito de hover nos botões */
-    buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse" | "shine";
+    buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse";
     /** Intensidade do efeito (10-100) */
     buttonHoverIntensity?: number;
+    // Button Hover Overlay (adicional)
+    /** Efeito visual adicional nos botões */
+    buttonHoverOverlay?: "none" | "shine" | "ripple" | "gradient" | "sparkle" | "border-glow";
   };
 }
 
@@ -663,9 +672,11 @@ export interface NavbarBlock extends BlockBase {
     /** Border radius do botão em pixels (0-24) */
     buttonBorderRadius?: number;
     /** Efeito de hover no botão CTA */
-    buttonHoverEffect?: "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse" | "shine";
+    buttonHoverEffect?: "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse";
     /** Intensidade do efeito de hover no botão (0-100) */
     buttonHoverIntensity?: number;
+    /** Efeito visual adicional no botão CTA */
+    buttonHoverOverlay?: "none" | "shine" | "ripple" | "gradient" | "sparkle" | "border-glow";
   };
 }
 

@@ -11,9 +11,10 @@ import { generateScopedId } from "../../shared/idGenerator";
 import { resolveResponsiveColumns, generateResponsiveGridStyles } from "../../shared/responsiveGridHelper";
 import {
   generateButtonHoverStyles,
+  generateButtonOverlayCSS,
   getButtonHoverKeyframes,
-  getShineEffectCSS,
   type ButtonHoverEffect,
+  type ButtonHoverOverlay,
 } from "../../../shared/hoverEffects";
 
 export function exportFeature(
@@ -91,6 +92,7 @@ export function exportCta(
     // Button hover effects
     buttonHoverEffect = "scale",
     buttonHoverIntensity = 50,
+    buttonHoverOverlay = "none",
   } = (block as any).props;
 
   // Responsive buttons: column (mobile) → row (desktop)
@@ -170,10 +172,18 @@ export function exportCta(
 
     // Add keyframes for pulse animation
     buttonsCss += getButtonHoverKeyframes();
+  }
 
-    // Add shine effect CSS
-    buttonsCss += getShineEffectCSS(`${scope} .sg-cta__btn--primary`);
-    buttonsCss += getShineEffectCSS(`${scope} .sg-cta__btn--secondary`);
+  // Efeito overlay (adicional)
+  if (buttonHoverOverlay && buttonHoverOverlay !== "none") {
+    buttonsCss += generateButtonOverlayCSS(`${scope} .sg-cta__btn--primary`, {
+      overlay: buttonHoverOverlay as ButtonHoverOverlay,
+      primaryColor,
+    });
+    buttonsCss += generateButtonOverlayCSS(`${scope} .sg-cta__btn--secondary`, {
+      overlay: buttonHoverOverlay as ButtonHoverOverlay,
+      primaryColor,
+    });
   }
 
   const bgStyle = isGradient

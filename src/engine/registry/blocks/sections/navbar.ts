@@ -43,6 +43,7 @@ export const NAVBAR_DEFAULT_PROPS = {
   buttonTextColor: "#ffffff",
   buttonHoverEffect: "darken",
   buttonHoverIntensity: 50,
+  buttonHoverOverlay: "none",
 } as const;
 
 export const navbarBlock: BlockDefinition = {
@@ -259,7 +260,7 @@ export const navbarBlock: BlockDefinition = {
       group: "🎯 Botão CTA",
     },
     buttonHoverEffect: {
-      label: "Efeito Hover",
+      label: "Efeito Principal",
       inputType: "select",
       options: [
         { label: "Escurecer", value: "darken" },
@@ -268,7 +269,6 @@ export const navbarBlock: BlockDefinition = {
         { label: "Brilho Neon", value: "glow" },
         { label: "Sombra", value: "shadow" },
         { label: "Pulso", value: "pulse" },
-        { label: "Brilho ✨", value: "shine" },
       ],
       group: "🎯 Botão CTA",
     },
@@ -278,6 +278,19 @@ export const navbarBlock: BlockDefinition = {
       min: 10,
       max: 100,
       step: 10,
+      group: "🎯 Botão CTA",
+    },
+    buttonHoverOverlay: {
+      label: "Efeito Extra",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "none" },
+        { label: "✨ Brilho", value: "shine" },
+        { label: "🌊 Ondas", value: "ripple" },
+        { label: "🌈 Gradiente", value: "gradient" },
+        { label: "⭐ Faíscas", value: "sparkle" },
+        { label: "💫 Borda Glow", value: "border-glow" },
+      ],
       group: "🎯 Botão CTA",
     },
   },

@@ -10,9 +10,10 @@ import { dataBlockIdAttr, blockIdAttr, escapeHtml, resolveHref, linkTargetAttr }
 import { generateScopedId } from "../../shared/idGenerator";
 import {
   generateButtonHoverStyles,
+  generateButtonOverlayCSS,
   getButtonHoverKeyframes,
-  getShineEffectCSS,
   type ButtonHoverEffect,
+  type ButtonHoverOverlay,
 } from "../../../shared/hoverEffects";
 
 export function exportHero(
@@ -39,10 +40,11 @@ export function exportHero(
     // Button hover effects
     buttonHoverEffect = "scale",
     buttonHoverIntensity = 50,
+    buttonHoverOverlay = "none",
   } = (block as any).props;
 
   // Resolver estilos dos botões com base na paleta
-  const buttonStyles = resolveHeroButtonStylesWithHover(theme, block.id, buttonHoverEffect, buttonHoverIntensity);
+  const buttonStyles = resolveHeroButtonStylesWithHover(theme, block.id, buttonHoverEffect, buttonHoverIntensity, buttonHoverOverlay);
 
   const heroImage = image || PLACEHOLDER_IMAGE_URL;
   const isImageBg = variant === "image-bg" && heroImage;
@@ -159,6 +161,7 @@ function resolveHeroButtonStylesWithHover(
   blockId: string,
   hoverEffect: string,
   hoverIntensity: number,
+  hoverOverlay: string = "none",
 ): { primary: string; secondary: string; css: string } {
   const primaryColor = theme?.colors?.primary || "#3b82f6";
   const primaryText = theme?.colors?.primaryText || "#ffffff";
@@ -196,6 +199,7 @@ function resolveHeroButtonStylesWithHover(
   const scope = blockId ? `[data-block-id="${blockId}"]` : "";
   let css = "";
 
+  // Efeito principal
   if (hoverEffect !== "none") {
     // Primary button hover
     const primaryHoverResult = generateButtonHoverStyles({
@@ -244,10 +248,18 @@ function resolveHeroButtonStylesWithHover(
 
     // Add keyframes for pulse animation
     css += getButtonHoverKeyframes();
+  }
 
-    // Add shine effect CSS for both buttons
-    css += getShineEffectCSS(`${scope} .sg-hero__btn--primary`);
-    css += getShineEffectCSS(`${scope} .sg-hero__btn--secondary`);
+  // Efeito overlay (adicional)
+  if (hoverOverlay && hoverOverlay !== "none") {
+    css += generateButtonOverlayCSS(`${scope} .sg-hero__btn--primary`, {
+      overlay: hoverOverlay as ButtonHoverOverlay,
+      primaryColor,
+    });
+    css += generateButtonOverlayCSS(`${scope} .sg-hero__btn--secondary`, {
+      overlay: hoverOverlay as ButtonHoverOverlay,
+      primaryColor,
+    });
   }
 
   return {

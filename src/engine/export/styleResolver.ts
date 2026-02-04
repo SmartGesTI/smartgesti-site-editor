@@ -10,13 +10,14 @@
 import {
     generateLinkHoverStyles,
     generateButtonHoverStyles,
+    generateButtonOverlayCSS,
     getButtonHoverKeyframes,
-    getShineEffectCSS,
     hexToRgb,
     hexToRgba,
     adjustColor,
     type LinkHoverConfig,
     type ButtonHoverConfig,
+    type ButtonHoverOverlay,
 } from "../shared/hoverEffects";
 
 // Re-export for backwards compatibility
@@ -174,6 +175,7 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
         buttonVariant = navbarDefaults.buttonVariant,
         buttonHoverEffect = "darken",
         buttonHoverIntensity = 50,
+        buttonHoverOverlay = "none",
         floating = false,
         sticky = true,
         transparent = false,
@@ -351,8 +353,13 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
     // Adicionar keyframes para animações (pulse)
     cssRules.push(getButtonHoverKeyframes());
 
-    // Adicionar CSS para efeito shine
-    cssRules.push(getShineEffectCSS(`${scope} .sg-navbar__btn`));
+    // Adicionar CSS para efeito overlay (se configurado)
+    if (buttonHoverOverlay && buttonHoverOverlay !== "none") {
+        cssRules.push(generateButtonOverlayCSS(`${scope} .sg-navbar__btn`, {
+            overlay: buttonHoverOverlay as ButtonHoverOverlay,
+            primaryColor: buttonColor,
+        }));
+    }
 
     // Resolve button styles
     // Minimal forces small button look if not customized? 

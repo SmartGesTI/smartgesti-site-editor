@@ -27,8 +27,10 @@
 export type {
     LinkHoverEffect,
     ButtonHoverEffect,
+    ButtonHoverOverlay,
     LinkHoverConfig,
     ButtonHoverConfig,
+    ButtonOverlayConfig,
     HoverStyles,
     HoverCSS,
     HoverPreset,
@@ -38,11 +40,17 @@ export type {
 // Link hover
 export { generateLinkHoverStyles } from "./linkHover";
 
-// Button hover
+// Button hover (efeitos principais)
 export {
     generateButtonHoverStyles,
     getButtonHoverKeyframes,
-    getShineEffectCSS,
+} from "./buttonHover";
+
+// Button overlay (efeitos combinados)
+export {
+    generateButtonOverlayCSS,
+    getOverlayKeyframes,
+    getShineEffectCSS, // deprecated, mantido para compatibilidade
 } from "./buttonHover";
 
 // CSS generation

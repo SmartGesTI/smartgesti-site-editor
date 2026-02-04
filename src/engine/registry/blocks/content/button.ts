@@ -14,6 +14,7 @@ export const buttonBlock: BlockDefinition = {
     // Hover effects defaults
     hoverEffect: "darken",
     hoverIntensity: 50,
+    hoverOverlay: "none",
   },
   constraints: {
     required: ["text"],
@@ -50,9 +51,9 @@ export const buttonBlock: BlockDefinition = {
       ],
       group: "Estilo",
     },
-    // Hover effects
+    // Hover effects (principal)
     hoverEffect: {
-      label: "Efeito Hover",
+      label: "Efeito Principal",
       inputType: "select",
       options: [
         { label: "Nenhum", value: "none" },
@@ -62,7 +63,6 @@ export const buttonBlock: BlockDefinition = {
         { label: "Brilho Neon", value: "glow" },
         { label: "Sombra", value: "shadow" },
         { label: "Pulso", value: "pulse" },
-        { label: "Brilho ✨", value: "shine" },
       ],
       group: "🎯 Hover",
     },
@@ -72,6 +72,20 @@ export const buttonBlock: BlockDefinition = {
       min: 10,
       max: 100,
       step: 10,
+      group: "🎯 Hover",
+    },
+    // Hover overlay (adicional - combina com o principal)
+    hoverOverlay: {
+      label: "Efeito Extra",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "none" },
+        { label: "✨ Brilho", value: "shine" },
+        { label: "🌊 Ondas", value: "ripple" },
+        { label: "🌈 Gradiente", value: "gradient" },
+        { label: "⭐ Faíscas", value: "sparkle" },
+        { label: "💫 Borda Glow", value: "border-glow" },
+      ],
       group: "🎯 Hover",
     },
   },
