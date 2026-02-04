@@ -125,6 +125,29 @@ export function exportNavbar(
   // Links with resolved styles (complete inline styling)
   const linksHtml = links
     .map((l: any) => {
+      if (l.dropdown && Array.isArray(l.dropdown)) {
+        // Link com dropdown
+        const dropdownItemsHtml = l.dropdown
+          .map((item: any) => {
+            const itemResolved = resolveHref(item.href || "#", basePath);
+            const itemTargetAttr = linkTargetAttr(itemResolved, basePath);
+            return `<a href="${escapeHtml(itemResolved)}"${itemTargetAttr} class="sg-navbar-dropdown__item" style="${resolvedStyles.dropdownItem}">${escapeHtml(item.text)}</a>`;
+          })
+          .join("");
+
+        return `
+          <div class="sg-navbar__dropdown-wrapper">
+            <button class="sg-navbar__link sg-navbar__link--has-dropdown" style="${resolvedStyles.link}">
+              ${escapeHtml(l.text)}
+              <!-- Chevron adicionado via CSS ::after -->
+            </button>
+            <div class="sg-navbar-dropdown" style="${resolvedStyles.dropdown}">
+              ${dropdownItemsHtml}
+            </div>
+          </div>
+        `;
+      }
+      // Link normal sem dropdown
       const resolved = resolveHref(l.href || "#", basePath);
       const targetAttr = linkTargetAttr(resolved, basePath);
       return `<a href="${escapeHtml(resolved)}"${targetAttr} class="sg-navbar__link" style="${resolvedStyles.link}">${escapeHtml(l.text)}</a>`;
@@ -208,6 +231,43 @@ export function exportNavbar(
   // 3. Mobile links (stack vertical)
   const linksMobileHtml = links
     .map((l: any) => {
+      if (l.dropdown && Array.isArray(l.dropdown)) {
+        // Link com dropdown no mobile
+        const dropdownItemsHtml = l.dropdown
+          .map((item: any) => {
+            const itemResolved = resolveHref(item.href || "#", basePath);
+            const itemTargetAttr = linkTargetAttr(itemResolved, basePath);
+            return `
+              <a
+                href="${escapeHtml(itemResolved)}"${itemTargetAttr}
+                class="sg-navbar__link-mobile sg-navbar__link-mobile--dropdown-item"
+                style="
+                  display: block;
+                  padding: 0.75rem 0 0.75rem 1.5rem;
+                  color: ${linkColor};
+                  text-decoration: none;
+                  font-weight: 400;
+                  font-size: 0.9rem;
+                  border-bottom: 1px solid rgba(0,0,0,0.05);
+                  transition: color 0.2s;
+                "
+              >
+                ${escapeHtml(item.text)}
+              </a>
+            `;
+          })
+          .join("");
+
+        return `
+          <div class="sg-navbar__link-mobile sg-navbar__link-mobile--has-dropdown" style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+            <div style="display: block; padding: 1rem 0; color: ${linkColor}; font-weight: 600; font-size: 1rem;">
+              ${escapeHtml(l.text)}
+            </div>
+            ${dropdownItemsHtml}
+          </div>
+        `;
+      }
+      // Link normal sem dropdown
       const resolved = resolveHref(l.href || "#", basePath);
       const targetAttr = linkTargetAttr(resolved, basePath);
       return `

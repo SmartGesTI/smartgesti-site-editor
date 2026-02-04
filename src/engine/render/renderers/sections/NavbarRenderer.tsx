@@ -33,6 +33,8 @@ export function renderNavbar(block: any): React.ReactNode {
   const linkStyle = styleStringToReactStyle(resolvedStyles.link);
   const buttonStyle = styleStringToReactStyle(resolvedStyles.button);
   const brandTextStyle = styleStringToReactStyle(resolvedStyles.brandText);
+  const dropdownStyle = styleStringToReactStyle(resolvedStyles.dropdown);
+  const dropdownItemStyle = styleStringToReactStyle(resolvedStyles.dropdownItem);
 
   // Dynamic CSS for hover
   const hoverCss = resolvedStyles.css ? (
@@ -165,16 +167,45 @@ export function renderNavbar(block: any): React.ReactNode {
           {brandEl}
         </div>
         <div className="sg-navbar__menu" style={menuStyle}>
-          {links.map((link: any, index: number) => (
-            <a
-              key={index}
-              href={link.href}
-              className="sg-navbar__link"
-              style={linkStyle}
-            >
-              {link.text}
-            </a>
-          ))}
+          {links.map((link: any, index: number) => {
+            if (link.dropdown && Array.isArray(link.dropdown)) {
+              // Link com dropdown
+              return (
+                <div key={index} className="sg-navbar__dropdown-wrapper">
+                  <button
+                    className="sg-navbar__link sg-navbar__link--has-dropdown"
+                    style={linkStyle}
+                  >
+                    {link.text}
+                    {/* Chevron será adicionado via CSS ::after */}
+                  </button>
+                  <div className="sg-navbar-dropdown" style={dropdownStyle}>
+                    {link.dropdown.map((item: any, itemIndex: number) => (
+                      <a
+                        key={itemIndex}
+                        href={item.href}
+                        className="sg-navbar-dropdown__item"
+                        style={dropdownItemStyle}
+                      >
+                        {item.text}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+            // Link normal sem dropdown
+            return (
+              <a
+                key={index}
+                href={link.href}
+                className="sg-navbar__link"
+                style={linkStyle}
+              >
+                {link.text}
+              </a>
+            );
+          })}
           {ctaButton && (
             <a
               href={ctaButton.href || "#"}

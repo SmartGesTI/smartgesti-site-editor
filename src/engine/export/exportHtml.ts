@@ -37,19 +37,12 @@ const landingPageCSS = `
   right: 0;
   bottom: 0;
   background: inherit;
-  opacity: var(--navbar-opacity, 1);
+  opacity: var(--navbar-blur-opacity, 0);
   border-radius: inherit;
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
-}
-
-.sg-navbar--sticky:not(.sg-navbar--floating)::before {
-  opacity: var(--navbar-blur-opacity, 0.15);
-}
-
-.sg-navbar--sticky {
-  backdrop-filter: blur(var(--navbar-blur-amount, 10px));
-  -webkit-backdrop-filter: blur(var(--navbar-blur-amount, 10px));
+  backdrop-filter: blur(var(--navbar-blur-amount, 0px));
+  -webkit-backdrop-filter: blur(var(--navbar-blur-amount, 0px));
 }
 
 .sg-navbar--floating {
@@ -189,6 +182,121 @@ const landingPageCSS = `
 
 .sg-navbar--centered .sg-navbar__actions {
   justify-self: end;
+}
+
+/* Dropdown wrapper */
+.sg-navbar__dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.sg-navbar__link--has-dropdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  position: relative;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+/* Chevron-down icon (▼) */
+.sg-navbar__link--has-dropdown::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 0.25rem;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  transition: transform 0.2s ease;
+}
+
+.sg-navbar__dropdown-wrapper:hover .sg-navbar__link--has-dropdown::after {
+  transform: rotate(180deg);
+}
+
+/* Dropdown container */
+.sg-navbar-dropdown {
+  display: none;
+  opacity: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  margin-top: 0.5rem;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  overflow: hidden;
+}
+
+/* Frost layer do dropdown (igual ao navbar) */
+.sg-navbar-dropdown::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  opacity: var(--navbar-blur-opacity, 0);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  backdrop-filter: blur(var(--navbar-blur-amount, 0px));
+  -webkit-backdrop-filter: blur(var(--navbar-blur-amount, 0px));
+}
+
+/* Dropdown items acima do frost layer */
+.sg-navbar-dropdown > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Show dropdown on hover/focus with animation */
+.sg-navbar__dropdown-wrapper:hover .sg-navbar-dropdown,
+.sg-navbar__dropdown-wrapper:focus-within .sg-navbar-dropdown {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Dropdown items */
+.sg-navbar-dropdown__item {
+  display: block;
+  white-space: nowrap;
+}
+
+/* Mobile - dropdowns sempre visíveis no sidebar */
+@media (max-width: 768px) {
+  .sg-navbar-dropdown {
+    position: static;
+    display: block !important;
+    opacity: 1 !important;
+    transform: none !important;
+    min-width: auto;
+    padding-left: 1rem;
+    background: transparent !important;
+    box-shadow: none !important;
+    margin-top: 0.25rem;
+  }
+
+  .sg-navbar__link--has-dropdown::after {
+    content: none;
+  }
+
+  .sg-navbar-dropdown__item {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.9rem;
+  }
 }
 `;
 

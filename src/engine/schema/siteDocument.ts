@@ -559,11 +559,22 @@ export interface LogoCloudBlock extends BlockBase {
 }
 
 /**
+ * Link da Navbar - pode ser um link simples ou ter um dropdown com subitems
+ */
+export type NavbarLink = {
+  text: string;
+  href?: string;
+  dropdown?: Array<{ text: string; href: string }>;
+};
+
+/**
  * IDs das variações visuais do bloco Navbar
  */
 export type NavbarVariationId =
   | "navbar-classic"
-  | "navbar-centered";
+  | "navbar-centered"
+  | "navbar-dropdown-classic"
+  | "navbar-dropdown-centered";
 
 /**
  * Navbar - Barra de navegação
@@ -575,10 +586,7 @@ export interface NavbarBlock extends BlockBase {
     /** URL da imagem do logo ou objeto com src, alt e href */
     logo?: string | { src: string; alt?: string; href?: string };
     logoText?: string;
-    links: Array<{
-      text: string;
-      href: string;
-    }>;
+    links: Array<NavbarLink>;
     ctaButton?: { text: string; href?: string };
     sticky?: boolean;
     /** Cor de fundo customizada (suporta gradientes) */

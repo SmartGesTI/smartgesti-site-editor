@@ -1,9 +1,9 @@
 /**
  * Presets de variações do bloco Navbar
- * 3 estilos visuais: Clássico, Centralizado, Minimal
+ * Estilos visuais: Clássico, Centralizado, Clássico com Dropdowns, Centralizado com Dropdowns
  */
 
-import type { NavbarVariationId } from "../schema/siteDocument";
+import type { NavbarVariationId, NavbarLink } from "../schema/siteDocument";
 
 export interface NavbarVariationPreset {
   id: NavbarVariationId;
@@ -11,7 +11,7 @@ export interface NavbarVariationPreset {
   defaultProps: {
     variation: NavbarVariationId;
     logoText: string;
-    links: Array<{ text: string; href: string }>;
+    links: Array<NavbarLink>;
     ctaButton?: { text: string; href?: string };
     sticky: boolean;
     bg?: string;
@@ -54,11 +54,59 @@ export const navbarVariations: Record<
       sticky: true,
     },
   },
+  "navbar-dropdown-classic": {
+    id: "navbar-dropdown-classic",
+    name: "Clássico com Dropdowns",
+    defaultProps: {
+      variation: "navbar-dropdown-classic",
+      logoText: "Logo",
+      links: [
+        { text: "Início", href: "/site/p/home" },
+        {
+          text: "Cursos",
+          dropdown: [
+            { text: "Ensino Fundamental", href: "/site/p/fundamental" },
+            { text: "Ensino Médio", href: "/site/p/medio" },
+            { text: "EJA", href: "/site/p/eja" },
+          ],
+        },
+        { text: "Avisos", href: "/site/p/avisos" },
+        { text: "Contato", href: "/site/p/contato" },
+      ],
+      ctaButton: { text: "Matrícula", href: "/site/p/matricula" },
+      sticky: true,
+    },
+  },
+  "navbar-dropdown-centered": {
+    id: "navbar-dropdown-centered",
+    name: "Centralizado com Dropdowns",
+    defaultProps: {
+      variation: "navbar-dropdown-centered",
+      logoText: "Logo",
+      links: [
+        { text: "Início", href: "/site/p/home" },
+        {
+          text: "Cursos",
+          dropdown: [
+            { text: "Ensino Fundamental", href: "/site/p/fundamental" },
+            { text: "Ensino Médio", href: "/site/p/medio" },
+            { text: "EJA", href: "/site/p/eja" },
+          ],
+        },
+        { text: "Avisos", href: "/site/p/avisos" },
+        { text: "Contato", href: "/site/p/contato" },
+      ],
+      ctaButton: { text: "Matrícula", href: "/site/p/matricula" },
+      sticky: true,
+    },
+  },
 };
 
 export const navbarVariationIds: NavbarVariationId[] = [
   "navbar-classic",
   "navbar-centered",
+  "navbar-dropdown-classic",
+  "navbar-dropdown-centered",
 ];
 
 export function getNavbarVariation(

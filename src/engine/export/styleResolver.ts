@@ -46,6 +46,10 @@ export interface NavbarResolvedStyles {
     button: string;
     /** Styles for the brand text */
     brandText: string;
+    /** Styles for dropdown container */
+    dropdown: string;
+    /** Styles for dropdown items */
+    dropdownItem: string;
     /** Dynamic CSS block for hover states and media queries */
     css: string;
 }
@@ -187,16 +191,14 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
         }
     }
 
-    // Apply blur intensity as CSS variable for glass effect
+    // Apply blur intensity as CSS variable for glass effect (ALWAYS, independent of positioning)
     // Convert 0-100 to 0px-30px blur amount
-    if (sticky && !floating) {
-        const blurAmount = Math.round((blurOpacity / 100) * 30); // 0-30px
-        const blurBgOpacity = (blurOpacity / 100) * 0.3; // 0-0.3 additional opacity for frosted glass effect
-        navStyles.push(`--navbar-blur-amount: ${blurAmount}px`);
-        navStyles.push(`--navbar-blur-opacity: ${blurBgOpacity}`);
-    }
+    const blurAmount = Math.round((blurOpacity / 100) * 30); // 0-30px
+    const blurBgOpacity = blurOpacity / 100; // 0-1 opacity for frosted glass effect (0% to 100%)
+    navStyles.push(`--navbar-blur-amount: ${blurAmount}px`);
+    navStyles.push(`--navbar-blur-opacity: ${blurBgOpacity}`);
 
-    // Layout specific logic
+    // Layout specific logic (positioning, not styles)
     if (floating) {
         // Floating navbar - fixed with margins
         navStyles.push("position: fixed");
@@ -336,11 +338,47 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
         "font-size: 1.25rem",
     ];
 
+    // Resolve dropdown styles - herda EXATAMENTE a mesma opacidade/blur da navbar
+    // NOTA: backdrop-filter é aplicado via CSS: .sg-navbar--sticky .sg-navbar-dropdown
+    const dropdownBg = applyOpacityToColor(effectiveBg === "transparent" ? navbarDefaults.bg : effectiveBg, opacity);
+
+    const dropdownStyles = [
+        `background-color: ${dropdownBg}`,
+        `border-radius: ${borderRadius}px`,
+        "box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15)",
+        "min-width: 220px",
+        "padding: 0.5rem 0",
+    ];
+
+    // Resolve dropdown item styles - herda linkColor
+    const linkFontSizeValue = fontSizes[linkFontSize] || fontSizes.md;
+    const dropdownItemStyles = [
+        `color: ${linkColor}`,
+        `font-size: ${linkFontSizeValue}`,
+        "text-decoration: none",
+        "font-weight: 500",
+        "padding: 0.75rem 1.25rem",
+        "display: block",
+        "white-space: nowrap",
+        "transition: background-color 0.2s ease, color 0.2s ease",
+    ];
+
+    // Dropdown item hover CSS
+    cssRules.push(`
+    ${scope} .sg-navbar-dropdown__item:hover {
+      background-color: ${primaryWithOpacity};
+      color: ${buttonColor};
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+  `);
+
     return {
         nav: navStyles.join("; "),
         link: linkStyles.join("; "),
         button: buttonStyle,
         brandText: brandTextStyles.join("; "),
+        dropdown: dropdownStyles.join("; "),
+        dropdownItem: dropdownItemStyles.join("; "),
         css: cssRules.join("\n"),
     };
 }
@@ -490,11 +528,19 @@ export function styleStringToReactStyle(styleString: string): any {
     return styleString
         .split(";")
         .reduce((acc, rule) => {
-            const [key, value] = rule.split(":").map(s => s.trim());
+            const [rawKey, rawValue] = rule.split(":");
+            const key = rawKey?.trim();
+            const value = rawValue?.trim();
+
             if (key && value) {
-                // Convert kebab-case to camelCase
-                const camelKey = key.replace(/-([a-z])/g, g => g[1].toUpperCase());
-                acc[camelKey] = value;
+                // ✅ Não camelCase CSS variables (React precisa da chave EXATA)
+                if (key.startsWith("--")) {
+                    acc[key] = value;
+                } else {
+                    // Convert kebab-case to camelCase
+                    const camelKey = key.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+                    acc[camelKey] = value;
+                }
             }
             return acc;
         }, {} as any);
