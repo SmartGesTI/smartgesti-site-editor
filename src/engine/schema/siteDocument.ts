@@ -626,6 +626,10 @@ export interface NavbarBlock extends BlockBase {
     linkHoverColor?: string;
     /** Tamanho da fonte dos links */
     linkFontSize?: "sm" | "md" | "lg";
+    /** Efeito de hover nos links */
+    linkHoverEffect?: "background" | "underline" | "underline-center" | "slide-bg" | "scale" | "glow";
+    /** Intensidade do efeito de hover nos links (0-100) */
+    linkHoverIntensity?: number;
 
     // Button/CTA Styling
     /** Variante do botão CTA */
@@ -636,6 +640,10 @@ export interface NavbarBlock extends BlockBase {
     buttonTextColor?: string;
     /** Border radius do botão em pixels (0-24) */
     buttonBorderRadius?: number;
+    /** Efeito de hover no botão CTA */
+    buttonHoverEffect?: "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse" | "shine";
+    /** Intensidade do efeito de hover no botão (0-100) */
+    buttonHoverIntensity?: number;
   };
 }
 

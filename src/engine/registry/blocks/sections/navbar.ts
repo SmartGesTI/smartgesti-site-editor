@@ -37,8 +37,12 @@ export const NAVBAR_DEFAULT_PROPS = {
   bg: "#ffffff",
   linkColor: "#374151",
   linkHoverColor: "#2563eb",
+  linkHoverEffect: "background",
+  linkHoverIntensity: 50,
   buttonColor: "#2563eb",
   buttonTextColor: "#ffffff",
+  buttonHoverEffect: "darken",
+  buttonHoverIntensity: 50,
 } as const;
 
 export const navbarBlock: BlockDefinition = {
@@ -203,6 +207,27 @@ export const navbarBlock: BlockDefinition = {
       ],
       group: "🔗 Links",
     },
+    linkHoverEffect: {
+      label: "Efeito Hover",
+      inputType: "select",
+      options: [
+        { label: "Fundo", value: "background" },
+        { label: "Sublinhado →", value: "underline" },
+        { label: "Sublinhado ←→", value: "underline-center" },
+        { label: "Fundo ↑", value: "slide-bg" },
+        { label: "Escala", value: "scale" },
+        { label: "Brilho Neon", value: "glow" },
+      ],
+      group: "🔗 Links",
+    },
+    linkHoverIntensity: {
+      label: "Intensidade",
+      inputType: "slider",
+      min: 10,
+      max: 100,
+      step: 10,
+      group: "🔗 Links",
+    },
 
     // === GRUPO: 🎯 Botão CTA ===
     buttonVariant: {
@@ -231,6 +256,28 @@ export const navbarBlock: BlockDefinition = {
       min: 0,
       max: 32,
       step: 2,
+      group: "🎯 Botão CTA",
+    },
+    buttonHoverEffect: {
+      label: "Efeito Hover",
+      inputType: "select",
+      options: [
+        { label: "Escurecer", value: "darken" },
+        { label: "Clarear", value: "lighten" },
+        { label: "Escala", value: "scale" },
+        { label: "Brilho Neon", value: "glow" },
+        { label: "Sombra", value: "shadow" },
+        { label: "Pulso", value: "pulse" },
+        { label: "Brilho ✨", value: "shine" },
+      ],
+      group: "🎯 Botão CTA",
+    },
+    buttonHoverIntensity: {
+      label: "Intensidade",
+      inputType: "slider",
+      min: 10,
+      max: 100,
+      step: 10,
       group: "🎯 Botão CTA",
     },
   },
