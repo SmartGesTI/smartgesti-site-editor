@@ -173,23 +173,27 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
         buttonTextColor = themePrimaryText,
         buttonBorderRadius = navbarDefaults.buttonBorderRadius,
         buttonVariant = navbarDefaults.buttonVariant,
+        buttonSize = "md",
         buttonHoverEffect = "darken",
         buttonHoverIntensity = 50,
         buttonHoverOverlay = "none",
+        buttonHoverIconName = "arrow-right",
         floating = false,
         sticky = true,
         transparent = false,
         variation = "navbar-classic",
+        layout = "expanded",
     } = props;
 
     const isMinimal = variation === "navbar-minimal";
+    const isCompact = layout === "compact";
 
     // Resolve nav styles
     const navStyles: string[] = [];
     const cssRules: string[] = [];
 
-    // Fixed navbar height - all navbars should have the same height
-    navStyles.push("height: 4.5rem");
+    // Navbar height - compact is 20% smaller (3.6rem vs 4.5rem)
+    navStyles.push(`height: ${isCompact ? "3.6rem" : "4.5rem"}`);
 
     // Determine effective background
     const rawBg = props.bg;
@@ -285,15 +289,25 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
     const transitionDuration = (linkHoverEffect === "underline" || linkHoverEffect === "underline-center" || linkHoverEffect === "slide-bg")
         ? "0.3s"
         : "0.2s";
+
+    // Link font size - compact mode uses smaller sizes
+    const getLinkFontSize = () => {
+        if (isMinimal || isCompact) return fontSizes.sm;
+        return fontSizes[linkFontSize] || fontSizes.md;
+    };
+
+    // Link padding - compact mode uses smaller padding
+    const linkPadding = isCompact ? "0.375rem 0.5rem" : "0.5rem 0.75rem";
+
     const linkStyles = [
         `color: ${linkColor}`,
-        `font-size: ${isMinimal ? fontSizes.sm : (fontSizes[linkFontSize] || fontSizes.md)}`,
+        `font-size: ${getLinkFontSize()}`,
         "text-decoration: none",
-        "font-weight: 500",
+        `font-weight: ${isCompact ? "400" : "500"}`,
         `transition: all ${transitionDuration} ease`,
-        "padding: 0.5rem 0.75rem", // Add padding for hover effect
-        "border-radius: 6px",         // Rounded for hover effect
-        "display: inline-block",      // Needed for padding/transform
+        `padding: ${linkPadding}`,
+        "border-radius: 6px",
+        "display: inline-block",
     ];
 
     // Hover Effects CSS
@@ -358,20 +372,23 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
         cssRules.push(generateButtonOverlayCSS(`${scope} .sg-navbar__btn`, {
             overlay: buttonHoverOverlay as ButtonHoverOverlay,
             primaryColor: buttonColor,
+            iconName: buttonHoverIconName,
+            textColor: buttonTextColor,
         }));
     }
 
-    // Resolve button styles
-    // Minimal forces small button look if not customized? 
-    // User asked "Minimal ... botões SM". 
-    // We can't easily change the 'variant' here if it's passed as prop, but we can adjust padding in style
-    let btnPadding = "0.5rem 1rem";
-    let btnSize = "1rem";
+    // Resolve button styles based on buttonSize prop
+    const buttonSizeStyles: Record<string, { padding: string; fontSize: string }> = {
+        sm: { padding: "0.375rem 0.875rem", fontSize: "0.875rem" },
+        md: { padding: "0.5rem 1rem", fontSize: "1rem" },
+        lg: { padding: "0.625rem 1.25rem", fontSize: "1.125rem" },
+    };
 
-    if (isMinimal) {
-        btnPadding = "0.25rem 0.75rem";
-        btnSize = "0.875rem";
-    }
+    // Use buttonSize from props, fallback to sm for minimal or compact variations
+    const effectiveButtonSize = (isMinimal || isCompact) ? "sm" : buttonSize;
+    const btnSizeConfig = buttonSizeStyles[effectiveButtonSize] || buttonSizeStyles.md;
+    const btnPadding = btnSizeConfig.padding;
+    const btnSize = btnSizeConfig.fontSize;
 
     const buttonStyle = resolveButtonStyle(
         buttonVariant,
@@ -442,20 +459,9 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
 /**
  * Resolve hero button styles based on theme
  */
-export function resolveHeroButtonStyles(theme?: any, blockId?: string): { primary: string; secondary: string; css: string } {
+export function resolveHeroButtonStyles(theme?: any, _blockId?: string): { primary: string; secondary: string; css: string } {
     const primaryColor = theme?.colors?.primary || "#3b82f6";
     const primaryText = theme?.colors?.primaryText || "#ffffff";
-
-    // Calcular versão mais escura para hover (15% mais escuro)
-    let primaryHover = primaryColor;
-    if (primaryColor.startsWith('#')) {
-        const hex = primaryColor.replace('#', '');
-        const r = parseInt(hex.substring(0, 2), 16);
-        const g = parseInt(hex.substring(2, 4), 16);
-        const b = parseInt(hex.substring(4, 6), 16);
-        const darker = (val: number) => Math.max(0, Math.floor(val * 0.85));
-        primaryHover = `rgb(${darker(r)}, ${darker(g)}, ${darker(b)})`;
-    }
 
     const primaryStyles = [
         `background-color: ${primaryColor}`,
@@ -483,24 +489,12 @@ export function resolveHeroButtonStyles(theme?: any, blockId?: string): { primar
         `border: 2px solid ${primaryColor}`,
     ].join("; ");
 
-    const scope = blockId ? `[data-block-id="${blockId}"]` : "";
-    const css = `
-        ${scope} .sg-hero__btn--primary:hover {
-            background-color: ${primaryHover};
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px -4px ${primaryColor}40;
-        }
-        ${scope} .sg-hero__btn--secondary:hover {
-            background-color: ${primaryColor}10;
-            transform: translateY(-2px);
-            border-color: ${primaryHover};
-        }
-    `;
-
+    // Hover effects are now controlled by the hover effects system
+    // This function returns empty CSS - use resolveHeroButtonStylesWithHover for hover effects
     return {
         primary: primaryStyles,
         secondary: secondaryStyles,
-        css,
+        css: "",
     };
 }
 

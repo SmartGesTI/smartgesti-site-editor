@@ -181,7 +181,9 @@ export interface ButtonBlock extends BlockBase {
     hoverIntensity?: number;
     // Hover overlay (adicional - combina com o principal)
     /** Efeito visual adicional no hover */
-    hoverOverlay?: "none" | "shine" | "ripple" | "gradient" | "sparkle" | "border-glow";
+    hoverOverlay?: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow";
+    /** Nome do ícone para o efeito "icon" */
+    hoverIconName?: string;
   };
 }
 
@@ -374,6 +376,9 @@ export interface HeroBlock extends BlockBase {
     overlayColor?: string;
     /** Cor ou gradiente no layout split (lado do conteúdo). */
     background?: string;
+    // Button Size
+    /** Tamanho dos botões */
+    buttonSize?: "sm" | "md" | "lg";
     // Button Hover Effects (principal)
     /** Efeito de hover nos botões */
     buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse";
@@ -381,7 +386,9 @@ export interface HeroBlock extends BlockBase {
     buttonHoverIntensity?: number;
     // Button Hover Overlay (adicional)
     /** Efeito visual adicional nos botões */
-    buttonHoverOverlay?: "none" | "shine" | "ripple" | "gradient" | "sparkle" | "border-glow";
+    buttonHoverOverlay?: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow";
+    /** Nome do ícone para o efeito "icon" */
+    buttonHoverIconName?: string;
   };
 }
 
@@ -532,6 +539,9 @@ export interface CtaBlock extends BlockBase {
     secondaryButton?: { text: string; href?: string };
     variant?: "default" | "centered" | "split" | "gradient";
     bg?: string;
+    // Button Size
+    /** Tamanho dos botões */
+    buttonSize?: "sm" | "md" | "lg";
     // Button Hover Effects (principal)
     /** Efeito de hover nos botões */
     buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse";
@@ -539,7 +549,9 @@ export interface CtaBlock extends BlockBase {
     buttonHoverIntensity?: number;
     // Button Hover Overlay (adicional)
     /** Efeito visual adicional nos botões */
-    buttonHoverOverlay?: "none" | "shine" | "ripple" | "gradient" | "sparkle" | "border-glow";
+    buttonHoverOverlay?: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow";
+    /** Nome do ícone para o efeito "icon" */
+    buttonHoverIconName?: string;
   };
 }
 
@@ -627,8 +639,6 @@ export interface NavbarBlock extends BlockBase {
     // Layout Options
     /** Distribuição do navbar: expandido, centralizado ou compacto */
     layout?: "expanded" | "centered" | "compact";
-    /** Posição do logo: esquerda ou centro */
-    logoPosition?: "left" | "center";
     /** Modo flutuante: navbar com margem lateral e mais destaque */
     floating?: boolean;
 
@@ -665,6 +675,8 @@ export interface NavbarBlock extends BlockBase {
     // Button/CTA Styling
     /** Variante do botão CTA */
     buttonVariant?: "solid" | "outline" | "ghost";
+    /** Tamanho do botão CTA */
+    buttonSize?: "sm" | "md" | "lg";
     /** Cor do botão CTA */
     buttonColor?: string;
     /** Cor do texto do botão CTA */
@@ -676,7 +688,9 @@ export interface NavbarBlock extends BlockBase {
     /** Intensidade do efeito de hover no botão (0-100) */
     buttonHoverIntensity?: number;
     /** Efeito visual adicional no botão CTA */
-    buttonHoverOverlay?: "none" | "shine" | "ripple" | "gradient" | "sparkle" | "border-glow";
+    buttonHoverOverlay?: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow";
+    /** Nome do ícone para o efeito "icon" */
+    buttonHoverIconName?: string;
   };
 }
 

@@ -38,11 +38,11 @@ export type ButtonHoverEffect =
  */
 export type ButtonHoverOverlay =
     | "none"
-    | "shine"        // ✨ Luz branca que desliza sobre o botão
-    | "ripple"       // 🌊 Ondas/círculos se expandindo do centro
-    | "gradient"     // 🌈 Gradiente colorido passando pelo botão
-    | "sparkle"      // ⭐ Pequenas faíscas/partículas brilhantes
-    | "border-glow"; // 💫 Borda que brilha e pulsa
+    | "shine"        // Luz branca que desliza sobre o botão
+    | "fill"         // Preenchimento de cor da esquerda para direita
+    | "bounce"       // Pequeno salto animado
+    | "icon"         // Ícone que aparece no hover com slide
+    | "border-glow"; // Borda que brilha e pulsa
 
 // ============================================================================
 // CONFIGURATION INTERFACES
@@ -90,6 +90,10 @@ export interface ButtonOverlayConfig {
     overlayColor?: string;
     /** Cor primária do tema (para gradientes) */
     primaryColor?: string;
+    /** Nome do ícone para o efeito "icon" */
+    iconName?: string;
+    /** Cor do texto do botão (para o ícone usar a mesma cor) */
+    textColor?: string;
 }
 
 // ============================================================================

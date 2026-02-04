@@ -15,6 +15,7 @@ export const buttonBlock: BlockDefinition = {
     hoverEffect: "darken",
     hoverIntensity: 50,
     hoverOverlay: "none",
+    hoverIconName: "arrow-right",
   },
   constraints: {
     required: ["text"],
@@ -64,7 +65,7 @@ export const buttonBlock: BlockDefinition = {
         { label: "Sombra", value: "shadow" },
         { label: "Pulso", value: "pulse" },
       ],
-      group: "🎯 Hover",
+      group: "Hover",
     },
     hoverIntensity: {
       label: "Intensidade",
@@ -72,7 +73,7 @@ export const buttonBlock: BlockDefinition = {
       min: 10,
       max: 100,
       step: 10,
-      group: "🎯 Hover",
+      group: "Hover",
     },
     // Hover overlay (adicional - combina com o principal)
     hoverOverlay: {
@@ -80,13 +81,19 @@ export const buttonBlock: BlockDefinition = {
       inputType: "select",
       options: [
         { label: "Nenhum", value: "none" },
-        { label: "✨ Brilho", value: "shine" },
-        { label: "🌊 Ondas", value: "ripple" },
-        { label: "🌈 Gradiente", value: "gradient" },
-        { label: "⭐ Faíscas", value: "sparkle" },
-        { label: "💫 Borda Glow", value: "border-glow" },
+        { label: "Brilho", value: "shine" },
+        { label: "Preenchimento", value: "fill" },
+        { label: "Salto", value: "bounce" },
+        { label: "Icone", value: "icon" },
+        { label: "Borda Glow", value: "border-glow" },
       ],
-      group: "🎯 Hover",
+      group: "Hover",
+    },
+    hoverIconName: {
+      label: "Icone",
+      inputType: "icon-grid",
+      group: "Hover",
+      showWhen: { field: "hoverOverlay", equals: "icon" },
     },
   },
 };

@@ -52,6 +52,15 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
         continue; // Pular este campo
       }
 
+      // Lógica condicional genérica: showWhen
+      if (meta.showWhen) {
+        const { field, equals } = meta.showWhen;
+        const fieldValue = props[field] ?? defaultProps[field];
+        if (fieldValue !== equals) {
+          continue; // Pular este campo se a condição não for atendida
+        }
+      }
+
       const group = meta.group || "Geral";
       if (!groups[group]) {
         groups[group] = [];

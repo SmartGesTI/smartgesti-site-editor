@@ -33,7 +33,6 @@ export function exportNavbar(
     floating = false,
     layout,
     logoHeight = 70,
-    logoPosition = "left",
     borderPosition = "none",
     borderWidth = 1,
     borderColor = "#e5e7eb",
@@ -58,9 +57,8 @@ export function exportNavbar(
 
   // Determine effective layout
   const effectiveLayout = layout || "expanded";
-  const isExpanded = effectiveLayout === "expanded";
   const isCentered = effectiveLayout === "centered";
-  const isCompact = effectiveLayout === "compact";
+  const isCompact = layout === "compact";
 
   const navClasses = [
     "sg-navbar",
@@ -71,9 +69,6 @@ export function exportNavbar(
   ]
     .filter(Boolean)
     .join(" ");
-
-  // Logo centralizado usa layout de 3 colunas
-  const isLogoCentered = logoPosition === "center";
 
   // Build nav style from resolved styles + layout modifiers
   // Note: floating mode already includes position: fixed in resolvedStyles.nav
@@ -192,33 +187,24 @@ export function exportNavbar(
     : "";
 
   // Container style baseado no layout
-  const useGridLayout = isCentered || isLogoCentered;
+  // Nota: isCompact apenas reduz tamanhos, não altera o layout base
+  const useGridLayout = isCentered;
   const containerStyle = useGridLayout
-    ? `max-width: ${isCompact ? "900px" : "1200px"}; margin: 0 auto; padding: 0 ${isCompact ? "1rem" : "1.5rem"}; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: ${isCompact ? "0.75rem" : "1.5rem"};`
-    : isExpanded
-      ? `width: 100%; max-width: 100%; padding: 0 ${floating ? "2rem" : "1.5rem"}; display: flex; justify-content: space-between; align-items: center; gap: 2rem;`
-      : `max-width: 900px; margin: 0 auto; padding: 0 1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;`;
+    ? `max-width: 1200px; margin: 0 auto; padding: 0 ${isCompact ? "1rem" : "1.5rem"}; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: ${isCompact ? "1rem" : "1.5rem"};`
+    : `width: 100%; max-width: 100%; padding: 0 ${floating ? "2rem" : (isCompact ? "1rem" : "1.5rem")}; display: flex; justify-content: space-between; align-items: center; gap: ${isCompact ? "1.5rem" : "2rem"};`;
   const menuStyle = `display: flex; align-items: center; gap: ${isCompact ? "1rem" : "1.5rem"}; flex-wrap: wrap;${isCentered ? " justify-self: center;" : ""}`;
-  const linksLeftStyle = `display: flex; align-items: center; gap: ${isCompact ? "1rem" : "1.5rem"}; justify-self: start;`;
-  const ctaRightStyle = `display: flex; align-items: center; justify-self: end;`;
   const brandWrapStyle = isCentered
     ? "flex-shrink: 0; justify-self: start;"
-    : isLogoCentered
-      ? "flex-shrink: 0; justify-self: center;"
-      : "flex-shrink: 0;";
+    : "flex-shrink: 0;";
 
-  const menuHtml = `<div class="sg-navbar__menu" style="${menuStyle}">${linksHtml}${!isCentered && !isLogoCentered ? ctaBtnHtml : ""}</div>`;
-  const linksLeftHtml = `<div class="sg-navbar__menu" style="${linksLeftStyle}">${linksHtml}</div>`;
-  const ctaRightHtml = ctaBtnHtml ? `<div class="sg-navbar__actions" style="${ctaRightStyle}">${ctaBtnHtml}</div>` : `<div></div>`;
+  const menuHtml = `<div class="sg-navbar__menu" style="${menuStyle}">${linksHtml}${!isCentered ? ctaBtnHtml : ""}</div>`;
   const actionsHtml =
-    (isCentered || isLogoCentered) && ctaButton
+    isCentered && ctaButton
       ? `<div class="sg-navbar__actions" style="flex-shrink: 0; justify-self: end;">${ctaBtnHtml}</div>`
       : "";
 
-  // Container HTML - layout diferente para logo centralizado
-  const containerHtml = isLogoCentered
-    ? `<div class="sg-navbar__container" style="${containerStyle}">${linksLeftHtml}<div class="sg-navbar__brand" style="${brandWrapStyle}">${logoHtml}</div>${ctaRightHtml}</div>`
-    : `<div class="sg-navbar__container" style="${containerStyle}"><div class="sg-navbar__brand" style="${brandWrapStyle}">${logoHtml}</div>${menuHtml}${actionsHtml}</div>`;
+  // Container HTML
+  const containerHtml = `<div class="sg-navbar__container" style="${containerStyle}"><div class="sg-navbar__brand" style="${brandWrapStyle}">${logoHtml}</div>${menuHtml}${actionsHtml}</div>`;
 
   // Inject dynamic CSS styles (hover effects) if present
   const styleBlock = resolvedStyles.css ? `<style>${resolvedStyles.css}</style>` : "";

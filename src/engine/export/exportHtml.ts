@@ -52,6 +52,21 @@ const landingPageCSS = `
   box-shadow: var(--navbar-shadow, 0 10px 40px rgba(0, 0, 0, 0.15));
 }
 
+/* Compact mode - 20% smaller height and smaller elements */
+.sg-navbar--compact {
+  height: 3.6rem;
+}
+
+.sg-navbar--compact .sg-navbar__link {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.5rem;
+}
+
+.sg-navbar--compact .sg-navbar__btn {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.875rem;
+}
+
 .sg-navbar__container {
   display: flex;
   align-items: center;
@@ -129,10 +144,7 @@ const landingPageCSS = `
   border: none;
 }
 
-.sg-navbar__btn--solid:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
-}
+/* Hover effects are now controlled by the hover effects system */
 
 .sg-navbar__btn--outline {
   background-color: transparent;
@@ -140,19 +152,10 @@ const landingPageCSS = `
   border: 2px solid var(--navbar-btn-bg, var(--sg-primary, #3b82f6));
 }
 
-.sg-navbar__btn--outline:hover {
-  background-color: var(--navbar-btn-bg, var(--sg-primary, #3b82f6));
-  color: var(--navbar-btn-text, var(--sg-primary-text, #fff));
-}
-
 .sg-navbar__btn--ghost {
   background-color: transparent;
   color: var(--navbar-btn-bg, var(--sg-primary, #3b82f6));
   border: none;
-}
-
-.sg-navbar__btn--ghost:hover {
-  background-color: rgba(59, 130, 246, 0.1);
 }
 
 .sg-navbar--classic.sg-navbar--floating {

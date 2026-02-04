@@ -20,7 +20,6 @@ export const NAVBAR_DEFAULT_PROPS = {
   sticky: true,
   floating: false,
   layout: "expanded",
-  logoPosition: "left",
   borderRadius: 0,
   shadow: "sm",
   opacity: 100,
@@ -41,9 +40,11 @@ export const NAVBAR_DEFAULT_PROPS = {
   linkHoverIntensity: 50,
   buttonColor: "#2563eb",
   buttonTextColor: "#ffffff",
+  buttonSize: "md",
   buttonHoverEffect: "darken",
   buttonHoverIntensity: 50,
   buttonHoverOverlay: "none",
+  buttonHoverIconName: "arrow-right",
 } as const;
 
 export const navbarBlock: BlockDefinition = {
@@ -65,43 +66,43 @@ export const navbarBlock: BlockDefinition = {
     >,
   ),
   inspectorMeta: {
-    // === GRUPO: 📐 Posicionamento ===
+    // === GRUPO: Posicionamento ===
     layout: {
-      label: "Organização",
+      label: "Organizacao",
       inputType: "select",
       options: [
         { label: "Expandido", value: "expanded" },
         { label: "Centralizado", value: "centered" },
         { label: "Compacto", value: "compact" },
       ],
-      group: "📐 Posicionamento",
+      group: "Posicionamento",
     },
     sticky: {
       label: "Fixar no Topo",
       inputType: "checkbox",
       size: "sm",
-      group: "📐 Posicionamento",
+      group: "Posicionamento",
     },
     floating: {
       label: "Menu Flutuante",
       inputType: "checkbox",
       size: "sm",
-      group: "📐 Posicionamento",
+      group: "Posicionamento",
     },
 
-    // === GRUPO: 🎨 Aparência ===
+    // === GRUPO: Aparencia ===
     bg: {
       label: "Cor de Fundo",
       inputType: "color-advanced",
-      group: "🎨 Aparência",
+      group: "Aparencia",
     },
     opacity: {
-      label: "Transparência",
+      label: "Transparencia",
       inputType: "slider",
       min: 0,
       max: 100,
       step: 5,
-      group: "🎨 Aparência",
+      group: "Aparencia",
     },
     blurOpacity: {
       label: "Desfoque",
@@ -109,7 +110,7 @@ export const navbarBlock: BlockDefinition = {
       min: 0,
       max: 100,
       step: 5,
-      group: "🎨 Aparência",
+      group: "Aparencia",
     },
     borderRadius: {
       label: "Cantos",
@@ -117,7 +118,7 @@ export const navbarBlock: BlockDefinition = {
       min: 0,
       max: 32,
       step: 2,
-      group: "🎨 Aparência",
+      group: "Aparencia",
     },
     shadow: {
       label: "Sombra",
@@ -125,11 +126,11 @@ export const navbarBlock: BlockDefinition = {
       options: [
         { label: "Nenhuma", value: "none" },
         { label: "Pequena", value: "sm" },
-        { label: "Média", value: "md" },
+        { label: "Media", value: "md" },
         { label: "Grande", value: "lg" },
         { label: "Extra Grande", value: "xl" },
       ],
-      group: "🎨 Aparência",
+      group: "Aparencia",
     },
     borderPosition: {
       label: "Borda",
@@ -142,7 +143,7 @@ export const navbarBlock: BlockDefinition = {
         { label: "Esquerda", value: "left" },
         { label: "Direita", value: "right" },
       ],
-      group: "🎨 Aparência",
+      group: "Aparencia",
     },
     borderWidth: {
       label: "Espessura da Borda",
@@ -150,19 +151,19 @@ export const navbarBlock: BlockDefinition = {
       min: 1,
       max: 4,
       step: 1,
-      group: "🎨 Aparência",
+      group: "Aparencia",
     },
     borderColor: {
       label: "Cor da Borda",
       inputType: "color-advanced",
-      group: "🎨 Aparência",
+      group: "Aparencia",
     },
 
-    // === GRUPO: 🖼️ Logo e Marca ===
+    // === GRUPO: Logo e Marca ===
     logo: {
       label: "Logo (Imagem)",
       inputType: "image-upload",
-      group: "🖼️ Logo e Marca",
+      group: "Logo e Marca",
     },
     logoHeight: {
       label: "Tamanho do Logo",
@@ -170,56 +171,47 @@ export const navbarBlock: BlockDefinition = {
       min: 40,
       max: 130,
       step: 5,
-      group: "🖼️ Logo e Marca",
-    },
-    logoPosition: {
-      label: "Posição do Logo",
-      inputType: "select",
-      options: [
-        { label: "Esquerda", value: "left" },
-        { label: "Centro", value: "center" },
-      ],
-      group: "🖼️ Logo e Marca",
+      group: "Logo e Marca",
     },
     logoText: {
       label: "Texto Alternativo",
       inputType: "text",
-      group: "🖼️ Logo e Marca",
+      group: "Logo e Marca",
     },
 
-    // === GRUPO: 🔗 Links ===
+    // === GRUPO: Links ===
     linkColor: {
       label: "Cor",
       inputType: "color-advanced",
-      group: "🔗 Links",
+      group: "Links",
     },
     linkHoverColor: {
       label: "Cor (Hover)",
       inputType: "color-advanced",
-      group: "🔗 Links",
+      group: "Links",
     },
     linkFontSize: {
       label: "Tamanho",
       inputType: "select",
       options: [
         { label: "Pequeno", value: "sm" },
-        { label: "Médio", value: "md" },
+        { label: "Medio", value: "md" },
         { label: "Grande", value: "lg" },
       ],
-      group: "🔗 Links",
+      group: "Links",
     },
     linkHoverEffect: {
       label: "Efeito Hover",
       inputType: "select",
       options: [
         { label: "Fundo", value: "background" },
-        { label: "Sublinhado →", value: "underline" },
-        { label: "Sublinhado ←→", value: "underline-center" },
-        { label: "Fundo ↑", value: "slide-bg" },
+        { label: "Sublinhado", value: "underline" },
+        { label: "Sublinhado Centro", value: "underline-center" },
+        { label: "Fundo Subindo", value: "slide-bg" },
         { label: "Escala", value: "scale" },
         { label: "Brilho Neon", value: "glow" },
       ],
-      group: "🔗 Links",
+      group: "Links",
     },
     linkHoverIntensity: {
       label: "Intensidade",
@@ -227,42 +219,53 @@ export const navbarBlock: BlockDefinition = {
       min: 10,
       max: 100,
       step: 10,
-      group: "🔗 Links",
+      group: "Links",
     },
 
-    // === GRUPO: 🎯 Botão CTA ===
+    // === GRUPO: Botao CTA ===
     buttonVariant: {
       label: "Estilo",
       inputType: "select",
       options: [
-        { label: "Sólido", value: "solid" },
+        { label: "Solido", value: "solid" },
         { label: "Contorno", value: "outline" },
         { label: "Ghost", value: "ghost" },
       ],
-      group: "🎯 Botão CTA",
+      group: "Botao CTA",
     },
     buttonColor: {
       label: "Cor",
       inputType: "color-advanced",
-      group: "🎯 Botão CTA",
+      group: "Botao CTA",
     },
     buttonTextColor: {
       label: "Cor do Texto",
       inputType: "color-advanced",
-      group: "🎯 Botão CTA",
+      group: "Botao CTA",
     },
     buttonBorderRadius: {
-      label: "Cantos do Botão",
+      label: "Cantos do Botao",
       inputType: "slider",
       min: 0,
       max: 32,
       step: 2,
-      group: "🎯 Botão CTA",
+      group: "Botao CTA",
     },
-    buttonHoverEffect: {
-      label: "Efeito Principal",
+    buttonSize: {
+      label: "Tamanho",
       inputType: "select",
       options: [
+        { label: "Pequeno", value: "sm" },
+        { label: "Medio", value: "md" },
+        { label: "Grande", value: "lg" },
+      ],
+      group: "Botao CTA",
+    },
+    buttonHoverEffect: {
+      label: "Efeito Hover",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "none" },
         { label: "Escurecer", value: "darken" },
         { label: "Clarear", value: "lighten" },
         { label: "Escala", value: "scale" },
@@ -270,7 +273,7 @@ export const navbarBlock: BlockDefinition = {
         { label: "Sombra", value: "shadow" },
         { label: "Pulso", value: "pulse" },
       ],
-      group: "🎯 Botão CTA",
+      group: "Botao CTA",
     },
     buttonHoverIntensity: {
       label: "Intensidade",
@@ -278,20 +281,26 @@ export const navbarBlock: BlockDefinition = {
       min: 10,
       max: 100,
       step: 10,
-      group: "🎯 Botão CTA",
+      group: "Botao CTA",
     },
     buttonHoverOverlay: {
       label: "Efeito Extra",
       inputType: "select",
       options: [
         { label: "Nenhum", value: "none" },
-        { label: "✨ Brilho", value: "shine" },
-        { label: "🌊 Ondas", value: "ripple" },
-        { label: "🌈 Gradiente", value: "gradient" },
-        { label: "⭐ Faíscas", value: "sparkle" },
-        { label: "💫 Borda Glow", value: "border-glow" },
+        { label: "Brilho", value: "shine" },
+        { label: "Preenchimento", value: "fill" },
+        { label: "Salto", value: "bounce" },
+        { label: "Icone", value: "icon" },
+        { label: "Borda Glow", value: "border-glow" },
       ],
-      group: "🎯 Botão CTA",
+      group: "Botao CTA",
+    },
+    buttonHoverIconName: {
+      label: "Icone",
+      inputType: "icon-grid",
+      group: "Botao CTA",
+      showWhen: { field: "buttonHoverOverlay", equals: "icon" },
     },
   },
 };

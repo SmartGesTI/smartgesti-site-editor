@@ -89,11 +89,22 @@ export function exportCta(
     primaryButton,
     secondaryButton,
     variant = "centered",
+    // Button size
+    buttonSize = "md",
     // Button hover effects
     buttonHoverEffect = "scale",
     buttonHoverIntensity = 50,
     buttonHoverOverlay = "none",
+    buttonHoverIconName = "arrow-right",
   } = (block as any).props;
+
+  // Size-based styles
+  const sizeStyles: Record<string, { padding: string; fontSize: string }> = {
+    sm: { padding: "0.5rem 1rem", fontSize: "0.875rem" },
+    md: { padding: "0.75rem 1.5rem", fontSize: "1rem" },
+    lg: { padding: "1rem 2rem", fontSize: "1.125rem" },
+  };
+  const btnSize = sizeStyles[buttonSize] || sizeStyles.md;
 
   // Responsive buttons: column (mobile) → row (desktop)
   const ctaId = generateScopedId(block.id || "", "cta-actions");
@@ -179,10 +190,14 @@ export function exportCta(
     buttonsCss += generateButtonOverlayCSS(`${scope} .sg-cta__btn--primary`, {
       overlay: buttonHoverOverlay as ButtonHoverOverlay,
       primaryColor,
+      iconName: buttonHoverIconName,
+      textColor: primaryBtnText,
     });
     buttonsCss += generateButtonOverlayCSS(`${scope} .sg-cta__btn--secondary`, {
       overlay: buttonHoverOverlay as ButtonHoverOverlay,
       primaryColor,
+      iconName: buttonHoverIconName,
+      textColor: secondaryBtnText,
     });
   }
 
@@ -200,8 +215,8 @@ export function exportCta(
     ? resolveHref(secondaryButton.href || "#", basePath)
     : "#";
 
-  const primaryBtnStyle = `padding: 0.75rem 1.5rem; background-color: ${primaryBtnBg}; color: ${primaryBtnText}; border-radius: var(--sg-button-radius); text-decoration: none; font-weight: 500; display: inline-block; transition: all 0.2s ease; position: relative; overflow: hidden;`;
-  const secondaryBtnStyle = `padding: 0.75rem 1.5rem; background-color: ${secondaryBtnBg}; color: ${secondaryBtnText}; border: 2px solid ${secondaryBtnBorder}; border-radius: var(--sg-button-radius); text-decoration: none; font-weight: 500; display: inline-block; transition: all 0.2s ease; position: relative; overflow: hidden;`;
+  const primaryBtnStyle = `padding: ${btnSize.padding}; font-size: ${btnSize.fontSize}; background-color: ${primaryBtnBg}; color: ${primaryBtnText}; border-radius: var(--sg-button-radius); text-decoration: none; font-weight: 500; display: inline-block; transition: all 0.2s ease; position: relative; overflow: hidden;`;
+  const secondaryBtnStyle = `padding: ${btnSize.padding}; font-size: ${btnSize.fontSize}; background-color: ${secondaryBtnBg}; color: ${secondaryBtnText}; border: 2px solid ${secondaryBtnBorder}; border-radius: var(--sg-button-radius); text-decoration: none; font-weight: 500; display: inline-block; transition: all 0.2s ease; position: relative; overflow: hidden;`;
 
   const primaryBtnHtml = primaryButton
     ? `<a href="${escapeHtml(ctaPrimaryHref)}"${linkTargetAttr(ctaPrimaryHref, basePath)} class="sg-cta__btn sg-cta__btn--primary" style="${primaryBtnStyle}">${escapeHtml(primaryButton.text)}</a>`

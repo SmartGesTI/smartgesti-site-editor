@@ -9,6 +9,7 @@ import {
   SliderInput,
   ToggleButton,
   ButtonGroupInput,
+  IconGridInput,
 } from "./inputs";
 import { ImageInput } from "../../components/inputs/ImageInput";
 import type { UploadConfig } from "../LandingPageEditorV2";
@@ -176,6 +177,17 @@ export function renderPropertyInput(
           label={label}
           description={description}
           size={size}
+        />
+      );
+
+    case "icon-grid":
+      return (
+        <IconGridInput
+          key={propName}
+          value={value || "arrow-right"}
+          onChange={onChange}
+          label={label}
+          description={description}
         />
       );
 

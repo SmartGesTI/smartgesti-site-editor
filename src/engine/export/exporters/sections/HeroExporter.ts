@@ -37,14 +37,17 @@ export function exportHero(
     overlay,
     overlayColor,
     background,
+    // Button size
+    buttonSize = "md",
     // Button hover effects
     buttonHoverEffect = "scale",
     buttonHoverIntensity = 50,
     buttonHoverOverlay = "none",
+    buttonHoverIconName = "arrow-right",
   } = (block as any).props;
 
   // Resolver estilos dos botões com base na paleta
-  const buttonStyles = resolveHeroButtonStylesWithHover(theme, block.id, buttonHoverEffect, buttonHoverIntensity, buttonHoverOverlay);
+  const buttonStyles = resolveHeroButtonStylesWithHover(theme, block.id, buttonSize, buttonHoverEffect, buttonHoverIntensity, buttonHoverOverlay, buttonHoverIconName);
 
   const heroImage = image || PLACEHOLDER_IMAGE_URL;
   const isImageBg = variant === "image-bg" && heroImage;
@@ -159,20 +162,30 @@ export function exportHero(
 function resolveHeroButtonStylesWithHover(
   theme: ThemeTokens | undefined,
   blockId: string,
+  buttonSize: string = "md",
   hoverEffect: string,
   hoverIntensity: number,
   hoverOverlay: string = "none",
+  hoverIconName: string = "arrow-right",
 ): { primary: string; secondary: string; css: string } {
   const primaryColor = theme?.colors?.primary || "#3b82f6";
   const primaryText = theme?.colors?.primaryText || "#ffffff";
 
+  // Size-based styles
+  const sizeStyles: Record<string, { padding: string; fontSize: string }> = {
+    sm: { padding: "0.625rem 1.25rem", fontSize: "0.875rem" },
+    md: { padding: "0.875rem 2rem", fontSize: "1rem" },
+    lg: { padding: "1rem 2.5rem", fontSize: "1.125rem" },
+  };
+  const size = sizeStyles[buttonSize] || sizeStyles.md;
+
   const primaryStyles = [
     `background-color: ${primaryColor}`,
     `color: ${primaryText}`,
-    "padding: 0.875rem 2rem",
+    `padding: ${size.padding}`,
     "border-radius: 0.5rem",
     "font-weight: 600",
-    "font-size: 1rem",
+    `font-size: ${size.fontSize}`,
     "text-decoration: none",
     "display: inline-block",
     "transition: all 0.2s ease",
@@ -184,10 +197,10 @@ function resolveHeroButtonStylesWithHover(
   const secondaryStyles = [
     "background-color: transparent",
     `color: ${primaryColor}`,
-    "padding: 0.875rem 2rem",
+    `padding: ${size.padding}`,
     "border-radius: 0.5rem",
     "font-weight: 600",
-    "font-size: 1rem",
+    `font-size: ${size.fontSize}`,
     "text-decoration: none",
     "display: inline-block",
     "transition: all 0.2s ease",
@@ -255,10 +268,14 @@ function resolveHeroButtonStylesWithHover(
     css += generateButtonOverlayCSS(`${scope} .sg-hero__btn--primary`, {
       overlay: hoverOverlay as ButtonHoverOverlay,
       primaryColor,
+      iconName: hoverIconName,
+      textColor: primaryText,
     });
     css += generateButtonOverlayCSS(`${scope} .sg-hero__btn--secondary`, {
       overlay: hoverOverlay as ButtonHoverOverlay,
       primaryColor,
+      iconName: hoverIconName,
+      textColor: primaryColor,
     });
   }
 

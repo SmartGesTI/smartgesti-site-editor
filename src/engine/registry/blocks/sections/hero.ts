@@ -16,10 +16,13 @@ export const heroBlock: BlockDefinition = {
     primaryButton: { text: "Começar Agora" },
     secondaryButton: { text: "Saber Mais" },
     align: "center",
+    // Button defaults
+    buttonSize: "md",
     // Button hover defaults
     buttonHoverEffect: "scale",
     buttonHoverIntensity: 50,
     buttonHoverOverlay: "none",
+    buttonHoverIconName: "arrow-right",
   },
   variations: heroVariationIds.reduce(
     (acc, id) => {
@@ -87,9 +90,20 @@ export const heroBlock: BlockDefinition = {
       ],
       group: "Estilo",
     },
+    // Button size
+    buttonSize: {
+      label: "Tamanho",
+      inputType: "select",
+      options: [
+        { label: "Pequeno", value: "sm" },
+        { label: "Medio", value: "md" },
+        { label: "Grande", value: "lg" },
+      ],
+      group: "Botoes",
+    },
     // Button hover effects (principal)
     buttonHoverEffect: {
-      label: "Efeito Principal",
+      label: "Efeito Hover",
       inputType: "select",
       options: [
         { label: "Nenhum", value: "none" },
@@ -100,7 +114,7 @@ export const heroBlock: BlockDefinition = {
         { label: "Sombra", value: "shadow" },
         { label: "Pulso", value: "pulse" },
       ],
-      group: "🎯 Botões",
+      group: "Botoes",
     },
     buttonHoverIntensity: {
       label: "Intensidade",
@@ -108,7 +122,7 @@ export const heroBlock: BlockDefinition = {
       min: 10,
       max: 100,
       step: 10,
-      group: "🎯 Botões",
+      group: "Botoes",
     },
     // Button hover overlay (adicional)
     buttonHoverOverlay: {
@@ -116,13 +130,19 @@ export const heroBlock: BlockDefinition = {
       inputType: "select",
       options: [
         { label: "Nenhum", value: "none" },
-        { label: "✨ Brilho", value: "shine" },
-        { label: "🌊 Ondas", value: "ripple" },
-        { label: "🌈 Gradiente", value: "gradient" },
-        { label: "⭐ Faíscas", value: "sparkle" },
-        { label: "💫 Borda Glow", value: "border-glow" },
+        { label: "Brilho", value: "shine" },
+        { label: "Preenchimento", value: "fill" },
+        { label: "Salto", value: "bounce" },
+        { label: "Icone", value: "icon" },
+        { label: "Borda Glow", value: "border-glow" },
       ],
-      group: "🎯 Botões",
+      group: "Botoes",
+    },
+    buttonHoverIconName: {
+      label: "Icone",
+      inputType: "icon-grid",
+      group: "Botoes",
+      showWhen: { field: "buttonHoverOverlay", equals: "icon" },
     },
   },
 };

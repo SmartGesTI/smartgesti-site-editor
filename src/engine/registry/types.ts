@@ -21,13 +21,16 @@ export interface InspectorMeta {
     | "textarea"
     | "image"
     | "image-upload"    // Image upload with file picker
-    | "checkbox";
+    | "checkbox"
+    | "icon-grid";      // Grid of icons for selection
   options?: Array<{ label: string; value: any }>;
   min?: number;
   max?: number;
   step?: number;
   /** Tamanho do input (para checkbox/toggle) */
   size?: "sm" | "md";
+  /** Condição para exibir o campo (visibilidade condicional) */
+  showWhen?: { field: string; equals: string | boolean | number };
 }
 
 /**

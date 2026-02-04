@@ -29,6 +29,7 @@ export function exportButton(
     hoverIntensity = 50,
     // Hover overlay (adicional)
     hoverOverlay = "none",
+    hoverIconName = "arrow-right",
   } = (block as any).props;
 
   const padding =
@@ -84,6 +85,7 @@ export function exportButton(
   const style = baseStyles.join("; ");
 
   // Generate hover CSS
+  // Nota: O seletor usa apenas [data-block-id] pois o próprio botão tem esse atributo
   const scope = `[data-block-id="${block.id}"]`;
   let hoverCss = "";
 
@@ -100,7 +102,7 @@ export function exportButton(
     // Base styles if needed
     if (hoverResult.base) {
       hoverCss += `
-        ${scope} .sg-btn {
+        ${scope} {
           ${hoverResult.base}
         }
       `;
@@ -108,7 +110,7 @@ export function exportButton(
 
     // Hover styles
     hoverCss += `
-      ${scope} .sg-btn:hover {
+      ${scope}:hover {
         ${hoverResult.hover}
       }
     `;
@@ -119,9 +121,11 @@ export function exportButton(
 
   // Efeito overlay (adicional)
   if (hoverOverlay && hoverOverlay !== "none") {
-    hoverCss += generateButtonOverlayCSS(`${scope} .sg-btn`, {
+    hoverCss += generateButtonOverlayCSS(scope, {
       overlay: hoverOverlay as ButtonHoverOverlay,
       primaryColor,
+      iconName: hoverIconName,
+      textColor: colors.text,
     });
   }
 

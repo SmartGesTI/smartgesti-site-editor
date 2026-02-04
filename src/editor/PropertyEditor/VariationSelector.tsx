@@ -97,7 +97,6 @@ export function VariationSelector({ block, onUpdate }: VariationSelectorProps) {
                     logo,
                     logoText,
                     logoHeight,
-                    logoPosition,
                     links,
                     ctaButton,
                     // Cores (vêm da paleta, não da variação)
@@ -122,7 +121,6 @@ export function VariationSelector({ block, onUpdate }: VariationSelectorProps) {
                     ...(logo ? { logo } : {}),
                     ...(logoText ? { logoText } : {}),
                     ...(logoHeight ? { logoHeight } : {}),
-                    ...(logoPosition ? { logoPosition } : {}),
                     ...(links ? { links } : {}),
                     ...(ctaButton ? { ctaButton } : {}),
                     // Preserva cores da paleta

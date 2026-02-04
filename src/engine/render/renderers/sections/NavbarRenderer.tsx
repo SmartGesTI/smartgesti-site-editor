@@ -22,7 +22,6 @@ export function renderNavbar(block: any): React.ReactNode {
     layout,
     floating = false,
     logoHeight = 70,
-    logoPosition = "left",
     borderPosition = "none",
     borderWidth = 1,
     borderColor = "#e5e7eb",
@@ -65,20 +64,14 @@ export function renderNavbar(block: any): React.ReactNode {
 
   // Determine layout (use custom layout or fallback)
   const effectiveLayout = layout || "expanded";
-  const isExpanded = effectiveLayout === "expanded";
   const isCentered = effectiveLayout === "centered";
-  const isCompact = effectiveLayout === "compact";
-
-  const layoutClass = floating
-    ? "sg-navbar--floating"
-    : isCompact
-      ? "sg-navbar--compact"
-      : "";
+  const isCompact = layout === "compact";
 
   const navClassName = [
     "sg-navbar",
     variationClass,
-    layoutClass,
+    floating ? "sg-navbar--floating" : "",
+    isCompact ? "sg-navbar--compact" : "",
     sticky ? "sg-navbar--sticky" : "",
   ]
     .filter(Boolean)
@@ -149,59 +142,36 @@ export function renderNavbar(block: any): React.ReactNode {
   };
   const borderStyle = getBorderStyle();
 
-  // Logo centralizado usa layout de 3 colunas
-  const isLogoCentered = logoPosition === "center";
-
   // Container style baseado no layout
-  const containerStyle: React.CSSProperties = isCentered || isLogoCentered
+  // Nota: isCompact apenas reduz tamanhos, não altera o layout base
+  const containerStyle: React.CSSProperties = isCentered
     ? {
-        maxWidth: isCompact ? "900px" : "1200px",
+        maxWidth: "1200px",
         margin: "0 auto",
         padding: isCompact ? "0 1rem" : "0 1.5rem",
         display: "grid",
         gridTemplateColumns: "1fr auto 1fr",
         alignItems: "center",
-        gap: isCompact ? "0.75rem" : "1.5rem",
+        gap: isCompact ? "1rem" : "1.5rem",
       }
-    : isExpanded
-      ? {
-          // Expandido: logo no canto esquerdo, links no direito
-          width: "100%",
-          maxWidth: "100%",
-          padding: floating ? "0 2rem" : "0 1.5rem",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "2rem",
-        }
-      : {
-          // Compacto: container centralizado menor
-          maxWidth: "900px",
-          margin: "0 auto",
-          padding: "0 1rem",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "1rem",
-        };
+    : {
+        // Expandido (padrão): logo no canto esquerdo, links no direito
+        width: "100%",
+        maxWidth: "100%",
+        padding: floating ? "0 2rem" : (isCompact ? "0 1rem" : "0 1.5rem"),
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: isCompact ? "1.5rem" : "2rem",
+      };
 
   const menuStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
     gap: isCompact ? "1rem" : "1.5rem",
     flexWrap: "wrap",
-    ...((isCentered || isLogoCentered) ? { justifySelf: "center" as const } : {}),
+    ...(isCentered ? { justifySelf: "center" as const } : {}),
   };
-
-  // Estilo para links à esquerda quando logo está centralizado
-  const linksLeftStyle: React.CSSProperties = isLogoCentered
-    ? { display: "flex", alignItems: "center", gap: isCompact ? "1rem" : "1.5rem", justifySelf: "start" }
-    : {};
-
-  // Estilo para CTA à direita quando logo está centralizado
-  const ctaRightStyle: React.CSSProperties = isLogoCentered
-    ? { display: "flex", alignItems: "center", justifySelf: "end" }
-    : {};
 
   const buttonVariantClass =
     navbarBlock.props.buttonVariant === "outline"
@@ -220,107 +190,52 @@ export function renderNavbar(block: any): React.ReactNode {
     >
       {hoverCss}
       <div className="sg-navbar__container" style={containerStyle}>
-        {/* Layout com logo centralizado: links | logo | cta */}
-        {isLogoCentered ? (
-          <>
-            <div className="sg-navbar__menu" style={linksLeftStyle}>
-              {links.map((link: any, index: number) => {
-                if (link.dropdown && Array.isArray(link.dropdown)) {
-                  return (
-                    <div key={index} className="sg-navbar__dropdown-wrapper">
-                      <button
-                        className="sg-navbar__link sg-navbar__link--has-dropdown"
-                        style={linkStyle}
-                      >
-                        {link.text}
-                      </button>
-                      <div className="sg-navbar-dropdown" style={dropdownStyle}>
-                        {link.dropdown.map((item: any, itemIndex: number) => (
-                          <a
-                            key={itemIndex}
-                            href={item.href}
-                            className="sg-navbar-dropdown__item"
-                            style={dropdownItemStyle}
-                          >
-                            {item.text}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                }
-                return (
-                  <a key={index} href={link.href} className="sg-navbar__link" style={linkStyle}>
+        {/* Layout padrão: logo | links + cta */}
+        <div className="sg-navbar__brand" style={{ flexShrink: 0 }}>
+          {brandEl}
+        </div>
+        <div className="sg-navbar__menu" style={menuStyle}>
+          {links.map((link: any, index: number) => {
+            if (link.dropdown && Array.isArray(link.dropdown)) {
+              return (
+                <div key={index} className="sg-navbar__dropdown-wrapper">
+                  <button
+                    className="sg-navbar__link sg-navbar__link--has-dropdown"
+                    style={linkStyle}
+                  >
                     {link.text}
-                  </a>
-                );
-              })}
-            </div>
-            <div className="sg-navbar__brand" style={{ flexShrink: 0, justifySelf: "center" }}>
-              {brandEl}
-            </div>
-            <div className="sg-navbar__actions" style={ctaRightStyle}>
-              {ctaButton && (
-                <a
-                  href={ctaButton.href || "#"}
-                  className={`sg-navbar__btn ${buttonVariantClass}`}
-                  style={buttonStyle}
-                >
-                  {ctaButton.text}
-                </a>
-              )}
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Layout padrão: logo | links + cta */}
-            <div className="sg-navbar__brand" style={{ flexShrink: 0 }}>
-              {brandEl}
-            </div>
-            <div className="sg-navbar__menu" style={menuStyle}>
-              {links.map((link: any, index: number) => {
-                if (link.dropdown && Array.isArray(link.dropdown)) {
-                  return (
-                    <div key={index} className="sg-navbar__dropdown-wrapper">
-                      <button
-                        className="sg-navbar__link sg-navbar__link--has-dropdown"
-                        style={linkStyle}
+                  </button>
+                  <div className="sg-navbar-dropdown" style={dropdownStyle}>
+                    {link.dropdown.map((item: any, itemIndex: number) => (
+                      <a
+                        key={itemIndex}
+                        href={item.href}
+                        className="sg-navbar-dropdown__item"
+                        style={dropdownItemStyle}
                       >
-                        {link.text}
-                      </button>
-                      <div className="sg-navbar-dropdown" style={dropdownStyle}>
-                        {link.dropdown.map((item: any, itemIndex: number) => (
-                          <a
-                            key={itemIndex}
-                            href={item.href}
-                            className="sg-navbar-dropdown__item"
-                            style={dropdownItemStyle}
-                          >
-                            {item.text}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                }
-                return (
-                  <a key={index} href={link.href} className="sg-navbar__link" style={linkStyle}>
-                    {link.text}
-                  </a>
-                );
-              })}
-              {ctaButton && (
-                <a
-                  href={ctaButton.href || "#"}
-                  className={`sg-navbar__btn ${buttonVariantClass}`}
-                  style={buttonStyle}
-                >
-                  {ctaButton.text}
-                </a>
-              )}
-            </div>
-          </>
-        )}
+                        {item.text}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+            return (
+              <a key={index} href={link.href} className="sg-navbar__link" style={linkStyle}>
+                {link.text}
+              </a>
+            );
+          })}
+          {ctaButton && (
+            <a
+              href={ctaButton.href || "#"}
+              className={`sg-navbar__btn ${buttonVariantClass}`}
+              style={buttonStyle}
+            >
+              {ctaButton.text}
+            </a>
+          )}
+        </div>
       </div>
     </nav>
   );
