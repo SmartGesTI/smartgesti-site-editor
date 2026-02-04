@@ -174,6 +174,11 @@ export interface ButtonBlock extends BlockBase {
     href?: string;
     variant?: "primary" | "secondary" | "outline" | "ghost";
     size?: "sm" | "md" | "lg";
+    // Hover effects
+    /** Efeito de hover no botão */
+    hoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse" | "shine";
+    /** Intensidade do efeito (10-100) */
+    hoverIntensity?: number;
   };
 }
 
@@ -186,6 +191,13 @@ export interface LinkBlock extends BlockBase {
     text: string;
     href: string;
     target?: "_blank" | "_self";
+    // Hover effects
+    /** Efeito de hover no link */
+    hoverEffect?: "none" | "background" | "underline" | "underline-center" | "scale" | "glow";
+    /** Intensidade do efeito (10-100) */
+    hoverIntensity?: number;
+    /** Cor do hover */
+    hoverColor?: string;
   };
 }
 
@@ -359,6 +371,11 @@ export interface HeroBlock extends BlockBase {
     overlayColor?: string;
     /** Cor ou gradiente no layout split (lado do conteúdo). */
     background?: string;
+    // Button Hover Effects
+    /** Efeito de hover nos botões */
+    buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse" | "shine";
+    /** Intensidade do efeito (10-100) */
+    buttonHoverIntensity?: number;
   };
 }
 
@@ -509,6 +526,11 @@ export interface CtaBlock extends BlockBase {
     secondaryButton?: { text: string; href?: string };
     variant?: "default" | "centered" | "split" | "gradient";
     bg?: string;
+    // Button Hover Effects
+    /** Efeito de hover nos botões */
+    buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse" | "shine";
+    /** Intensidade do efeito (10-100) */
+    buttonHoverIntensity?: number;
   };
 }
 

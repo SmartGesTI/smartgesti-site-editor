@@ -12,6 +12,9 @@ export const ctaBlock: BlockDefinition = {
     description: "Junte-se a milhares de usuários satisfeitos.",
     primaryButton: { text: "Começar Agora" },
     variant: "centered",
+    // Button hover defaults
+    buttonHoverEffect: "scale",
+    buttonHoverIntensity: 50,
   },
   inspectorMeta: {
     title: {
@@ -39,6 +42,30 @@ export const ctaBlock: BlockDefinition = {
       label: "Cor de Fundo",
       inputType: "color",
       group: "Estilo",
+    },
+    // Button hover effects
+    buttonHoverEffect: {
+      label: "Efeito Hover Botões",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "none" },
+        { label: "Escurecer", value: "darken" },
+        { label: "Clarear", value: "lighten" },
+        { label: "Escala", value: "scale" },
+        { label: "Brilho Neon", value: "glow" },
+        { label: "Sombra", value: "shadow" },
+        { label: "Pulso", value: "pulse" },
+        { label: "Brilho ✨", value: "shine" },
+      ],
+      group: "🎯 Botões",
+    },
+    buttonHoverIntensity: {
+      label: "Intensidade Hover",
+      inputType: "slider",
+      min: 10,
+      max: 100,
+      step: 10,
+      group: "🎯 Botões",
     },
   },
 };

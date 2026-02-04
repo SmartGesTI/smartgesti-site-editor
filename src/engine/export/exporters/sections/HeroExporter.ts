@@ -6,9 +6,14 @@
 import { Block } from "../../../schema/siteDocument";
 import { ThemeTokens } from "../../../schema/themeTokens";
 import { PLACEHOLDER_IMAGE_URL } from "../../../presets/heroVariations";
-import { resolveHeroButtonStyles } from "../../styleResolver";
 import { dataBlockIdAttr, blockIdAttr, escapeHtml, resolveHref, linkTargetAttr } from "../../shared/htmlHelpers";
 import { generateScopedId } from "../../shared/idGenerator";
+import {
+  generateButtonHoverStyles,
+  getButtonHoverKeyframes,
+  getShineEffectCSS,
+  type ButtonHoverEffect,
+} from "../../../shared/hoverEffects";
 
 export function exportHero(
   block: Block,
@@ -31,10 +36,13 @@ export function exportHero(
     overlay,
     overlayColor,
     background,
+    // Button hover effects
+    buttonHoverEffect = "scale",
+    buttonHoverIntensity = 50,
   } = (block as any).props;
 
   // Resolver estilos dos botões com base na paleta
-  const buttonStyles = resolveHeroButtonStyles(theme, block.id);
+  const buttonStyles = resolveHeroButtonStylesWithHover(theme, block.id, buttonHoverEffect, buttonHoverIntensity);
 
   const heroImage = image || PLACEHOLDER_IMAGE_URL;
   const isImageBg = variant === "image-bg" && heroImage;
@@ -141,4 +149,110 @@ export function exportHero(
 
   const wrapHtml = `<div style="max-width: 900px; padding: 0 2rem; text-align: ${align}; position: relative; z-index: 1;">${contentBlock}</div>`;
   return `<section ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; padding: 8rem 2rem; display: flex; align-items: center; justify-content: center; ${bgStyle} position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${wrapHtml}</section>`;
+}
+
+/**
+ * Resolve hero button styles with configurable hover effects
+ */
+function resolveHeroButtonStylesWithHover(
+  theme: ThemeTokens | undefined,
+  blockId: string,
+  hoverEffect: string,
+  hoverIntensity: number,
+): { primary: string; secondary: string; css: string } {
+  const primaryColor = theme?.colors?.primary || "#3b82f6";
+  const primaryText = theme?.colors?.primaryText || "#ffffff";
+
+  const primaryStyles = [
+    `background-color: ${primaryColor}`,
+    `color: ${primaryText}`,
+    "padding: 0.875rem 2rem",
+    "border-radius: 0.5rem",
+    "font-weight: 600",
+    "font-size: 1rem",
+    "text-decoration: none",
+    "display: inline-block",
+    "transition: all 0.2s ease",
+    "border: none",
+    "position: relative",
+    "overflow: hidden",
+  ].join("; ");
+
+  const secondaryStyles = [
+    "background-color: transparent",
+    `color: ${primaryColor}`,
+    "padding: 0.875rem 2rem",
+    "border-radius: 0.5rem",
+    "font-weight: 600",
+    "font-size: 1rem",
+    "text-decoration: none",
+    "display: inline-block",
+    "transition: all 0.2s ease",
+    `border: 2px solid ${primaryColor}`,
+    "position: relative",
+    "overflow: hidden",
+  ].join("; ");
+
+  const scope = blockId ? `[data-block-id="${blockId}"]` : "";
+  let css = "";
+
+  if (hoverEffect !== "none") {
+    // Primary button hover
+    const primaryHoverResult = generateButtonHoverStyles({
+      effect: hoverEffect as ButtonHoverEffect,
+      intensity: hoverIntensity,
+      buttonColor: primaryColor,
+      buttonTextColor: primaryText,
+      variant: "solid",
+    });
+
+    // Secondary button hover
+    const secondaryHoverResult = generateButtonHoverStyles({
+      effect: hoverEffect as ButtonHoverEffect,
+      intensity: hoverIntensity,
+      buttonColor: primaryColor,
+      buttonTextColor: primaryColor,
+      variant: "outline",
+    });
+
+    // Base styles if needed
+    if (primaryHoverResult.base) {
+      css += `
+        ${scope} .sg-hero__btn--primary {
+          ${primaryHoverResult.base}
+        }
+      `;
+    }
+
+    if (secondaryHoverResult.base) {
+      css += `
+        ${scope} .sg-hero__btn--secondary {
+          ${secondaryHoverResult.base}
+        }
+      `;
+    }
+
+    // Hover styles
+    css += `
+      ${scope} .sg-hero__btn--primary:hover {
+        ${primaryHoverResult.hover}
+      }
+      ${scope} .sg-hero__btn--secondary:hover {
+        ${secondaryHoverResult.hover}
+      }
+    `;
+
+    // Add keyframes for pulse animation
+    css += getButtonHoverKeyframes();
+
+    // Add shine effect CSS for both buttons
+    css += getShineEffectCSS(`${scope} .sg-hero__btn--primary`);
+    css += getShineEffectCSS(`${scope} .sg-hero__btn--secondary`);
+  }
+
+  return {
+    primary: primaryStyles,
+    secondary: secondaryStyles,
+    css,
+  };
 }

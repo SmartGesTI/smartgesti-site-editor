@@ -11,6 +11,9 @@ export const buttonBlock: BlockDefinition = {
     text: "Clique aqui",
     variant: "primary",
     size: "md",
+    // Hover effects defaults
+    hoverEffect: "darken",
+    hoverIntensity: 50,
   },
   constraints: {
     required: ["text"],
@@ -46,6 +49,30 @@ export const buttonBlock: BlockDefinition = {
         { label: "Grande", value: "lg" },
       ],
       group: "Estilo",
+    },
+    // Hover effects
+    hoverEffect: {
+      label: "Efeito Hover",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "none" },
+        { label: "Escurecer", value: "darken" },
+        { label: "Clarear", value: "lighten" },
+        { label: "Escala", value: "scale" },
+        { label: "Brilho Neon", value: "glow" },
+        { label: "Sombra", value: "shadow" },
+        { label: "Pulso", value: "pulse" },
+        { label: "Brilho ✨", value: "shine" },
+      ],
+      group: "🎯 Hover",
+    },
+    hoverIntensity: {
+      label: "Intensidade",
+      inputType: "slider",
+      min: 10,
+      max: 100,
+      step: 10,
+      group: "🎯 Hover",
     },
   },
 };

@@ -9,6 +9,12 @@ import { ThemeTokens } from "../../../schema/themeTokens";
 import { dataBlockIdAttr, blockIdAttr, escapeHtml, resolveHref, linkTargetAttr } from "../../shared/htmlHelpers";
 import { generateScopedId } from "../../shared/idGenerator";
 import { resolveResponsiveColumns, generateResponsiveGridStyles } from "../../shared/responsiveGridHelper";
+import {
+  generateButtonHoverStyles,
+  getButtonHoverKeyframes,
+  getShineEffectCSS,
+  type ButtonHoverEffect,
+} from "../../../shared/hoverEffects";
 
 export function exportFeature(
   block: Block,
@@ -82,11 +88,27 @@ export function exportCta(
     primaryButton,
     secondaryButton,
     variant = "centered",
+    // Button hover effects
+    buttonHoverEffect = "scale",
+    buttonHoverIntensity = 50,
   } = (block as any).props;
 
   // Responsive buttons: column (mobile) → row (desktop)
   const ctaId = generateScopedId(block.id || "", "cta-actions");
-  const buttonsCss = `
+  const scope = `[data-block-id="${block.id}"]`;
+
+  const isGradient = variant === "gradient";
+  const primaryColor = theme?.colors?.primary || "#3b82f6";
+  const primaryText = theme?.colors?.primaryText || "#ffffff";
+
+  // Button colors depend on gradient variant
+  const primaryBtnBg = isGradient ? "#fff" : primaryColor;
+  const primaryBtnText = isGradient ? primaryColor : primaryText;
+  const secondaryBtnBg = "transparent";
+  const secondaryBtnText = isGradient ? "#fff" : primaryColor;
+  const secondaryBtnBorder = isGradient ? "#fff" : primaryColor;
+
+  let buttonsCss = `
     @media (max-width: 640px) {
       #${ctaId} {
         flex-direction: column !important;
@@ -99,7 +121,61 @@ export function exportCta(
     }
   `;
 
-  const isGradient = variant === "gradient";
+  // Generate hover CSS
+  if (buttonHoverEffect !== "none") {
+    // Primary button hover
+    const primaryHoverResult = generateButtonHoverStyles({
+      effect: buttonHoverEffect as ButtonHoverEffect,
+      intensity: buttonHoverIntensity,
+      buttonColor: primaryBtnBg,
+      buttonTextColor: primaryBtnText,
+      variant: "solid",
+    });
+
+    // Secondary button hover
+    const secondaryHoverResult = generateButtonHoverStyles({
+      effect: buttonHoverEffect as ButtonHoverEffect,
+      intensity: buttonHoverIntensity,
+      buttonColor: secondaryBtnBorder,
+      buttonTextColor: secondaryBtnText,
+      variant: "outline",
+    });
+
+    // Base styles if needed
+    if (primaryHoverResult.base) {
+      buttonsCss += `
+        ${scope} .sg-cta__btn--primary {
+          ${primaryHoverResult.base}
+        }
+      `;
+    }
+
+    if (secondaryHoverResult.base) {
+      buttonsCss += `
+        ${scope} .sg-cta__btn--secondary {
+          ${secondaryHoverResult.base}
+        }
+      `;
+    }
+
+    // Hover styles
+    buttonsCss += `
+      ${scope} .sg-cta__btn--primary:hover {
+        ${primaryHoverResult.hover}
+      }
+      ${scope} .sg-cta__btn--secondary:hover {
+        ${secondaryHoverResult.hover}
+      }
+    `;
+
+    // Add keyframes for pulse animation
+    buttonsCss += getButtonHoverKeyframes();
+
+    // Add shine effect CSS
+    buttonsCss += getShineEffectCSS(`${scope} .sg-cta__btn--primary`);
+    buttonsCss += getShineEffectCSS(`${scope} .sg-cta__btn--secondary`);
+  }
+
   const bgStyle = isGradient
     ? "background: linear-gradient(135deg, var(--sg-primary), var(--sg-accent));"
     : "background-color: var(--sg-surface);";
@@ -113,11 +189,15 @@ export function exportCta(
   const ctaSecondaryHref = secondaryButton
     ? resolveHref(secondaryButton.href || "#", basePath)
     : "#";
+
+  const primaryBtnStyle = `padding: 0.75rem 1.5rem; background-color: ${primaryBtnBg}; color: ${primaryBtnText}; border-radius: var(--sg-button-radius); text-decoration: none; font-weight: 500; display: inline-block; transition: all 0.2s ease; position: relative; overflow: hidden;`;
+  const secondaryBtnStyle = `padding: 0.75rem 1.5rem; background-color: ${secondaryBtnBg}; color: ${secondaryBtnText}; border: 2px solid ${secondaryBtnBorder}; border-radius: var(--sg-button-radius); text-decoration: none; font-weight: 500; display: inline-block; transition: all 0.2s ease; position: relative; overflow: hidden;`;
+
   const primaryBtnHtml = primaryButton
-    ? `<a href="${escapeHtml(ctaPrimaryHref)}"${linkTargetAttr(ctaPrimaryHref, basePath)} style="padding: 0.75rem 1.5rem; background-color: ${isGradient ? "#fff" : "var(--sg-primary)"}; color: ${isGradient ? "var(--sg-primary)" : "var(--sg-primary-text)"}; border-radius: var(--sg-button-radius); text-decoration: none; font-weight: 500;">${escapeHtml(primaryButton.text)}</a>`
+    ? `<a href="${escapeHtml(ctaPrimaryHref)}"${linkTargetAttr(ctaPrimaryHref, basePath)} class="sg-cta__btn sg-cta__btn--primary" style="${primaryBtnStyle}">${escapeHtml(primaryButton.text)}</a>`
     : "";
   const secondaryBtnHtml = secondaryButton
-    ? `<a href="${escapeHtml(ctaSecondaryHref)}"${linkTargetAttr(ctaSecondaryHref, basePath)} style="padding: 0.75rem 1.5rem; background-color: transparent; color: ${isGradient ? "#fff" : "var(--sg-primary)"}; border: 1px solid ${isGradient ? "#fff" : "var(--sg-primary)"}; border-radius: var(--sg-button-radius); text-decoration: none; font-weight: 500;">${escapeHtml(secondaryButton.text)}</a>`
+    ? `<a href="${escapeHtml(ctaSecondaryHref)}"${linkTargetAttr(ctaSecondaryHref, basePath)} class="sg-cta__btn sg-cta__btn--secondary" style="${secondaryBtnStyle}">${escapeHtml(secondaryButton.text)}</a>`
     : "";
   return `<style>${buttonsCss}</style><section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; ${bgStyle} text-align: center;"><div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;"><h2 style="font-size: var(--sg-heading-h2); margin-bottom: 1rem; color: ${textColor};">${escapeHtml(title)}</h2>${ctaDesc ? `<p style="font-size: 1.125rem; margin-bottom: 2rem; color: ${mutedColor};">${escapeHtml(ctaDesc)}</p>` : ""}<div id="${ctaId}" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">${primaryBtnHtml}${secondaryBtnHtml}</div></div></section>`;
 }

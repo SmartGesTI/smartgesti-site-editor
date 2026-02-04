@@ -16,6 +16,9 @@ export const heroBlock: BlockDefinition = {
     primaryButton: { text: "Começar Agora" },
     secondaryButton: { text: "Saber Mais" },
     align: "center",
+    // Button hover defaults
+    buttonHoverEffect: "scale",
+    buttonHoverIntensity: 50,
   },
   variations: heroVariationIds.reduce(
     (acc, id) => {
@@ -82,6 +85,30 @@ export const heroBlock: BlockDefinition = {
         { label: "Direita", value: "right" },
       ],
       group: "Estilo",
+    },
+    // Button hover effects
+    buttonHoverEffect: {
+      label: "Efeito Hover Botões",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "none" },
+        { label: "Escurecer", value: "darken" },
+        { label: "Clarear", value: "lighten" },
+        { label: "Escala", value: "scale" },
+        { label: "Brilho Neon", value: "glow" },
+        { label: "Sombra", value: "shadow" },
+        { label: "Pulso", value: "pulse" },
+        { label: "Brilho ✨", value: "shine" },
+      ],
+      group: "🎯 Botões",
+    },
+    buttonHoverIntensity: {
+      label: "Intensidade Hover",
+      inputType: "slider",
+      min: 10,
+      max: 100,
+      step: 10,
+      group: "🎯 Botões",
     },
   },
 };
