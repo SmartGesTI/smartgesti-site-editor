@@ -35,7 +35,7 @@ const HERO_VISUAL_PROPS_TO_RESET: Record<string, any> = {
   contentSpacing: "default",
   blockGap: "default",
   minHeight: "70vh",
-  contentMaxWidth: "800px",
+  contentMaxWidth: "700px",
   paddingY: undefined,
   // Background & Overlay
   background: undefined,

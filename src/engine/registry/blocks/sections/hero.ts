@@ -18,7 +18,7 @@ export const HERO_DEFAULT_PROPS = {
   blockGap: "default",
   minHeight: "70vh",
   // Layout
-  contentMaxWidth: "800px",
+  contentMaxWidth: "700px",
   paddingY: "100px",
   // Image
   imageRadius: 16,
@@ -197,10 +197,9 @@ export const heroBlock: BlockDefinition = {
       label: "Largura do Conteúdo",
       inputType: "select",
       options: [
-        { label: "Estreita", value: "500px" },
-        { label: "Média", value: "700px" },
+        { label: "Padrão", value: "700px" },
         { label: "Larga", value: "900px" },
-        { label: "Total", value: "1200px" },
+        { label: "Máxima", value: "1200px" },
       ],
       group: "Layout",
       showWhen: { field: "variant", notEquals: "split" },
