@@ -31,6 +31,7 @@ const HERO_VISUAL_PROPS_TO_RESET: Record<string, any> = {
   variant: "centered",
   // Layout
   align: "center",
+  contentPosition: "center",
   minHeight: "80vh",
   contentMaxWidth: "800px",
   paddingY: undefined,

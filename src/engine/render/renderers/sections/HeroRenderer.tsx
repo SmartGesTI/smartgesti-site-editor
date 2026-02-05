@@ -28,6 +28,7 @@ export function renderHero(block: any): React.ReactNode {
     image,
     badge,
     align = "center",
+    contentPosition = "center",
     minHeight = "80vh",
     overlay,
     overlayColor,
@@ -96,13 +97,20 @@ export function renderHero(block: any): React.ReactNode {
     .filter(Boolean)
     .join(" ");
 
+  // Map content position to flexbox justify-content
+  const contentPositionMap: Record<string, string> = {
+    left: "flex-start",
+    center: "center",
+    right: "flex-end",
+  };
+
   // Container styles
   const containerStyle: React.CSSProperties = {
     minHeight,
     padding: paddingY ? `${paddingY} 2rem` : "6rem 2rem",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: contentPositionMap[contentPosition] || "center",
     position: "relative",
     overflow: "hidden",
     // Background

@@ -13,6 +13,7 @@ export const HERO_DEFAULT_PROPS = {
   primaryButton: { text: "Começar Agora" },
   secondaryButton: { text: "Saber Mais" },
   align: "center",
+  contentPosition: "center",
   minHeight: "80vh",
   // Layout
   contentMaxWidth: "800px",
@@ -136,7 +137,7 @@ export const heroBlock: BlockDefinition = {
     // GRUPO: Layout
     // =========================================================================
     align: {
-      label: "Alinhamento",
+      label: "Alinhamento do Texto",
       inputType: "select",
       options: [
         { label: "Esquerda", value: "left" },
@@ -144,6 +145,18 @@ export const heroBlock: BlockDefinition = {
         { label: "Direita", value: "right" },
       ],
       group: "Layout",
+      description: "Alinhamento do texto e elementos internos",
+    },
+    contentPosition: {
+      label: "Posição do Conteúdo",
+      inputType: "select",
+      options: [
+        { label: "Esquerda", value: "left" },
+        { label: "Centro", value: "center" },
+        { label: "Direita", value: "right" },
+      ],
+      group: "Layout",
+      description: "Posição do bloco de conteúdo no layout",
     },
     minHeight: {
       label: "Altura Mínima",

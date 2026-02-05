@@ -380,6 +380,8 @@ export interface HeroBlock extends BlockBase {
     video?: string;
     badge?: string;
     align?: "left" | "center" | "right";
+    /** Posição horizontal do container de conteúdo no layout */
+    contentPosition?: "left" | "center" | "right";
     minHeight?: string;
     overlay?: boolean;
     /** Cor/gradiente do overlay (ex.: linear-gradient). Se omitido, usa fallback do CSS. */

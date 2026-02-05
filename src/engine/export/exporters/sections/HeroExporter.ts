@@ -43,6 +43,7 @@ export function exportHero(
     secondaryButton,
     badge,
     align = "center",
+    contentPosition = "center",
     minHeight = "80vh",
     image,
     overlay,
@@ -151,6 +152,14 @@ export function exportHero(
 
   // Padding
   const paddingStyle = paddingY ? `padding: ${paddingY} 2rem;` : "padding: 6rem 2rem;";
+
+  // Content position mapping for flexbox justify-content
+  const contentPositionMap: Record<string, string> = {
+    left: "flex-start",
+    center: "center",
+    right: "flex-end",
+  };
+  const justifyContent = contentPositionMap[contentPosition] || "center";
 
   // Overlay HTML
   const overlayStyle = overlayColor
@@ -315,7 +324,7 @@ export function exportHero(
       ? `<style>${splitCss}</style><div id="${splitId}" class="sg-hero__split-inner" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; max-width: 1200px; width: 100%; padding: 0 2rem;">${imageDiv}${contentDiv}</div>`
       : `<style>${splitCss}</style><div id="${splitId}" class="sg-hero__split-inner" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; max-width: 1200px; width: 100%; padding: 0 2rem;">${contentDiv}${imageDiv}</div>`;
 
-    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; ${paddingStyle} display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; ${splitBgStyle}" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${innerHtml}</section>`;
+    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; ${paddingStyle} display: flex; align-items: center; justify-content: ${justifyContent}; position: relative; overflow: hidden; ${splitBgStyle}" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${innerHtml}</section>`;
   }
 
   // =========================================================================
@@ -362,18 +371,17 @@ export function exportHero(
 
       const cardGridLayoutHtml = `<style>${layoutCss}</style><div id="${cardGridLayoutId}" class="sg-hero__card-grid-layout" style="display: flex; width: 100%; max-width: 1200px; align-items: center; justify-content: space-between; position: relative; z-index: 2; padding: 0 2rem; gap: 3rem;">${innerHtml}</div>`;
 
-      return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses} sg-hero--with-grid" style="min-height: ${minHeight}; padding: ${cardPadding}; display: flex; align-items: center; justify-content: flex-start; background-image: url(${escapeHtml(heroImage)}); background-size: cover; background-position: center; position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${cardGridLayoutHtml}</section>`;
+      return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses} sg-hero--with-grid" style="min-height: ${minHeight}; padding: ${cardPadding}; display: flex; align-items: center; justify-content: ${justifyContent}; background-image: url(${escapeHtml(heroImage)}); background-size: cover; background-position: center; position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${cardGridLayoutHtml}</section>`;
     }
 
     // Without Image Grid: Original card layout
-    const cardAlign = align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start";
     const cardHtml = `
       <div class="sg-hero__card" style="max-width: ${contentMaxWidth}; width: 100%; background: ${cardBg}; padding: 2rem; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); position: relative; z-index: 2; text-align: ${align};">
         ${contentBlock}
       </div>
     `;
 
-    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; padding: ${cardPadding}; display: flex; align-items: center; justify-content: ${cardAlign}; background-image: url(${escapeHtml(heroImage)}); background-size: cover; background-position: center; position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${cardHtml}</section>`;
+    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; padding: ${cardPadding}; display: flex; align-items: center; justify-content: ${justifyContent}; background-image: url(${escapeHtml(heroImage)}); background-size: cover; background-position: center; position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${cardHtml}</section>`;
   }
 
   // =========================================================================
@@ -416,7 +424,7 @@ export function exportHero(
 
     const gridLayoutHtml = `<style>${layoutCss}</style><div id="${gridLayoutId}" class="sg-hero__grid-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; max-width: 1200px; width: 100%; align-items: center; position: relative; z-index: 2; padding: 0 2rem;">${innerHtml}</div>`;
 
-    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses} sg-hero--with-grid" style="min-height: ${minHeight}; ${paddingStyle} display: flex; align-items: center; justify-content: center; ${bgStyle} position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${waveHtml}${gridLayoutHtml}</section>`;
+    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses} sg-hero--with-grid" style="min-height: ${minHeight}; ${paddingStyle} display: flex; align-items: center; justify-content: ${justifyContent}; ${bgStyle} position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${waveHtml}${gridLayoutHtml}</section>`;
   }
 
   // =========================================================================
@@ -424,7 +432,7 @@ export function exportHero(
   // =========================================================================
   const contentWrapHtml = `<div style="max-width: ${contentMaxWidth}; width: 100%; padding: 0 2rem; text-align: ${align}; position: relative; z-index: 2;">${contentBlock}</div>`;
 
-  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; ${paddingStyle} display: flex; align-items: center; justify-content: center; ${bgStyle} position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${waveHtml}${contentWrapHtml}</section>`;
+  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; ${paddingStyle} display: flex; align-items: center; justify-content: ${justifyContent}; ${bgStyle} position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${waveHtml}${contentWrapHtml}</section>`;
 }
 
 /**
