@@ -41,10 +41,14 @@ const HERO_VISUAL_PROPS_TO_RESET: Record<string, any> = {
   background: undefined,
   overlay: false,
   overlayColor: undefined,
-  // Typography colors
+  // Typography colors (legacy)
   titleColor: undefined,
   subtitleColor: undefined,
   descriptionColor: undefined,
+  // Typography config (novo sistema)
+  titleTypography: undefined,
+  subtitleTypography: undefined,
+  descriptionTypography: undefined,
   // Badge styling
   badgeColor: undefined,
   badgeTextColor: undefined,

@@ -6,6 +6,14 @@
 import React from "react";
 import { PLACEHOLDER_IMAGE_URL } from "../../../presets/heroVariations";
 import { gridPresetMap, type ImageGridItem, type ImageGridPreset } from "../../../shared/imageGrid";
+import {
+  generateTypographyStyles,
+  mergeTypographyWithDefaults,
+  heroTitleDefaults,
+  heroSubtitleDefaults,
+  heroDescriptionDefaults,
+  type TypographyConfig,
+} from "../../../shared/typography";
 
 // Mapa de sombras para imagens
 const imageShadowMap: Record<string, string> = {
@@ -35,10 +43,14 @@ export function renderHero(block: any): React.ReactNode {
     overlay,
     overlayColor,
     background,
-    // Typography colors
+    // Typography colors (legacy)
     titleColor,
     subtitleColor,
     descriptionColor,
+    // Typography config (novo sistema)
+    titleTypography,
+    subtitleTypography,
+    descriptionTypography,
     // Badge styling
     badgeColor,
     badgeTextColor,
@@ -150,18 +162,37 @@ export function renderHero(block: any): React.ReactNode {
   const containerMaxWidth = blocksConfig.containerMaxWidth;
   const blocksGap = blocksConfig.gap;
 
+  // Merge typography configs with defaults (retrocompatível com titleColor, etc.)
+  const mergedTitleTypo = mergeTypographyWithDefaults(
+    titleTypography as TypographyConfig | undefined,
+    { ...heroTitleDefaults, color: titleColor || undefined }
+  );
+  const mergedSubtitleTypo = mergeTypographyWithDefaults(
+    subtitleTypography as TypographyConfig | undefined,
+    { ...heroSubtitleDefaults, color: subtitleColor || undefined }
+  );
+  const mergedDescriptionTypo = mergeTypographyWithDefaults(
+    descriptionTypography as TypographyConfig | undefined,
+    { ...heroDescriptionDefaults, color: descriptionColor || undefined }
+  );
+
+  // Generate typography styles
+  const titleTypoStyles = generateTypographyStyles(mergedTitleTypo, defaultTextColor);
+  const subtitleTypoStyles = generateTypographyStyles(mergedSubtitleTypo, defaultMutedColor);
+  const descriptionTypoStyles = generateTypographyStyles(mergedDescriptionTypo, defaultMutedColor);
+
   const titleStyle: React.CSSProperties = {
-    color: titleColor || defaultTextColor,
+    ...titleTypoStyles.style,
     marginBottom: spacing.title,
   };
 
   const subtitleStyle: React.CSSProperties = {
-    color: subtitleColor || defaultMutedColor,
+    ...subtitleTypoStyles.style,
     marginBottom: spacing.subtitle,
   };
 
   const descriptionStyle: React.CSSProperties = {
-    color: descriptionColor || defaultMutedColor,
+    ...descriptionTypoStyles.style,
     maxWidth: "600px",
     margin: align === "center" ? `0 auto ${spacing.description}` : `0 0 ${spacing.description}`,
   };

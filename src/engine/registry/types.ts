@@ -23,7 +23,8 @@ export interface InspectorMeta {
     | "image-upload"    // Image upload with file picker
     | "checkbox"
     | "icon-grid"       // Grid of icons for selection
-    | "image-grid";     // Image grid editor with preset selector
+    | "image-grid"      // Image grid editor with preset selector
+    | "typography";     // Typography editor (size, weight, color, effects)
   options?: Array<{ label: string; value: any }>;
   min?: number;
   max?: number;

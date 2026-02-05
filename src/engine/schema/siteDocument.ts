@@ -5,9 +5,11 @@
 
 import { ThemeTokens } from "./themeTokens";
 import type { ImageGridItem, ImageGridPreset } from "../shared/imageGrid";
+import type { TypographyConfig } from "../shared/typography";
 
-// Re-export image grid types for convenience
+// Re-export shared types for convenience
 export type { ImageGridItem, ImageGridPreset } from "../shared/imageGrid";
+export type { TypographyConfig } from "../shared/typography";
 
 /**
  * Tipos de blocos disponíveis
@@ -393,13 +395,21 @@ export interface HeroBlock extends BlockBase {
     /** Cor ou gradiente no layout split (lado do conteúdo). */
     background?: string;
 
-    // === Typography Colors ===
+    // === Typography Colors (legacy - mantido para retrocompatibilidade) ===
     /** Cor do título */
     titleColor?: string;
     /** Cor do subtítulo */
     subtitleColor?: string;
     /** Cor da descrição */
     descriptionColor?: string;
+
+    // === Typography Config (novo sistema completo) ===
+    /** Configuração completa de tipografia do título */
+    titleTypography?: TypographyConfig;
+    /** Configuração completa de tipografia do subtítulo */
+    subtitleTypography?: TypographyConfig;
+    /** Configuração completa de tipografia da descrição */
+    descriptionTypography?: TypographyConfig;
 
     // === Badge Styling ===
     /** Cor de fundo do badge */

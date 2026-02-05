@@ -64,14 +64,29 @@ export const heroBlock: BlockDefinition = {
       inputType: "text",
       group: "Conteúdo",
     },
+    titleTypography: {
+      label: "Estilo do Título",
+      inputType: "typography",
+      group: "Conteúdo",
+    },
     subtitle: {
       label: "Subtítulo",
       inputType: "text",
       group: "Conteúdo",
     },
+    subtitleTypography: {
+      label: "Estilo do Subtítulo",
+      inputType: "typography",
+      group: "Conteúdo",
+    },
     description: {
       label: "Descrição",
       inputType: "textarea",
+      group: "Conteúdo",
+    },
+    descriptionTypography: {
+      label: "Estilo da Descrição",
+      inputType: "typography",
       group: "Conteúdo",
     },
     badge: {
@@ -235,25 +250,6 @@ export const heroBlock: BlockDefinition = {
       inputType: "color-advanced",
       group: "Aparência",
       showWhen: { field: "showWave", equals: true },
-    },
-
-    // =========================================================================
-    // GRUPO: Tipografia
-    // =========================================================================
-    titleColor: {
-      label: "Cor do Título",
-      inputType: "color-advanced",
-      group: "Tipografia",
-    },
-    subtitleColor: {
-      label: "Cor do Subtítulo",
-      inputType: "color-advanced",
-      group: "Tipografia",
-    },
-    descriptionColor: {
-      label: "Cor da Descrição",
-      inputType: "color-advanced",
-      group: "Tipografia",
     },
 
     // =========================================================================

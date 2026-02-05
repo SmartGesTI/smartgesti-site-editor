@@ -49,7 +49,7 @@ export const CollapsiblePropertyGroup = memo(function CollapsiblePropertyGroup({
   }
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+    <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
       {/* Header clicável */}
       <button
         type="button"
@@ -59,7 +59,9 @@ export const CollapsiblePropertyGroup = memo(function CollapsiblePropertyGroup({
           "bg-gray-50 dark:bg-gray-800/50",
           "hover:bg-gray-100 dark:hover:bg-gray-800",
           "transition-colors cursor-pointer",
-          "focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+          "focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500",
+          "rounded-t-lg",
+          !isOpen && "rounded-b-lg"
         )}
       >
         <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
@@ -75,7 +77,7 @@ export const CollapsiblePropertyGroup = memo(function CollapsiblePropertyGroup({
 
       {/* Conteúdo colapsável */}
       {isOpen && (
-        <div className="p-3 space-y-3 bg-white dark:bg-gray-900">
+        <div className="p-3 space-y-3 bg-white dark:bg-gray-900 rounded-b-lg">
           {props.map(({ propName, meta, value }) =>
             renderPropertyInput(
               propName,

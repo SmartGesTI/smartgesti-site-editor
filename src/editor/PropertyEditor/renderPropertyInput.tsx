@@ -11,6 +11,7 @@ import {
   ButtonGroupInput,
   IconGridInput,
   ImageGridInput,
+  TypographyInput,
 } from "./inputs";
 import { ImageInput } from "../../components/inputs/ImageInput";
 import type { UploadConfig } from "../LandingPageEditorV2";
@@ -234,6 +235,33 @@ export function renderPropertyInput(
       }
       // Fallback: single-value mode (shouldn't happen in practice)
       return null;
+
+    case "typography":
+      // Determina defaults baseado no nome da prop
+      let defaultFontSize = 16;
+      let defaultFontWeight: "light" | "normal" | "medium" | "semibold" | "bold" = "normal";
+
+      if (propName.includes("title") || propName.includes("Title")) {
+        defaultFontSize = 48;
+        defaultFontWeight = "bold";
+      } else if (propName.includes("subtitle") || propName.includes("Subtitle")) {
+        defaultFontSize = 24;
+        defaultFontWeight = "medium";
+      } else if (propName.includes("description") || propName.includes("Description")) {
+        defaultFontSize = 16;
+        defaultFontWeight = "normal";
+      }
+
+      return (
+        <TypographyInput
+          key={propName}
+          value={value}
+          onChange={onChange}
+          label={label}
+          defaultFontSize={defaultFontSize}
+          defaultFontWeight={defaultFontWeight}
+        />
+      );
 
     default:
       // Fallback para text input

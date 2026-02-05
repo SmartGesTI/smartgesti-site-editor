@@ -17,6 +17,14 @@ import {
   type ButtonHoverOverlay,
 } from "../../../shared/hoverEffects";
 import { gridPresetMap, type ImageGridItem, type ImageGridPreset } from "../../../shared/imageGrid";
+import {
+  generateTypographyStyles,
+  mergeTypographyWithDefaults,
+  heroTitleDefaults,
+  heroSubtitleDefaults,
+  heroDescriptionDefaults,
+  type TypographyConfig,
+} from "../../../shared/typography";
 
 // Mapa de sombras
 const shadowMap: Record<string, string> = {
@@ -51,10 +59,14 @@ export function exportHero(
     overlay,
     overlayColor,
     background,
-    // Typography colors
+    // Typography colors (legacy)
     titleColor,
     subtitleColor,
     descriptionColor,
+    // Typography config (novo sistema)
+    titleTypography,
+    subtitleTypography,
+    descriptionTypography,
     // Badge styling
     badgeColor,
     badgeTextColor,
@@ -110,12 +122,28 @@ export function exportHero(
   const themePrimaryColor = theme?.colors?.primary || "#3b82f6";
   const themePrimaryText = theme?.colors?.primaryText || "#ffffff";
 
-  // Text colors
+  // Text colors (fallback)
   const defaultTextColor = hasDarkBg ? "#ffffff" : "var(--sg-text, #1f2937)";
   const defaultMutedColor = hasDarkBg ? "rgba(255,255,255,0.85)" : "var(--sg-muted-text, #6b7280)";
-  const finalTitleColor = titleColor || defaultTextColor;
-  const finalSubtitleColor = subtitleColor || defaultMutedColor;
-  const finalDescriptionColor = descriptionColor || defaultMutedColor;
+
+  // Merge typography configs with defaults (retrocompatível com titleColor, etc.)
+  const mergedTitleTypo = mergeTypographyWithDefaults(
+    titleTypography as TypographyConfig | undefined,
+    { ...heroTitleDefaults, color: titleColor as string | undefined }
+  );
+  const mergedSubtitleTypo = mergeTypographyWithDefaults(
+    subtitleTypography as TypographyConfig | undefined,
+    { ...heroSubtitleDefaults, color: subtitleColor as string | undefined }
+  );
+  const mergedDescriptionTypo = mergeTypographyWithDefaults(
+    descriptionTypography as TypographyConfig | undefined,
+    { ...heroDescriptionDefaults, color: descriptionColor as string | undefined }
+  );
+
+  // Generate typography CSS strings
+  const titleTypoStyles = generateTypographyStyles(mergedTitleTypo, defaultTextColor);
+  const subtitleTypoStyles = generateTypographyStyles(mergedSubtitleTypo, defaultMutedColor);
+  const descriptionTypoStyles = generateTypographyStyles(mergedDescriptionTypo, defaultMutedColor);
 
   // Badge colors
   const finalBadgeColor = badgeColor || themePrimaryColor;
@@ -210,19 +238,21 @@ export function exportHero(
     ? `<span class="sg-hero__badge" style="display: inline-block; padding: 0.5rem 1.25rem; background: ${finalBadgeColor}; color: ${finalBadgeTextColor}; border-radius: 999px; font-size: 0.875rem; font-weight: 600; margin-bottom: ${spacing.badge};">${escapeHtml(badge)}</span>`
     : "";
 
-  // Title HTML
+  // Title HTML - usa tipografia customizada com clamp para responsividade
+  const titleFontSize = mergedTitleTypo.fontSize || 48;
   const titleHtml = title
-    ? `<h1 class="sg-hero__title" style="color: ${finalTitleColor}; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: ${spacing.title}; letter-spacing: -0.02em;">${escapeHtml(title)}</h1>`
+    ? `<h1 class="sg-hero__title" style="${titleTypoStyles.cssString} font-size: clamp(2rem, 5vw, ${titleFontSize}px); line-height: 1.1; margin-bottom: ${spacing.title}; letter-spacing: -0.02em;">${escapeHtml(title)}</h1>`
     : "";
 
-  // Subtitle HTML
+  // Subtitle HTML - usa tipografia customizada com clamp para responsividade
+  const subtitleFontSize = mergedSubtitleTypo.fontSize || 24;
   const subtitleHtml = subtitle
-    ? `<h2 class="sg-hero__subtitle" style="color: ${finalSubtitleColor}; font-size: clamp(1.25rem, 2.5vw, 1.875rem); font-weight: 600; line-height: 1.3; margin-bottom: ${spacing.subtitle};">${escapeHtml(subtitle)}</h2>`
+    ? `<h2 class="sg-hero__subtitle" style="${subtitleTypoStyles.cssString} font-size: clamp(1.125rem, 2.5vw, ${subtitleFontSize}px); line-height: 1.3; margin-bottom: ${spacing.subtitle};">${escapeHtml(subtitle)}</h2>`
     : "";
 
-  // Description HTML
+  // Description HTML - usa tipografia customizada
   const descHtml = description
-    ? `<p class="sg-hero__description" style="max-width: 650px; margin: ${align === "center" ? `0 auto ${spacing.description}` : `0 0 ${spacing.description}`}; color: ${finalDescriptionColor}; font-size: 1.125rem; line-height: 1.7;">${escapeHtml(description)}</p>`
+    ? `<p class="sg-hero__description" style="max-width: 650px; margin: ${align === "center" ? `0 auto ${spacing.description}` : `0 0 ${spacing.description}`}; ${descriptionTypoStyles.cssString} line-height: 1.7;">${escapeHtml(description)}</p>`
     : "";
 
   // Button styles
