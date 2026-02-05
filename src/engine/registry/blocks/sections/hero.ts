@@ -88,13 +88,14 @@ export const heroBlock: BlockDefinition = {
       description: "Imagem de fundo ou lateral",
     },
     imagePosition: {
-      label: "Posição da Imagem",
+      label: "Inverter Layout",
       inputType: "select",
       options: [
-        { label: "Direita", value: "right" },
-        { label: "Esquerda", value: "left" },
+        { label: "Conteúdo à Esquerda / Imagem à Direita", value: "right" },
+        { label: "Imagem à Esquerda / Conteúdo à Direita", value: "left" },
       ],
-      group: "Mídia",
+      group: "Layout",
+      description: "Inverte a posição do conteúdo e da imagem em layouts divididos",
     },
     imageRadius: {
       label: "Cantos da Imagem",
