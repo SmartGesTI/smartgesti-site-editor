@@ -4,6 +4,10 @@
  */
 
 import { ThemeTokens } from "./themeTokens";
+import type { ImageGridItem, ImageGridPreset } from "../shared/imageGrid";
+
+// Re-export image grid types for convenience
+export type { ImageGridItem, ImageGridPreset } from "../shared/imageGrid";
 
 /**
  * Tipos de blocos disponíveis
@@ -354,7 +358,13 @@ export interface SocialLinksBlock extends BlockBase {
 /**
  * Hero - Seção hero completa
  */
-export type HeroVariationId = "hero-split" | "hero-parallax" | "hero-overlay";
+export type HeroVariationId =
+  | "hero-split"
+  | "hero-parallax"
+  | "hero-overlay"
+  | "hero-gradient"
+  | "hero-minimal"
+  | "hero-card";
 
 export interface HeroBlock extends BlockBase {
   type: "hero";
@@ -376,19 +386,86 @@ export interface HeroBlock extends BlockBase {
     overlayColor?: string;
     /** Cor ou gradiente no layout split (lado do conteúdo). */
     background?: string;
-    // Button Size
+
+    // === Typography Colors ===
+    /** Cor do título */
+    titleColor?: string;
+    /** Cor do subtítulo */
+    subtitleColor?: string;
+    /** Cor da descrição */
+    descriptionColor?: string;
+
+    // === Badge Styling ===
+    /** Cor de fundo do badge */
+    badgeColor?: string;
+    /** Cor do texto do badge */
+    badgeTextColor?: string;
+
+    // === Layout & Spacing ===
+    /** Largura máxima do conteúdo */
+    contentMaxWidth?: string;
+    /** Espaçamento interno vertical */
+    paddingY?: string;
+
+    // === Image Styling ===
+    /** Border radius da imagem (px) */
+    imageRadius?: number;
+    /** Sombra da imagem */
+    imageShadow?: "none" | "sm" | "md" | "lg" | "xl";
+    /** Posição da imagem no split */
+    imagePosition?: "left" | "right";
+
+    // === Button Size ===
     /** Tamanho dos botões */
     buttonSize?: "sm" | "md" | "lg";
-    // Button Hover Effects (principal)
+
+    // === Primary Button Styling ===
+    /** Variante do botão primário */
+    primaryButtonVariant?: "solid" | "outline" | "ghost";
+    /** Cor do botão primário */
+    primaryButtonColor?: string;
+    /** Cor do texto do botão primário */
+    primaryButtonTextColor?: string;
+    /** Border radius do botão primário */
+    primaryButtonRadius?: number;
+
+    // === Secondary Button Styling ===
+    /** Variante do botão secundário */
+    secondaryButtonVariant?: "solid" | "outline" | "ghost";
+    /** Cor do botão secundário */
+    secondaryButtonColor?: string;
+    /** Cor do texto do botão secundário */
+    secondaryButtonTextColor?: string;
+    /** Border radius do botão secundário */
+    secondaryButtonRadius?: number;
+
+    // === Button Hover Effects (principal) ===
     /** Efeito de hover nos botões */
     buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse";
     /** Intensidade do efeito (10-100) */
     buttonHoverIntensity?: number;
-    // Button Hover Overlay (adicional)
+
+    // === Button Hover Overlay (adicional) ===
     /** Efeito visual adicional nos botões */
     buttonHoverOverlay?: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow";
     /** Nome do ícone para o efeito "icon" */
     buttonHoverIconName?: string;
+
+    // === Decorative Elements ===
+    /** Mostrar elemento decorativo de onda no fundo */
+    showWave?: boolean;
+    /** Cor da onda decorativa */
+    waveColor?: string;
+
+    // === Image Grid System ===
+    /** Habilita grid de imagens no lugar da imagem única (split layout) */
+    imageGridEnabled?: boolean;
+    /** Preset de layout da grid */
+    imageGridPreset?: ImageGridPreset;
+    /** Array de imagens da grid (até 4) */
+    imageGridImages?: ImageGridItem[];
+    /** Espaçamento entre imagens em pixels */
+    imageGridGap?: number;
   };
 }
 

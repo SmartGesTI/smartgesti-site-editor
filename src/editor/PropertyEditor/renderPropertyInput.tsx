@@ -10,9 +10,20 @@ import {
   ToggleButton,
   ButtonGroupInput,
   IconGridInput,
+  ImageGridInput,
 } from "./inputs";
 import { ImageInput } from "../../components/inputs/ImageInput";
 import type { UploadConfig } from "../LandingPageEditorV2";
+
+/**
+ * Extended context for special input types that need to update multiple props
+ */
+export interface RenderInputContext {
+  /** All current prop values (for inputs that read multiple props) */
+  allProps?: Record<string, any>;
+  /** Callback to update multiple props at once */
+  onMultiUpdate?: (updates: Record<string, any>) => void;
+}
 
 /**
  * Renderiza um input baseado no tipo especificado em inspectorMeta
@@ -23,6 +34,7 @@ export function renderPropertyInput(
   value: any,
   onChange: (value: any) => void,
   uploadConfig?: UploadConfig,
+  context?: RenderInputContext,
 ): React.ReactNode {
   const { label, description, inputType, options, min, max, step, size } = meta;
 
@@ -190,6 +202,38 @@ export function renderPropertyInput(
           description={description}
         />
       );
+
+    case "image-grid":
+      // Image grid needs to read/write multiple props (preset, images, gap)
+      // We use the extended context if available
+      if (context?.allProps && context?.onMultiUpdate) {
+        const preset = context.allProps.imageGridPreset || "four-equal";
+        const images = context.allProps.imageGridImages || [];
+        const gap = context.allProps.imageGridGap ?? 8;
+
+        return (
+          <ImageGridInput
+            key={propName}
+            preset={preset}
+            images={images}
+            gap={gap}
+            onPresetChange={(newPreset) => {
+              context.onMultiUpdate!({ imageGridPreset: newPreset });
+            }}
+            onImagesChange={(newImages) => {
+              context.onMultiUpdate!({ imageGridImages: newImages });
+            }}
+            onGapChange={(newGap) => {
+              context.onMultiUpdate!({ imageGridGap: newGap });
+            }}
+            label={label}
+            description={description}
+            uploadConfig={uploadConfig}
+          />
+        );
+      }
+      // Fallback: single-value mode (shouldn't happen in practice)
+      return null;
 
     default:
       // Fallback para text input

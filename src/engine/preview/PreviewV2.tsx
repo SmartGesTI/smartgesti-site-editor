@@ -144,6 +144,7 @@ export function PreviewV2({
       const clickHandler = `
           <script>
             (function() {
+              // Click handler
               document.addEventListener('click', function(e) {
                 var target = e.target;
                 var anchor = target;

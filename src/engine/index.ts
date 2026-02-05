@@ -53,3 +53,6 @@ export {
 
 // Generators
 export * from "./generators/generateLandingPage";
+
+// Shared modules
+export * from "./shared/imageGrid";

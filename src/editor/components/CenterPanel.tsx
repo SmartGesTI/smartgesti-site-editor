@@ -18,6 +18,8 @@ interface CenterPanelProps {
   onAddPage: () => void;
   onRemovePage: (id: string) => void;
   canRemovePage: (id: string) => boolean;
+  /** Callback ao atualizar um bloco específico */
+  onUpdateBlock?: (blockId: string, updates: Record<string, any>) => void;
 }
 
 export function CenterPanel({
@@ -44,13 +46,13 @@ export function CenterPanel({
       />
 
       {/* Preview */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         {currentPage ? (
           <Suspense fallback={<LoadingSpinner />}>
             <PreviewV2
               document={document}
               pageId={currentPageId}
-              style={{ height: "100%" }}
+              style={{ height: "100%", width: "100%" }}
               onBlockClick={onBlockClick}
               selectedBlockId={selectedBlockId}
             />

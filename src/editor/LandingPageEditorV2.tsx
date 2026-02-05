@@ -9,7 +9,7 @@ import { Toolbar, LeftPanel, CenterPanel, RightPanel } from "./components";
 import { useEditorState } from "../hooks/useEditorState";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import { SiteDocumentV2, PatchBuilder } from "../engine";
+import { SiteDocumentV2, PatchBuilder, Block } from "../engine";
 import { getTemplate } from "../shared/templates";
 import type { TemplateId } from "../shared/templates";
 import { sharedTemplateToEngineDocument } from "../utils/sharedTemplateToEngine";
@@ -235,6 +235,30 @@ export function LandingPageEditorV2({
     }
   };
 
+  // Handler para atualizar um bloco específico
+  const handleUpdateBlockById = useCallback(
+    (blockId: string, updates: Record<string, any>) => {
+      if (!document || !currentPage) return;
+      const pageId = (currentPage as any).id;
+      if (!pageId) return;
+
+      try {
+        const patch = PatchBuilder.updateBlockProps(
+          document,
+          pageId,
+          blockId,
+          updates
+        );
+        if (patch?.length) {
+          applyChange(patch, "Update block properties");
+        }
+      } catch (error) {
+        console.error("Error updating block:", error);
+      }
+    },
+    [document, currentPage, applyChange]
+  );
+
   // Handler para atualizar paleta de cores (inclui mutedText, primaryText, linkColor e menuLinkColor)
   const handlePaletteChange = (palette: any) => {
     if (!document) return;
@@ -362,6 +386,7 @@ export function LandingPageEditorV2({
           }}
           onRemovePage={removePage}
           canRemovePage={canRemovePage}
+          onUpdateBlock={handleUpdateBlockById}
         />
 
         {/* Right: Editor Panel */}

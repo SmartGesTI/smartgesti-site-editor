@@ -15,6 +15,102 @@ interface VariationSelectorProps {
 }
 
 /**
+ * Helper para preservar um valor se ele existir (não undefined)
+ */
+function preserveIfDefined(obj: Record<string, any>, key: string): Record<string, any> {
+  return obj[key] !== undefined ? { [key]: obj[key] } : {};
+}
+
+/**
+ * Props visuais do Hero que DEVEM ser resetadas ao trocar de variação
+ * para evitar "vazamento" de estilos entre variações
+ */
+const HERO_VISUAL_PROPS_TO_RESET: Record<string, any> = {
+  // Variant e variation
+  variation: undefined,
+  variant: "centered",
+  // Layout
+  align: "center",
+  minHeight: "80vh",
+  contentMaxWidth: "800px",
+  paddingY: undefined,
+  // Background & Overlay
+  background: undefined,
+  overlay: false,
+  overlayColor: undefined,
+  // Typography colors
+  titleColor: undefined,
+  subtitleColor: undefined,
+  descriptionColor: undefined,
+  // Badge styling
+  badgeColor: undefined,
+  badgeTextColor: undefined,
+  // Image styling
+  imageRadius: 16,
+  imageShadow: "lg",
+  imagePosition: "right",
+  // Button styling
+  buttonSize: "md",
+  primaryButtonVariant: "solid",
+  primaryButtonColor: undefined,
+  primaryButtonTextColor: undefined,
+  primaryButtonRadius: 8,
+  secondaryButtonVariant: "outline",
+  secondaryButtonColor: undefined,
+  secondaryButtonTextColor: undefined,
+  secondaryButtonRadius: 8,
+  // Button hover
+  buttonHoverEffect: "scale",
+  buttonHoverIntensity: 50,
+  buttonHoverOverlay: "none",
+  buttonHoverIconName: "arrow-right",
+  // Decorative
+  showWave: false,
+  waveColor: "rgba(255,255,255,0.1)",
+  // Image Grid
+  imageGridEnabled: false,
+  imageGridPreset: "four-equal",
+  imageGridImages: [],
+  imageGridGap: 8,
+};
+
+/**
+ * Props visuais da Navbar que DEVEM ser resetadas ao trocar de variação
+ */
+const NAVBAR_VISUAL_PROPS_TO_RESET: Record<string, any> = {
+  variation: undefined,
+  layout: "expanded",
+  floating: false,
+  sticky: true,
+  // Aparência
+  bg: "#ffffff",
+  opacity: 100,
+  blurOpacity: 0,
+  borderRadius: 0,
+  shadow: "sm",
+  // Borda
+  borderPosition: "none",
+  borderWidth: 1,
+  borderColor: "#e5e7eb",
+  // Links
+  linkColor: "#374151",
+  linkHoverColor: "#2563eb",
+  linkFontSize: "md",
+  linkHoverEffect: "background",
+  linkHoverIntensity: 50,
+  // Botão
+  buttonVariant: "solid",
+  buttonColor: "#2563eb",
+  buttonTextColor: "#ffffff",
+  buttonBorderRadius: 8,
+  buttonSize: "md",
+  buttonHoverEffect: "darken",
+  buttonHoverIntensity: 50,
+  buttonHoverOverlay: "none",
+  buttonHoverIconName: "arrow-right",
+};
+
+/**
  * Componente para selecionar variações de Hero e Navbar
  * Preserva props customizadas ao trocar variação
  */
@@ -22,13 +118,14 @@ export function VariationSelector({ block, onUpdate }: VariationSelectorProps) {
   // Hero variations
   if (block.type === "hero") {
     const currentVariation = (block.props as any).variation;
+    const props = block.props as any;
 
     return (
       <div className="space-y-2">
         <h4 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-          Variação
+          Variações
         </h4>
-        <div className="grid grid-cols-1 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {heroVariationIds.map((id) => {
             const v = heroVariations[id];
             const isActive = currentVariation === id;
@@ -37,22 +134,35 @@ export function VariationSelector({ block, onUpdate }: VariationSelectorProps) {
                 key={id}
                 type="button"
                 onClick={() => {
-                  // Preservar TODAS as props customizadas ao mudar variação
-                  // As variações definem a estrutura/layout, mas preservamos cores e outras customizações
-                  const {
-                    variation: _,
-                    title: __,
-                    subtitle: ___,
-                    badge: ____,
-                    primaryButton: _____,
-                    secondaryButton: ______,
-                    image: _______,
-                    ...customProps
-                  } = block.props as any;
-                  onUpdate({
-                    ...v.defaultProps, // Aplica estrutura da nova variação PRIMEIRO
-                    ...customProps, // DEPOIS preserva customizações (cores, etc.) - OVERRIDE
-                  });
+                  // IMPORTANTE: Ao trocar variação:
+                  // 1. Primeiro RESETA todas as props visuais para valores padrão
+                  // 2. Depois aplica os defaults da nova variação
+                  // 3. Por fim preserva o conteúdo do usuário
+
+                  const newProps = {
+                    // 1. RESET: Limpa todas as props visuais para evitar vazamento
+                    ...HERO_VISUAL_PROPS_TO_RESET,
+
+                    // 2. Aplica os defaults da nova variação
+                    ...v.defaultProps,
+
+                    // 3. Preserva APENAS o conteúdo editado pelo usuário
+                    ...preserveIfDefined(props, "title"),
+                    ...preserveIfDefined(props, "subtitle"),
+                    ...preserveIfDefined(props, "description"),
+                    ...preserveIfDefined(props, "badge"),
+                    ...preserveIfDefined(props, "primaryButton"),
+                    ...preserveIfDefined(props, "secondaryButton"),
+                    ...preserveIfDefined(props, "image"),
+
+                    // 4. Preserva configuração da Image Grid
+                    ...preserveIfDefined(props, "imageGridEnabled"),
+                    ...preserveIfDefined(props, "imageGridPreset"),
+                    ...preserveIfDefined(props, "imageGridImages"),
+                    ...preserveIfDefined(props, "imageGridGap"),
+                  };
+
+                  onUpdate(newProps);
                 }}
                 className={cn(
                   "flex items-center gap-2 p-2 rounded-lg border-2 text-left transition-all",
@@ -75,6 +185,7 @@ export function VariationSelector({ block, onUpdate }: VariationSelectorProps) {
   // Navbar variations
   if (block.type === "navbar") {
     const currentVariation = (block.props as any).variation;
+    const props = block.props as any;
 
     return (
       <div className="space-y-2">
@@ -90,54 +201,27 @@ export function VariationSelector({ block, onUpdate }: VariationSelectorProps) {
                 key={id}
                 type="button"
                 onClick={() => {
-                  // Variações definem apenas estrutura visual (layout, sombra, bordas)
-                  // Preservar: conteúdo, cores da paleta e customizações do logo
-                  const {
-                    // Conteúdo
-                    logo,
-                    logoText,
-                    logoHeight,
-                    links,
-                    ctaButton,
-                    // Cores (vêm da paleta, não da variação)
-                    bg,
-                    linkColor,
-                    linkHoverColor,
-                    linkHoverEffect,
-                    linkHoverIntensity,
-                    buttonColor,
-                    buttonTextColor,
-                    buttonHoverEffect,
-                    buttonHoverIntensity,
-                    // Bordas customizadas
-                    borderPosition,
-                    borderWidth,
-                    borderColor,
-                  } = block.props as any;
+                  // IMPORTANTE: Ao trocar variação:
+                  // 1. Primeiro RESETA todas as props visuais para valores padrão
+                  // 2. Depois aplica os defaults da nova variação
+                  // 3. Por fim preserva o conteúdo do usuário
 
-                  onUpdate({
-                    ...v.defaultProps, // Aplica estrutura visual da variação
-                    // Preserva conteúdo e customizações do logo
-                    ...(logo ? { logo } : {}),
-                    ...(logoText ? { logoText } : {}),
-                    ...(logoHeight ? { logoHeight } : {}),
-                    ...(links ? { links } : {}),
-                    ...(ctaButton ? { ctaButton } : {}),
-                    // Preserva cores da paleta
-                    ...(bg ? { bg } : {}),
-                    ...(linkColor ? { linkColor } : {}),
-                    ...(linkHoverColor ? { linkHoverColor } : {}),
-                    ...(linkHoverEffect ? { linkHoverEffect } : {}),
-                    ...(linkHoverIntensity !== undefined ? { linkHoverIntensity } : {}),
-                    ...(buttonColor ? { buttonColor } : {}),
-                    ...(buttonTextColor ? { buttonTextColor } : {}),
-                    ...(buttonHoverEffect ? { buttonHoverEffect } : {}),
-                    ...(buttonHoverIntensity !== undefined ? { buttonHoverIntensity } : {}),
-                    // Preserva bordas customizadas
-                    ...(borderPosition ? { borderPosition } : {}),
-                    ...(borderWidth ? { borderWidth } : {}),
-                    ...(borderColor ? { borderColor } : {}),
-                  });
+                  const newProps = {
+                    // 1. RESET: Limpa todas as props visuais para evitar vazamento
+                    ...NAVBAR_VISUAL_PROPS_TO_RESET,
+
+                    // 2. Aplica os defaults da nova variação
+                    ...v.defaultProps,
+
+                    // 3. Preserva APENAS o conteúdo editado pelo usuário
+                    ...preserveIfDefined(props, "logo"),
+                    ...preserveIfDefined(props, "logoText"),
+                    ...preserveIfDefined(props, "logoHeight"),
+                    ...preserveIfDefined(props, "links"),
+                    ...preserveIfDefined(props, "ctaButton"),
+                  };
+
+                  onUpdate(newProps);
                 }}
                 className={cn(
                   "flex items-center gap-2 p-2 rounded-lg border-2 text-left transition-all",

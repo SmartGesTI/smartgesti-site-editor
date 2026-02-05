@@ -8,3 +8,4 @@ export { CheckboxInput } from "./CheckboxInput";
 export { ToggleButton } from "./ToggleButton";
 export { ButtonGroupInput } from "./ButtonGroupInput";
 export { IconGridInput } from "./IconGridInput";
+export { ImageGridInput } from "./ImageGridInput";

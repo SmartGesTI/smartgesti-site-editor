@@ -1,7 +1,7 @@
-import { memo, useState } from "react";
+import { memo, useState, useMemo } from "react";
 import { ChevronDown } from "lucide-react";
 import { InspectorMeta } from "../../engine";
-import { renderPropertyInput } from "./renderPropertyInput";
+import { renderPropertyInput, type RenderInputContext } from "./renderPropertyInput";
 import { cn } from "../../utils/cn";
 import type { UploadConfig } from "../LandingPageEditorV2";
 
@@ -13,6 +13,10 @@ interface CollapsiblePropertyGroupProps {
     value: any;
   }>;
   onPropChange: (propName: string, value: any) => void;
+  /** Callback to update multiple props at once (for special inputs like image-grid) */
+  onMultiUpdate?: (updates: Record<string, any>) => void;
+  /** All current prop values (for special inputs that need to read multiple props) */
+  allProps?: Record<string, any>;
   uploadConfig?: UploadConfig;
   defaultOpen?: boolean;
 }
@@ -25,10 +29,20 @@ export const CollapsiblePropertyGroup = memo(function CollapsiblePropertyGroup({
   groupName,
   props,
   onPropChange,
+  onMultiUpdate,
+  allProps,
   uploadConfig,
   defaultOpen = true,
 }: CollapsiblePropertyGroupProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  // Create context for special inputs
+  const renderContext = useMemo<RenderInputContext | undefined>(() => {
+    if (allProps && onMultiUpdate) {
+      return { allProps, onMultiUpdate };
+    }
+    return undefined;
+  }, [allProps, onMultiUpdate]);
 
   if (props.length === 0) {
     return null;
@@ -68,7 +82,8 @@ export const CollapsiblePropertyGroup = memo(function CollapsiblePropertyGroup({
               meta,
               value,
               (newValue) => onPropChange(propName, newValue),
-              uploadConfig
+              uploadConfig,
+              renderContext
             )
           )}
         </div>

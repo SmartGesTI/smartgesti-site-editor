@@ -1,5 +1,6 @@
 /**
  * Hero Section Exporter
+ * Exporta Hero com múltiplas variações e customizações avançadas
  * Mobile-first responsive: split layout collapses to stack in mobile
  */
 
@@ -15,6 +16,16 @@ import {
   type ButtonHoverEffect,
   type ButtonHoverOverlay,
 } from "../../../shared/hoverEffects";
+import { gridPresetMap, type ImageGridItem, type ImageGridPreset } from "../../../shared/imageGrid";
+
+// Mapa de sombras
+const shadowMap: Record<string, string> = {
+  none: "none",
+  sm: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
+  md: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)",
+  lg: "0 10px 25px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05)",
+  xl: "0 25px 50px rgba(0,0,0,0.25)",
+};
 
 export function exportHero(
   block: Block,
@@ -37,46 +48,111 @@ export function exportHero(
     overlay,
     overlayColor,
     background,
+    // Typography colors
+    titleColor,
+    subtitleColor,
+    descriptionColor,
+    // Badge styling
+    badgeColor,
+    badgeTextColor,
+    // Layout
+    contentMaxWidth = "800px",
+    paddingY,
+    // Image styling
+    imageRadius = 16,
+    imageShadow = "lg",
+    imagePosition = "right",
     // Button size
     buttonSize = "md",
+    // Primary button styling
+    primaryButtonVariant = "solid",
+    primaryButtonColor,
+    primaryButtonTextColor,
+    primaryButtonRadius = 8,
+    // Secondary button styling
+    secondaryButtonVariant = "outline",
+    secondaryButtonColor,
+    secondaryButtonTextColor,
+    secondaryButtonRadius = 8,
     // Button hover effects
     buttonHoverEffect = "scale",
     buttonHoverIntensity = 50,
     buttonHoverOverlay = "none",
     buttonHoverIconName = "arrow-right",
+    // Decorative
+    showWave,
+    waveColor = "rgba(255,255,255,0.1)",
+    // Image Grid
+    imageGridEnabled,
+    imageGridPreset = "four-equal",
+    imageGridImages = [],
+    imageGridGap = 8,
   } = (block as any).props;
 
-  // Resolver estilos dos botões com base na paleta
-  const buttonStyles = resolveHeroButtonStylesWithHover(theme, block.id, buttonSize, buttonHoverEffect, buttonHoverIntensity, buttonHoverOverlay, buttonHoverIconName);
-
+  // Determine variation types
   const heroImage = image || PLACEHOLDER_IMAGE_URL;
-  const isImageBg = variant === "image-bg" && heroImage;
-  const isOverlay = isImageBg && overlay;
   const isSplit = variation === "hero-split" || variant === "split";
   const isParallax = variation === "hero-parallax";
   const isOverlayVariant = variation === "hero-overlay";
-  const textColor = isOverlay ? "#fff" : "var(--sg-text)";
-  const mutedColor = isOverlay
-    ? "rgba(255,255,255,0.85)"
-    : "var(--sg-muted-text)";
+  const isGradient = variation === "hero-gradient";
+  const isMinimal = variation === "hero-minimal";
+  const isCard = variation === "hero-card";
+  const isImageBg = (variant === "image-bg" || isOverlayVariant || isParallax || isCard) && heroImage;
+  const isOverlay = isImageBg && overlay;
 
+  // Determine if dark background context
+  const hasDarkBg = isOverlay || isGradient || isOverlayVariant;
+
+  // Theme colors
+  const themePrimaryColor = theme?.colors?.primary || "#3b82f6";
+  const themePrimaryText = theme?.colors?.primaryText || "#ffffff";
+
+  // Text colors
+  const defaultTextColor = hasDarkBg ? "#ffffff" : "var(--sg-text, #1f2937)";
+  const defaultMutedColor = hasDarkBg ? "rgba(255,255,255,0.85)" : "var(--sg-muted-text, #6b7280)";
+  const finalTitleColor = titleColor || defaultTextColor;
+  const finalSubtitleColor = subtitleColor || defaultMutedColor;
+  const finalDescriptionColor = descriptionColor || defaultMutedColor;
+
+  // Badge colors
+  const finalBadgeColor = badgeColor || themePrimaryColor;
+  const finalBadgeTextColor = badgeTextColor || "#ffffff";
+
+  // Button colors
+  const finalPrimaryBtnColor = primaryButtonColor || themePrimaryColor;
+  const finalPrimaryBtnTextColor = primaryButtonTextColor || themePrimaryText;
+  const finalSecondaryBtnColor = secondaryButtonColor || (hasDarkBg ? "#ffffff" : themePrimaryColor);
+  const finalSecondaryBtnTextColor = secondaryButtonTextColor || finalSecondaryBtnColor;
+
+  // Section classes
   const sectionClasses = [
     "sg-hero",
     variation ? `sg-hero--${String(variation).replace("hero-", "")}` : "",
     isSplit ? "sg-hero--split" : "",
     isParallax ? "sg-hero--parallax" : "",
     isOverlayVariant ? "sg-hero--overlay" : "",
+    isGradient ? "sg-hero--gradient" : "",
+    isMinimal ? "sg-hero--minimal" : "",
+    isCard ? "sg-hero--card" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
-  let bgStyle = "background-color: var(--sg-bg, #fff);";
-  if (isImageBg) {
+  // Build background style
+  let bgStyle = "";
+  if (background) {
+    bgStyle = `background: ${background};`;
+  } else if (isImageBg && !isSplit) {
     bgStyle = `background-image: url(${escapeHtml(heroImage)}); background-size: cover; background-position: center;`;
     if (isParallax) bgStyle += " background-attachment: fixed;";
+  } else {
+    bgStyle = "background-color: var(--sg-bg, #fff);";
   }
 
-  // Overlay: custom overlayColor ou fallback
+  // Padding
+  const paddingStyle = paddingY ? `padding: ${paddingY} 2rem;` : "padding: 6rem 2rem;";
+
+  // Overlay HTML
   const overlayStyle = overlayColor
     ? `position: absolute; inset: 0; background: ${overlayColor}; z-index: 0;`
     : "position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%); z-index: 0;";
@@ -84,57 +160,139 @@ export function exportHero(
     ? `<div class="sg-hero__overlay" style="${overlayStyle}"></div>`
     : "";
 
-  // Badge moderno
-  const primaryColor = theme?.colors?.primary || "#3b82f6";
+  // Wave SVG
+  const waveHtml = showWave
+    ? `<div style="position: absolute; bottom: 0; left: 0; right: 0; height: 150px; overflow: hidden; z-index: 1;">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style="position: absolute; bottom: 0; width: 100%; height: 100%;">
+          <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" fill="${waveColor}" opacity="0.5"/>
+          <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" fill="${waveColor}" opacity="0.3"/>
+        </svg>
+      </div>`
+    : "";
+
+  // Badge HTML
   const badgeHtml = badge
-    ? `<span class="sg-hero__badge" style="display: inline-block; padding: 0.5rem 1.25rem; background: ${primaryColor}15; color: ${primaryColor}; border-radius: 999px; font-size: 0.875rem; font-weight: 600; margin-bottom: 1.5rem; border: 1px solid ${primaryColor}30;">${escapeHtml(badge)}</span>`
+    ? `<span class="sg-hero__badge" style="display: inline-block; padding: 0.5rem 1.25rem; background: ${finalBadgeColor}; color: ${finalBadgeTextColor}; border-radius: 999px; font-size: 0.875rem; font-weight: 600; margin-bottom: 1.5rem;">${escapeHtml(badge)}</span>`
     : "";
 
-  // Título grande e impactante
+  // Title HTML
   const titleHtml = title
-    ? `<h1 class="sg-hero__title" style="color: ${textColor}; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.25rem; letter-spacing: -0.02em;">${escapeHtml(title)}</h1>`
+    ? `<h1 class="sg-hero__title" style="color: ${finalTitleColor}; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.25rem; letter-spacing: -0.02em;">${escapeHtml(title)}</h1>`
     : "";
 
-  // Subtítulo elegante
+  // Subtitle HTML
   const subtitleHtml = subtitle
-    ? `<h2 class="sg-hero__subtitle" style="color: ${mutedColor}; font-size: clamp(1.25rem, 2.5vw, 1.875rem); font-weight: 600; line-height: 1.3; margin-bottom: 1rem;">${escapeHtml(subtitle)}</h2>`
+    ? `<h2 class="sg-hero__subtitle" style="color: ${finalSubtitleColor}; font-size: clamp(1.25rem, 2.5vw, 1.875rem); font-weight: 600; line-height: 1.3; margin-bottom: 1rem;">${escapeHtml(subtitle)}</h2>`
     : "";
 
-  // Descrição com melhor legibilidade
+  // Description HTML
   const descHtml = description
-    ? `<p class="sg-hero__description" style="max-width: 650px; margin: ${align === "center" ? "0 auto 2.5rem" : "0 0 2.5rem"}; color: ${mutedColor}; font-size: 1.125rem; line-height: 1.7; opacity: 0.9;">${escapeHtml(description)}</p>`
+    ? `<p class="sg-hero__description" style="max-width: 650px; margin: ${align === "center" ? "0 auto 2.5rem" : "0 0 2.5rem"}; color: ${finalDescriptionColor}; font-size: 1.125rem; line-height: 1.7;">${escapeHtml(description)}</p>`
     : "";
 
-  const primaryHref = primaryButton
-    ? resolveHref(primaryButton.href || "#", basePath)
-    : "#";
-  const secondaryHref = secondaryButton
-    ? resolveHref(secondaryButton.href || "#", basePath)
-    : "#";
+  // Button styles
+  const buttonStyles = resolveHeroButtonStyles({
+    theme,
+    blockId: block.id,
+    buttonSize,
+    primaryButtonVariant,
+    primaryButtonColor: finalPrimaryBtnColor,
+    primaryButtonTextColor: finalPrimaryBtnTextColor,
+    primaryButtonRadius,
+    secondaryButtonVariant,
+    secondaryButtonColor: finalSecondaryBtnColor,
+    secondaryButtonTextColor: finalSecondaryBtnTextColor,
+    secondaryButtonRadius,
+    hoverEffect: buttonHoverEffect,
+    hoverIntensity: buttonHoverIntensity,
+    hoverOverlay: buttonHoverOverlay,
+    hoverIconName: buttonHoverIconName,
+  });
+
+  // Buttons HTML
+  const primaryHref = primaryButton ? resolveHref(primaryButton.href || "#", basePath) : "#";
+  const secondaryHref = secondaryButton ? resolveHref(secondaryButton.href || "#", basePath) : "#";
   const primaryBtnHtml = primaryButton
     ? `<a href="${escapeHtml(primaryHref)}"${linkTargetAttr(primaryHref, basePath)} class="sg-hero__btn sg-hero__btn--primary" style="${buttonStyles.primary}">${escapeHtml(primaryButton.text)}</a>`
     : "";
   const secondaryBtnHtml = secondaryButton
     ? `<a href="${escapeHtml(secondaryHref)}"${linkTargetAttr(secondaryHref, basePath)} class="sg-hero__btn sg-hero__btn--secondary" style="${buttonStyles.secondary}">${escapeHtml(secondaryButton.text)}</a>`
     : "";
-
-  // Botões com espaçamento moderno
   const buttonsHtml =
     primaryButton || secondaryButton
       ? `<div class="sg-hero__actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: ${align === "center" ? "center" : "flex-start"}; margin-top: 0.5rem;">${primaryBtnHtml}${secondaryBtnHtml}</div>`
       : "";
 
+  // Content block
   const contentBlock = `${badgeHtml}${titleHtml}${subtitleHtml}${descHtml}${buttonsHtml}`;
 
-  // Inject dynamic CSS styles (hover effects) if present
-  const styleBlock = buttonStyles.css
-    ? `<style>${buttonStyles.css}</style>`
-    : "";
+  // Style block (hover effects)
+  const styleBlock = buttonStyles.css ? `<style>${buttonStyles.css}</style>` : "";
 
+  // Image fallback
   const imgFallback = `this.onerror=null;this.src='${escapeHtml(PLACEHOLDER_IMAGE_URL)}';`;
-  if (isSplit && heroImage) {
-    // Responsive split layout: stack in mobile, 2 columns in desktop
+
+  // =========================================================================
+  // IMAGE GRID EXPORT HELPER
+  // =========================================================================
+  const exportImageGrid = (
+    images: ImageGridItem[],
+    preset: ImageGridPreset,
+    gap: number,
+    radius: number,
+    shadow: string,
+    gridId: string
+  ): { html: string; css: string } => {
+    const config = gridPresetMap[preset];
+    const shadowValue = shadowMap[shadow] || shadowMap.lg;
+
+    // Generate grid items HTML
+    const itemsHtml = config.positions
+      .map((pos, idx) => {
+        const img = images[idx];
+        const imgSrc = img?.src || PLACEHOLDER_IMAGE_URL;
+        const imgAlt = img?.alt || `Imagem ${idx + 1}`;
+
+        return `<div class="sg-hero__grid-item" style="grid-column: ${pos.col}; grid-row: ${pos.row}; overflow: hidden; border-radius: ${radius}px;">
+          <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(imgAlt)}" style="width: 100%; height: 100%; object-fit: cover; box-shadow: ${shadowValue};" onerror="${imgFallback}" />
+        </div>`;
+      })
+      .join("");
+
+    const gridHtml = `<div id="${gridId}" class="sg-hero__image-grid" style="display: grid; grid-template: ${config.gridTemplate}; gap: ${gap}px; width: 100%; max-width: 500px; aspect-ratio: 1 / 1;">
+      ${itemsHtml}
+    </div>`;
+
+    // Responsive CSS: collapse to single column on mobile
+    const gridCss = `
+      @media (max-width: 767px) {
+        #${gridId} {
+          grid-template: auto / 1fr !important;
+          aspect-ratio: auto !important;
+        }
+        #${gridId} .sg-hero__grid-item {
+          grid-column: 1 / -1 !important;
+          grid-row: auto !important;
+          aspect-ratio: 16 / 9;
+        }
+      }
+    `;
+
+    return { html: gridHtml, css: gridCss };
+  };
+
+  // Determine if we should use image grid (works in ANY variation now)
+  const hasValidGridImages = imageGridImages && imageGridImages.length > 0 && (imageGridImages as ImageGridItem[]).some((img: ImageGridItem) => img?.src);
+  const shouldShowImageGrid = imageGridEnabled && hasValidGridImages;
+
+  // =========================================================================
+  // RENDER: Split Layout (without image grid)
+  // =========================================================================
+  if (isSplit && heroImage && !shouldShowImageGrid) {
     const splitId = generateScopedId(block.id || "", "hero-split");
+    const isImageLeft = imagePosition === "left";
+    const imgShadow = shadowMap[imageShadow] || shadowMap.lg;
+
     const splitCss = `
       @media (max-width: 1023px) {
         #${splitId} {
@@ -147,29 +305,166 @@ export function exportHero(
         }
       }
     `;
-    const splitContentStyle = `text-align: ${align}; position: relative; z-index: 1;${background ? ` background: ${background};` : ""}`;
-    const innerHtml = `<style>${splitCss}</style><div id="${splitId}" class="sg-hero__split-inner" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; max-width: 1200px; width: 100%; padding: 0 2rem;"><div class="sg-hero__split-content" style="${splitContentStyle}">${contentBlock}</div><div class="sg-hero__split-image" style="position: relative;"><img src="${escapeHtml(heroImage)}" alt="${escapeHtml(title || "")}" class="sg-hero__img" style="width: 100%; height: auto; border-radius: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1);" onerror="${imgFallback}" /></div></div>`;
-    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; padding: 8rem 0; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${innerHtml}</section>`;
+
+    const splitBgStyle = background ? `background: ${background};` : "background-color: var(--sg-bg, #fff);";
+    const imgStyle = `width: 100%; max-width: 500px; height: auto; border-radius: ${imageRadius}px; box-shadow: ${imgShadow}; object-fit: cover;`;
+    const imageDiv = `<div class="sg-hero__split-image" style="display: flex; justify-content: center;"><img src="${escapeHtml(heroImage)}" alt="${escapeHtml(title || "")}" class="sg-hero__img" style="${imgStyle}" onerror="${imgFallback}" /></div>`;
+    const contentDiv = `<div class="sg-hero__split-content" style="text-align: ${align}; position: relative; z-index: 1; max-width: ${contentMaxWidth};">${contentBlock}</div>`;
+
+    const innerHtml = isImageLeft
+      ? `<style>${splitCss}</style><div id="${splitId}" class="sg-hero__split-inner" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; max-width: 1200px; width: 100%; padding: 0 2rem;">${imageDiv}${contentDiv}</div>`
+      : `<style>${splitCss}</style><div id="${splitId}" class="sg-hero__split-inner" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; max-width: 1200px; width: 100%; padding: 0 2rem;">${contentDiv}${imageDiv}</div>`;
+
+    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; ${paddingStyle} display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; ${splitBgStyle}" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${innerHtml}</section>`;
   }
 
-  const wrapHtml = `<div style="max-width: 900px; padding: 0 2rem; text-align: ${align}; position: relative; z-index: 1;">${contentBlock}</div>`;
-  return `<section ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; padding: 8rem 2rem; display: flex; align-items: center; justify-content: center; ${bgStyle} position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${wrapHtml}</section>`;
+  // =========================================================================
+  // RENDER: Card Layout (supports both with and without Image Grid)
+  // Card always stays on the left (original position), Grid on the right
+  // =========================================================================
+  if (isCard && heroImage) {
+    const cardBg = background || "#ffffff";
+    const cardPadding = paddingY ? `${paddingY} 3rem` : "6rem 3rem";
+
+    // With Image Grid: Card on left + Grid on right (preserves original card position)
+    if (shouldShowImageGrid) {
+      const cardGridLayoutId = generateScopedId(block.id || "", "hero-card-grid");
+      const gridId = generateScopedId(block.id || "", "hero-grid");
+
+      const gridResult = exportImageGrid(
+        imageGridImages as ImageGridItem[],
+        imageGridPreset as ImageGridPreset,
+        imageGridGap as number,
+        imageRadius,
+        imageShadow,
+        gridId
+      );
+
+      const cardHtml = `<div class="sg-hero__card" style="max-width: 500px; background: ${cardBg}; padding: 2rem; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); position: relative; z-index: 2; text-align: ${align};">${contentBlock}</div>`;
+      const gridWrapperHtml = `<div class="sg-hero__grid-wrapper" style="position: relative; z-index: 3; display: flex; justify-content: center; align-items: center;">${gridResult.html}</div>`;
+
+      // Card always left, Grid always right
+      const innerHtml = `${cardHtml}${gridWrapperHtml}`;
+
+      // Responsive CSS
+      let layoutCss = `
+        @media (max-width: 1023px) {
+          #${cardGridLayoutId} {
+            flex-direction: column !important;
+            gap: 2rem !important;
+          }
+          #${cardGridLayoutId} .sg-hero__grid-wrapper {
+            order: -1;
+          }
+        }
+      `;
+      layoutCss += gridResult.css;
+
+      const cardGridLayoutHtml = `<style>${layoutCss}</style><div id="${cardGridLayoutId}" class="sg-hero__card-grid-layout" style="display: flex; width: 100%; max-width: 1200px; align-items: center; justify-content: space-between; position: relative; z-index: 2; padding: 0 2rem; gap: 3rem;">${innerHtml}</div>`;
+
+      return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses} sg-hero--with-grid" style="min-height: ${minHeight}; padding: ${cardPadding}; display: flex; align-items: center; justify-content: flex-start; background-image: url(${escapeHtml(heroImage)}); background-size: cover; background-position: center; position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${cardGridLayoutHtml}</section>`;
+    }
+
+    // Without Image Grid: Original card layout
+    const cardAlign = align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start";
+    const cardHtml = `
+      <div class="sg-hero__card" style="max-width: ${contentMaxWidth}; width: 100%; background: ${cardBg}; padding: 2rem; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); position: relative; z-index: 2; text-align: ${align};">
+        ${contentBlock}
+      </div>
+    `;
+
+    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; padding: ${cardPadding}; display: flex; align-items: center; justify-content: ${cardAlign}; background-image: url(${escapeHtml(heroImage)}); background-size: cover; background-position: center; position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${cardHtml}</section>`;
+  }
+
+  // =========================================================================
+  // RENDER: With Image Grid (any variation) - Floating grid alongside content
+  // =========================================================================
+  if (shouldShowImageGrid) {
+    const gridLayoutId = generateScopedId(block.id || "", "hero-grid-layout");
+    const gridId = generateScopedId(block.id || "", "hero-grid");
+    const isGridLeft = imagePosition === "left";
+
+    const gridResult = exportImageGrid(
+      imageGridImages as ImageGridItem[],
+      imageGridPreset as ImageGridPreset,
+      imageGridGap as number,
+      imageRadius,
+      imageShadow,
+      gridId
+    );
+
+    const gridWrapperHtml = `<div class="sg-hero__grid-wrapper" style="position: relative; z-index: 3; display: flex; justify-content: center; align-items: center;">${gridResult.html}</div>`;
+    const contentSideHtml = `<div class="sg-hero__content-side" style="max-width: ${contentMaxWidth}; width: 100%; text-align: ${align}; position: relative; z-index: 2;">${contentBlock}</div>`;
+
+    // Responsive CSS for the grid layout
+    let layoutCss = `
+      @media (max-width: 1023px) {
+        #${gridLayoutId} {
+          grid-template-columns: 1fr !important;
+          gap: 2rem !important;
+        }
+        #${gridLayoutId} .sg-hero__grid-wrapper {
+          order: -1;
+        }
+      }
+    `;
+    layoutCss += gridResult.css;
+
+    const innerHtml = isGridLeft
+      ? `${gridWrapperHtml}${contentSideHtml}`
+      : `${contentSideHtml}${gridWrapperHtml}`;
+
+    const gridLayoutHtml = `<style>${layoutCss}</style><div id="${gridLayoutId}" class="sg-hero__grid-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; max-width: 1200px; width: 100%; align-items: center; position: relative; z-index: 2; padding: 0 2rem;">${innerHtml}</div>`;
+
+    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses} sg-hero--with-grid" style="min-height: ${minHeight}; ${paddingStyle} display: flex; align-items: center; justify-content: center; ${bgStyle} position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${waveHtml}${gridLayoutHtml}</section>`;
+  }
+
+  // =========================================================================
+  // RENDER: Default (centered, gradient, minimal, parallax, overlay)
+  // =========================================================================
+  const contentWrapHtml = `<div style="max-width: ${contentMaxWidth}; width: 100%; padding: 0 2rem; text-align: ${align}; position: relative; z-index: 2;">${contentBlock}</div>`;
+
+  return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; ${paddingStyle} display: flex; align-items: center; justify-content: center; ${bgStyle} position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${waveHtml}${contentWrapHtml}</section>`;
 }
 
 /**
- * Resolve hero button styles with configurable hover effects
+ * Resolve hero button styles with independent customization for primary and secondary
  */
-function resolveHeroButtonStylesWithHover(
-  theme: ThemeTokens | undefined,
-  blockId: string,
-  buttonSize: string = "md",
-  hoverEffect: string,
-  hoverIntensity: number,
-  hoverOverlay: string = "none",
-  hoverIconName: string = "arrow-right",
-): { primary: string; secondary: string; css: string } {
-  const primaryColor = theme?.colors?.primary || "#3b82f6";
-  const primaryText = theme?.colors?.primaryText || "#ffffff";
+interface ButtonStylesConfig {
+  theme?: ThemeTokens;
+  blockId: string;
+  buttonSize: string;
+  primaryButtonVariant: string;
+  primaryButtonColor: string;
+  primaryButtonTextColor: string;
+  primaryButtonRadius: number;
+  secondaryButtonVariant: string;
+  secondaryButtonColor: string;
+  secondaryButtonTextColor: string;
+  secondaryButtonRadius: number;
+  hoverEffect: string;
+  hoverIntensity: number;
+  hoverOverlay: string;
+  hoverIconName: string;
+}
+
+function resolveHeroButtonStyles(config: ButtonStylesConfig): { primary: string; secondary: string; css: string } {
+  const {
+    blockId,
+    buttonSize,
+    primaryButtonVariant,
+    primaryButtonColor,
+    primaryButtonTextColor,
+    primaryButtonRadius,
+    secondaryButtonVariant,
+    secondaryButtonColor,
+    secondaryButtonTextColor,
+    secondaryButtonRadius,
+    hoverEffect,
+    hoverIntensity,
+    hoverOverlay,
+    hoverIconName,
+  } = config;
 
   // Size-based styles
   const sizeStyles: Record<string, { padding: string; fontSize: string }> = {
@@ -179,109 +474,106 @@ function resolveHeroButtonStylesWithHover(
   };
   const size = sizeStyles[buttonSize] || sizeStyles.md;
 
-  const primaryStyles = [
-    `background-color: ${primaryColor}`,
-    `color: ${primaryText}`,
+  // Base button styles
+  const baseStyles = [
     `padding: ${size.padding}`,
-    "border-radius: 0.5rem",
     "font-weight: 600",
     `font-size: ${size.fontSize}`,
     "text-decoration: none",
-    "display: inline-block",
+    "display: inline-flex",
+    "align-items: center",
+    "justify-content: center",
+    "gap: 0.5rem",
     "transition: all 0.2s ease",
-    "border: none",
     "position: relative",
     "overflow: hidden",
-  ].join("; ");
+    "cursor: pointer",
+  ];
 
-  const secondaryStyles = [
-    "background-color: transparent",
-    `color: ${primaryColor}`,
-    `padding: ${size.padding}`,
-    "border-radius: 0.5rem",
-    "font-weight: 600",
-    `font-size: ${size.fontSize}`,
-    "text-decoration: none",
-    "display: inline-block",
-    "transition: all 0.2s ease",
-    `border: 2px solid ${primaryColor}`,
-    "position: relative",
-    "overflow: hidden",
-  ].join("; ");
+  // Primary button styles
+  const primaryStyles = [...baseStyles, `border-radius: ${primaryButtonRadius}px`];
+  switch (primaryButtonVariant) {
+    case "outline":
+      primaryStyles.push(`background-color: transparent`, `border: 2px solid ${primaryButtonColor}`, `color: ${primaryButtonColor}`);
+      break;
+    case "ghost":
+      primaryStyles.push(`background-color: transparent`, `border: none`, `color: ${primaryButtonColor}`);
+      break;
+    default: // solid
+      primaryStyles.push(`background-color: ${primaryButtonColor}`, `border: 2px solid ${primaryButtonColor}`, `color: ${primaryButtonTextColor}`);
+  }
+
+  // Secondary button styles
+  const secondaryStyles = [...baseStyles, `border-radius: ${secondaryButtonRadius}px`];
+  switch (secondaryButtonVariant) {
+    case "solid":
+      secondaryStyles.push(`background-color: ${secondaryButtonColor}`, `border: 2px solid ${secondaryButtonColor}`, `color: ${secondaryButtonTextColor}`);
+      break;
+    case "ghost":
+      secondaryStyles.push(`background-color: transparent`, `border: none`, `color: ${secondaryButtonTextColor}`);
+      break;
+    default: // outline
+      secondaryStyles.push(`background-color: transparent`, `border: 2px solid ${secondaryButtonColor}`, `color: ${secondaryButtonTextColor}`);
+  }
 
   const scope = blockId ? `[data-block-id="${blockId}"]` : "";
   let css = "";
 
-  // Efeito principal
+  // Hover effects
   if (hoverEffect !== "none") {
     // Primary button hover
     const primaryHoverResult = generateButtonHoverStyles({
       effect: hoverEffect as ButtonHoverEffect,
       intensity: hoverIntensity,
-      buttonColor: primaryColor,
-      buttonTextColor: primaryText,
-      variant: "solid",
+      buttonColor: primaryButtonColor,
+      buttonTextColor: primaryButtonVariant === "solid" ? primaryButtonTextColor : primaryButtonColor,
+      variant: primaryButtonVariant as "solid" | "outline" | "ghost",
     });
 
     // Secondary button hover
     const secondaryHoverResult = generateButtonHoverStyles({
       effect: hoverEffect as ButtonHoverEffect,
       intensity: hoverIntensity,
-      buttonColor: primaryColor,
-      buttonTextColor: primaryColor,
-      variant: "outline",
+      buttonColor: secondaryButtonColor,
+      buttonTextColor: secondaryButtonVariant === "solid" ? secondaryButtonTextColor : secondaryButtonColor,
+      variant: secondaryButtonVariant as "solid" | "outline" | "ghost",
     });
 
-    // Base styles if needed
     if (primaryHoverResult.base) {
-      css += `
-        ${scope} .sg-hero__btn--primary {
-          ${primaryHoverResult.base}
-        }
-      `;
+      css += `${scope} .sg-hero__btn--primary { ${primaryHoverResult.base} }\n`;
     }
-
     if (secondaryHoverResult.base) {
-      css += `
-        ${scope} .sg-hero__btn--secondary {
-          ${secondaryHoverResult.base}
-        }
-      `;
+      css += `${scope} .sg-hero__btn--secondary { ${secondaryHoverResult.base} }\n`;
     }
 
-    // Hover styles
     css += `
-      ${scope} .sg-hero__btn--primary:hover {
-        ${primaryHoverResult.hover}
-      }
-      ${scope} .sg-hero__btn--secondary:hover {
-        ${secondaryHoverResult.hover}
-      }
+      ${scope} .sg-hero__btn--primary:hover { ${primaryHoverResult.hover} }
+      ${scope} .sg-hero__btn--secondary:hover { ${secondaryHoverResult.hover} }
     `;
 
-    // Add keyframes for pulse animation
     css += getButtonHoverKeyframes();
   }
 
-  // Efeito overlay (adicional)
+  // Overlay effects
   if (hoverOverlay && hoverOverlay !== "none") {
     css += generateButtonOverlayCSS(`${scope} .sg-hero__btn--primary`, {
       overlay: hoverOverlay as ButtonHoverOverlay,
-      primaryColor,
+      primaryColor: primaryButtonColor,
       iconName: hoverIconName,
-      textColor: primaryText,
+      textColor: primaryButtonVariant === "solid" ? primaryButtonTextColor : primaryButtonColor,
     });
     css += generateButtonOverlayCSS(`${scope} .sg-hero__btn--secondary`, {
       overlay: hoverOverlay as ButtonHoverOverlay,
-      primaryColor,
+      primaryColor: secondaryButtonColor,
       iconName: hoverIconName,
-      textColor: primaryColor,
+      textColor: secondaryButtonVariant === "solid" ? secondaryButtonTextColor : secondaryButtonColor,
     });
   }
 
   return {
-    primary: primaryStyles,
-    secondary: secondaryStyles,
+    primary: primaryStyles.join("; "),
+    secondary: secondaryStyles.join("; "),
     css,
   };
 }
+

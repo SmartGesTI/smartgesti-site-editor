@@ -134,6 +134,8 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
             groupName={groupName}
             props={props}
             onPropChange={handlePropChange}
+            onMultiUpdate={onUpdate}
+            allProps={block?.props as Record<string, any>}
             uploadConfig={uploadConfig}
           />
         ))
