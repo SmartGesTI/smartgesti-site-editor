@@ -54,10 +54,14 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
 
       // Lógica condicional genérica: showWhen
       if (meta.showWhen) {
-        const { field, equals } = meta.showWhen;
+        const { field, equals, notEquals } = meta.showWhen;
         const fieldValue = props[field] ?? defaultProps[field];
-        if (fieldValue !== equals) {
-          continue; // Pular este campo se a condição não for atendida
+        // Suporta equals (mostrar quando igual) e notEquals (mostrar quando diferente)
+        if (equals !== undefined && fieldValue !== equals) {
+          continue; // Pular se não for igual ao valor esperado
+        }
+        if (notEquals !== undefined && fieldValue === notEquals) {
+          continue; // Pular se for igual ao valor que deve ser evitado
         }
       }
 

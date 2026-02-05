@@ -31,7 +31,7 @@ export interface InspectorMeta {
   /** Tamanho do input (para checkbox/toggle) */
   size?: "sm" | "md";
   /** Condição para exibir o campo (visibilidade condicional) */
-  showWhen?: { field: string; equals: string | boolean | number };
+  showWhen?: { field: string; equals?: string | boolean | number; notEquals?: string | boolean | number };
 }
 
 /**

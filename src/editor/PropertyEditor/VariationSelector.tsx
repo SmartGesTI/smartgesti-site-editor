@@ -32,7 +32,9 @@ const HERO_VISUAL_PROPS_TO_RESET: Record<string, any> = {
   // Layout
   align: "center",
   contentPosition: "center",
-  minHeight: "80vh",
+  contentSpacing: "default",
+  blockGap: "default",
+  minHeight: "70vh",
   contentMaxWidth: "800px",
   paddingY: undefined,
   // Background & Overlay

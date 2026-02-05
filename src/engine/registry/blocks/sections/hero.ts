@@ -14,7 +14,9 @@ export const HERO_DEFAULT_PROPS = {
   secondaryButton: { text: "Saber Mais" },
   align: "center",
   contentPosition: "center",
-  minHeight: "80vh",
+  contentSpacing: "default",
+  blockGap: "default",
+  minHeight: "70vh",
   // Layout
   contentMaxWidth: "800px",
   paddingY: "100px",
@@ -159,15 +161,35 @@ export const heroBlock: BlockDefinition = {
       group: "Layout",
       description: "Posição do bloco de conteúdo no layout",
     },
-    minHeight: {
-      label: "Altura Mínima",
+    contentSpacing: {
+      label: "Espaçamento do Conteúdo",
       inputType: "select",
       options: [
-        { label: "Pequena (50vh)", value: "50vh" },
-        { label: "Média (70vh)", value: "70vh" },
-        { label: "Grande (85vh)", value: "85vh" },
-        { label: "Tela Cheia (100vh)", value: "100vh" },
-        { label: "Auto", value: "auto" },
+        { label: "Compacto", value: "compact" },
+        { label: "Padrão", value: "default" },
+        { label: "Espaçoso", value: "spacious" },
+      ],
+      group: "Layout",
+      description: "Distância entre título, subtítulo, descrição e botões",
+    },
+    blockGap: {
+      label: "Distância entre Blocos",
+      inputType: "select",
+      options: [
+        { label: "Padrão", value: "default" },
+        { label: "Largo", value: "wide" },
+        { label: "X. Largo", value: "x-wide" },
+      ],
+      group: "Layout",
+      description: "Distância entre o bloco de conteúdo e a imagem",
+    },
+    minHeight: {
+      label: "Altura",
+      inputType: "select",
+      options: [
+        { label: "Padrão", value: "70vh" },
+        { label: "Média", value: "85vh" },
+        { label: "Tela Cheia", value: "100vh" },
       ],
       group: "Layout",
     },
@@ -175,12 +197,13 @@ export const heroBlock: BlockDefinition = {
       label: "Largura do Conteúdo",
       inputType: "select",
       options: [
-        { label: "Estreita (500px)", value: "500px" },
-        { label: "Média (700px)", value: "700px" },
-        { label: "Larga (900px)", value: "900px" },
-        { label: "Total (1200px)", value: "1200px" },
+        { label: "Estreita", value: "500px" },
+        { label: "Média", value: "700px" },
+        { label: "Larga", value: "900px" },
+        { label: "Total", value: "1200px" },
       ],
       group: "Layout",
+      showWhen: { field: "variant", notEquals: "split" },
     },
 
     // =========================================================================

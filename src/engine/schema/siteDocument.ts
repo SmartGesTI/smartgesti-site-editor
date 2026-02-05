@@ -382,6 +382,10 @@ export interface HeroBlock extends BlockBase {
     align?: "left" | "center" | "right";
     /** Posição horizontal do container de conteúdo no layout */
     contentPosition?: "left" | "center" | "right";
+    /** Espaçamento entre elementos do conteúdo (título, subtítulo, descrição, botões) */
+    contentSpacing?: "compact" | "default" | "spacious";
+    /** Distância entre o bloco de conteúdo e o bloco de imagem (layouts divididos) */
+    blockGap?: "default" | "wide" | "x-wide";
     minHeight?: string;
     overlay?: boolean;
     /** Cor/gradiente do overlay (ex.: linear-gradient). Se omitido, usa fallback do CSS. */

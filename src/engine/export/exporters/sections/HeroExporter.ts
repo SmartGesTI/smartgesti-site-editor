@@ -44,6 +44,8 @@ export function exportHero(
     badge,
     align = "center",
     contentPosition = "center",
+    contentSpacing = "default",
+    blockGap = "default",
     minHeight = "80vh",
     image,
     overlay,
@@ -161,6 +163,30 @@ export function exportHero(
   };
   const justifyContent = contentPositionMap[contentPosition] || "center";
 
+  // Determine if layout has two blocks (content + image) - these should always be centered
+  const hasTwoBlocks = isSplit || isCard;
+  // Note: shouldShowImageGrid is checked later, so we'll handle it in each section
+
+  // Content spacing map - controls margin between elements
+  const spacingMap: Record<string, { title: string; subtitle: string; description: string; badge: string; actions: string }> = {
+    compact: { title: "0.75rem", subtitle: "0.5rem", description: "1.25rem", badge: "1rem", actions: "0.25rem" },
+    default: { title: "1.25rem", subtitle: "1rem", description: "2.5rem", badge: "1.5rem", actions: "0.5rem" },
+    spacious: { title: "2.25rem", subtitle: "2rem", description: "3.5rem", badge: "2.5rem", actions: "1.5rem" },
+  };
+  const spacing = spacingMap[contentSpacing] || spacingMap.default;
+
+  // Block gap map - controls justify-content, block max-width, container max-width, and gap
+  const blockGapConfig: Record<string, { justify: string; blockMaxWidth: string; containerMaxWidth: string; gap: string }> = {
+    default: { justify: "center", blockMaxWidth: "45%", containerMaxWidth: "1200px", gap: "4rem" },
+    wide: { justify: "space-between", blockMaxWidth: "45%", containerMaxWidth: "1400px", gap: "2rem" },
+    "x-wide": { justify: "space-between", blockMaxWidth: "43%", containerMaxWidth: "100%", gap: "2rem" },
+  };
+  const blocksConfig = blockGapConfig[blockGap] || blockGapConfig.default;
+  const blocksJustify = blocksConfig.justify;
+  const blocksMaxWidth = blocksConfig.blockMaxWidth;
+  const containerMaxWidth = blocksConfig.containerMaxWidth;
+  const blocksGap = blocksConfig.gap;
+
   // Overlay HTML
   const overlayStyle = overlayColor
     ? `position: absolute; inset: 0; background: ${overlayColor}; z-index: 0;`
@@ -181,22 +207,22 @@ export function exportHero(
 
   // Badge HTML
   const badgeHtml = badge
-    ? `<span class="sg-hero__badge" style="display: inline-block; padding: 0.5rem 1.25rem; background: ${finalBadgeColor}; color: ${finalBadgeTextColor}; border-radius: 999px; font-size: 0.875rem; font-weight: 600; margin-bottom: 1.5rem;">${escapeHtml(badge)}</span>`
+    ? `<span class="sg-hero__badge" style="display: inline-block; padding: 0.5rem 1.25rem; background: ${finalBadgeColor}; color: ${finalBadgeTextColor}; border-radius: 999px; font-size: 0.875rem; font-weight: 600; margin-bottom: ${spacing.badge};">${escapeHtml(badge)}</span>`
     : "";
 
   // Title HTML
   const titleHtml = title
-    ? `<h1 class="sg-hero__title" style="color: ${finalTitleColor}; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.25rem; letter-spacing: -0.02em;">${escapeHtml(title)}</h1>`
+    ? `<h1 class="sg-hero__title" style="color: ${finalTitleColor}; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: ${spacing.title}; letter-spacing: -0.02em;">${escapeHtml(title)}</h1>`
     : "";
 
   // Subtitle HTML
   const subtitleHtml = subtitle
-    ? `<h2 class="sg-hero__subtitle" style="color: ${finalSubtitleColor}; font-size: clamp(1.25rem, 2.5vw, 1.875rem); font-weight: 600; line-height: 1.3; margin-bottom: 1rem;">${escapeHtml(subtitle)}</h2>`
+    ? `<h2 class="sg-hero__subtitle" style="color: ${finalSubtitleColor}; font-size: clamp(1.25rem, 2.5vw, 1.875rem); font-weight: 600; line-height: 1.3; margin-bottom: ${spacing.subtitle};">${escapeHtml(subtitle)}</h2>`
     : "";
 
   // Description HTML
   const descHtml = description
-    ? `<p class="sg-hero__description" style="max-width: 650px; margin: ${align === "center" ? "0 auto 2.5rem" : "0 0 2.5rem"}; color: ${finalDescriptionColor}; font-size: 1.125rem; line-height: 1.7;">${escapeHtml(description)}</p>`
+    ? `<p class="sg-hero__description" style="max-width: 650px; margin: ${align === "center" ? `0 auto ${spacing.description}` : `0 0 ${spacing.description}`}; color: ${finalDescriptionColor}; font-size: 1.125rem; line-height: 1.7;">${escapeHtml(description)}</p>`
     : "";
 
   // Button styles
@@ -229,7 +255,7 @@ export function exportHero(
     : "";
   const buttonsHtml =
     primaryButton || secondaryButton
-      ? `<div class="sg-hero__actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: ${align === "center" ? "center" : "flex-start"}; margin-top: 0.5rem;">${primaryBtnHtml}${secondaryBtnHtml}</div>`
+      ? `<div class="sg-hero__actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: ${align === "center" ? "center" : "flex-start"}; margin-top: ${spacing.actions};">${primaryBtnHtml}${secondaryBtnHtml}</div>`
       : "";
 
   // Content block
@@ -317,12 +343,12 @@ export function exportHero(
 
     const splitBgStyle = background ? `background: ${background};` : "background-color: var(--sg-bg, #fff);";
     const imgStyle = `width: 100%; max-width: 500px; height: auto; border-radius: ${imageRadius}px; box-shadow: ${imgShadow}; object-fit: cover;`;
-    const imageDiv = `<div class="sg-hero__split-image" style="display: flex; justify-content: center;"><img src="${escapeHtml(heroImage)}" alt="${escapeHtml(title || "")}" class="sg-hero__img" style="${imgStyle}" onerror="${imgFallback}" /></div>`;
-    const contentDiv = `<div class="sg-hero__split-content" style="text-align: ${align}; position: relative; z-index: 1; max-width: ${contentMaxWidth};">${contentBlock}</div>`;
+    const imageDiv = `<div class="sg-hero__split-image" style="display: flex; justify-content: center; flex: 0 1 auto; max-width: ${blocksMaxWidth};"><img src="${escapeHtml(heroImage)}" alt="${escapeHtml(title || "")}" class="sg-hero__img" style="${imgStyle}" onerror="${imgFallback}" /></div>`;
+    const contentDiv = `<div class="sg-hero__split-content" style="text-align: ${align}; position: relative; z-index: 1; max-width: ${blocksMaxWidth}; flex: 0 1 auto;">${contentBlock}</div>`;
 
     const innerHtml = isImageLeft
-      ? `<style>${splitCss}</style><div id="${splitId}" class="sg-hero__split-inner" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; max-width: 1200px; width: 100%; padding: 0 2rem;">${imageDiv}${contentDiv}</div>`
-      : `<style>${splitCss}</style><div id="${splitId}" class="sg-hero__split-inner" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; max-width: 1200px; width: 100%; padding: 0 2rem;">${contentDiv}${imageDiv}</div>`;
+      ? `<style>${splitCss}</style><div id="${splitId}" class="sg-hero__split-inner" style="display: flex; justify-content: ${blocksJustify}; gap: ${blocksGap}; align-items: center; max-width: ${containerMaxWidth}; width: 100%; padding: 0 2rem;">${imageDiv}${contentDiv}</div>`
+      : `<style>${splitCss}</style><div id="${splitId}" class="sg-hero__split-inner" style="display: flex; justify-content: ${blocksJustify}; gap: ${blocksGap}; align-items: center; max-width: ${containerMaxWidth}; width: 100%; padding: 0 2rem;">${contentDiv}${imageDiv}</div>`;
 
     return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; ${paddingStyle} display: flex; align-items: center; justify-content: ${justifyContent}; position: relative; overflow: hidden; ${splitBgStyle}" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${innerHtml}</section>`;
   }
@@ -349,8 +375,8 @@ export function exportHero(
         gridId
       );
 
-      const cardHtml = `<div class="sg-hero__card" style="max-width: 500px; background: ${cardBg}; padding: 2rem; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); position: relative; z-index: 2; text-align: ${align};">${contentBlock}</div>`;
-      const gridWrapperHtml = `<div class="sg-hero__grid-wrapper" style="position: relative; z-index: 3; display: flex; justify-content: center; align-items: center;">${gridResult.html}</div>`;
+      const cardHtml = `<div class="sg-hero__card" style="max-width: 500px; background: ${cardBg}; padding: 2rem; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); position: relative; z-index: 2; text-align: ${align}; flex: 0 1 auto;">${contentBlock}</div>`;
+      const gridWrapperHtml = `<div class="sg-hero__grid-wrapper" style="position: relative; z-index: 3; display: flex; justify-content: center; align-items: center; flex: 0 1 auto; max-width: ${blocksMaxWidth};">${gridResult.html}</div>`;
 
       // Card always left, Grid always right
       const innerHtml = `${cardHtml}${gridWrapperHtml}`;
@@ -369,9 +395,9 @@ export function exportHero(
       `;
       layoutCss += gridResult.css;
 
-      const cardGridLayoutHtml = `<style>${layoutCss}</style><div id="${cardGridLayoutId}" class="sg-hero__card-grid-layout" style="display: flex; width: 100%; max-width: 1200px; align-items: center; justify-content: space-between; position: relative; z-index: 2; padding: 0 2rem; gap: 3rem;">${innerHtml}</div>`;
+      const cardGridLayoutHtml = `<style>${layoutCss}</style><div id="${cardGridLayoutId}" class="sg-hero__card-grid-layout" style="display: flex; width: 100%; max-width: ${containerMaxWidth}; align-items: center; justify-content: ${blocksJustify}; position: relative; z-index: 2; padding: 0 2rem; gap: ${blocksGap};">${innerHtml}</div>`;
 
-      return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses} sg-hero--with-grid" style="min-height: ${minHeight}; padding: ${cardPadding}; display: flex; align-items: center; justify-content: ${justifyContent}; background-image: url(${escapeHtml(heroImage)}); background-size: cover; background-position: center; position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${cardGridLayoutHtml}</section>`;
+      return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses} sg-hero--with-grid" style="min-height: ${minHeight}; padding: ${cardPadding}; display: flex; align-items: center; justify-content: center; background-image: url(${escapeHtml(heroImage)}); background-size: cover; background-position: center; position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${cardGridLayoutHtml}</section>`;
     }
 
     // Without Image Grid: Original card layout
@@ -381,7 +407,7 @@ export function exportHero(
       </div>
     `;
 
-    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; padding: ${cardPadding}; display: flex; align-items: center; justify-content: ${justifyContent}; background-image: url(${escapeHtml(heroImage)}); background-size: cover; background-position: center; position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${cardHtml}</section>`;
+    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; padding: ${cardPadding}; display: flex; align-items: center; justify-content: center; background-image: url(${escapeHtml(heroImage)}); background-size: cover; background-position: center; position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${cardHtml}</section>`;
   }
 
   // =========================================================================
@@ -401,15 +427,19 @@ export function exportHero(
       gridId
     );
 
-    const gridWrapperHtml = `<div class="sg-hero__grid-wrapper" style="position: relative; z-index: 3; display: flex; justify-content: center; align-items: center;">${gridResult.html}</div>`;
-    const contentSideHtml = `<div class="sg-hero__content-side" style="max-width: ${contentMaxWidth}; width: 100%; text-align: ${align}; position: relative; z-index: 2;">${contentBlock}</div>`;
+    const gridWrapperHtml = `<div class="sg-hero__grid-wrapper" style="position: relative; z-index: 3; display: flex; justify-content: center; align-items: center; flex: 0 1 auto; max-width: ${blocksMaxWidth};">${gridResult.html}</div>`;
+    const contentSideHtml = `<div class="sg-hero__content-side" style="max-width: ${blocksMaxWidth}; flex: 0 1 auto; text-align: ${align}; position: relative; z-index: 2;">${contentBlock}</div>`;
 
     // Responsive CSS for the grid layout
     let layoutCss = `
       @media (max-width: 1023px) {
         #${gridLayoutId} {
-          grid-template-columns: 1fr !important;
+          flex-direction: column !important;
           gap: 2rem !important;
+        }
+        #${gridLayoutId} .sg-hero__grid-wrapper,
+        #${gridLayoutId} .sg-hero__content-side {
+          max-width: 100% !important;
         }
         #${gridLayoutId} .sg-hero__grid-wrapper {
           order: -1;
@@ -422,7 +452,7 @@ export function exportHero(
       ? `${gridWrapperHtml}${contentSideHtml}`
       : `${contentSideHtml}${gridWrapperHtml}`;
 
-    const gridLayoutHtml = `<style>${layoutCss}</style><div id="${gridLayoutId}" class="sg-hero__grid-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; max-width: 1200px; width: 100%; align-items: center; position: relative; z-index: 2; padding: 0 2rem;">${innerHtml}</div>`;
+    const gridLayoutHtml = `<style>${layoutCss}</style><div id="${gridLayoutId}" class="sg-hero__grid-layout" style="display: flex; justify-content: ${blocksJustify}; gap: ${blocksGap}; max-width: ${containerMaxWidth}; width: 100%; align-items: center; position: relative; z-index: 2; padding: 0 2rem;">${innerHtml}</div>`;
 
     return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses} sg-hero--with-grid" style="min-height: ${minHeight}; ${paddingStyle} display: flex; align-items: center; justify-content: ${justifyContent}; ${bgStyle} position: relative; overflow: hidden;" data-variation="${escapeHtml(variation || variant || "")}">${styleBlock}${overlayHtml}${waveHtml}${gridLayoutHtml}</section>`;
   }

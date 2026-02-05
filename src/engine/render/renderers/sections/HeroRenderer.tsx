@@ -29,6 +29,8 @@ export function renderHero(block: any): React.ReactNode {
     badge,
     align = "center",
     contentPosition = "center",
+    contentSpacing = "default",
+    blockGap = "default",
     minHeight = "80vh",
     overlay,
     overlayColor,
@@ -128,20 +130,40 @@ export function renderHero(block: any): React.ReactNode {
   const defaultTextColor = hasOverlayOrDarkBg ? "#ffffff" : "var(--sg-text, #1f2937)";
   const defaultMutedColor = hasOverlayOrDarkBg ? "rgba(255,255,255,0.85)" : "var(--sg-muted-text, #6b7280)";
 
+  // Content spacing map - controls margin between elements
+  const spacingMap: Record<string, { title: string; subtitle: string; description: string; badge: string; actions: string }> = {
+    compact: { title: "0.5rem", subtitle: "0.5rem", description: "1rem", badge: "1rem", actions: "0.25rem" },
+    default: { title: "1rem", subtitle: "1rem", description: "2rem", badge: "1.5rem", actions: "0.5rem" },
+    spacious: { title: "2rem", subtitle: "2rem", description: "3rem", badge: "2.5rem", actions: "1.5rem" },
+  };
+  const spacing = spacingMap[contentSpacing] || spacingMap.default;
+
+  // Block gap map - controls justify-content, block max-width, container max-width, and gap
+  const blockGapConfig: Record<string, { justify: string; blockMaxWidth: string; containerMaxWidth: string; gap: string }> = {
+    default: { justify: "center", blockMaxWidth: "45%", containerMaxWidth: "1200px", gap: "4rem" },
+    wide: { justify: "space-between", blockMaxWidth: "45%", containerMaxWidth: "1400px", gap: "2rem" },
+    "x-wide": { justify: "space-between", blockMaxWidth: "43%", containerMaxWidth: "100%", gap: "2rem" },
+  };
+  const blocksConfig = blockGapConfig[blockGap] || blockGapConfig.default;
+  const blocksJustify = blocksConfig.justify;
+  const blocksMaxWidth = blocksConfig.blockMaxWidth;
+  const containerMaxWidth = blocksConfig.containerMaxWidth;
+  const blocksGap = blocksConfig.gap;
+
   const titleStyle: React.CSSProperties = {
     color: titleColor || defaultTextColor,
-    marginBottom: "1rem",
+    marginBottom: spacing.title,
   };
 
   const subtitleStyle: React.CSSProperties = {
     color: subtitleColor || defaultMutedColor,
-    marginBottom: "1rem",
+    marginBottom: spacing.subtitle,
   };
 
   const descriptionStyle: React.CSSProperties = {
     color: descriptionColor || defaultMutedColor,
     maxWidth: "600px",
-    margin: align === "center" ? "0 auto 2rem" : "0 0 2rem",
+    margin: align === "center" ? `0 auto ${spacing.description}` : `0 0 ${spacing.description}`,
   };
 
   // Badge styles
@@ -151,7 +173,7 @@ export function renderHero(block: any): React.ReactNode {
     borderRadius: "9999px",
     fontSize: "0.875rem",
     fontWeight: 600,
-    marginBottom: "1.5rem",
+    marginBottom: spacing.badge,
     backgroundColor: badgeColor || "var(--sg-primary, #3b82f6)",
     color: badgeTextColor || "#ffffff",
   };
@@ -324,6 +346,7 @@ export function renderHero(block: any): React.ReactNode {
           flexWrap: "wrap",
           gap: "1rem",
           justifyContent: align === "center" ? "center" : "flex-start",
+          marginTop: spacing.actions,
         }}
       >
         {primaryButton && (
@@ -427,6 +450,8 @@ export function renderHero(block: any): React.ReactNode {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        flex: "0 1 auto",
+        maxWidth: blocksMaxWidth,
       }}
     >
       {renderImageGrid(
@@ -446,7 +471,7 @@ export function renderHero(block: any): React.ReactNode {
     const isImageLeft = imagePosition === "left";
 
     const imageArea = (
-      <div className="sg-hero__split-image" style={{ display: "flex", justifyContent: "center" }}>
+      <div className="sg-hero__split-image" style={{ display: "flex", justifyContent: "center", flex: "0 1 auto", maxWidth: blocksMaxWidth }}>
         <img
           src={heroImage}
           alt={title || ""}
@@ -474,16 +499,16 @@ export function renderHero(block: any): React.ReactNode {
         <div
           className="sg-hero__split-inner"
           style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "3rem",
-            maxWidth: "1200px",
+            display: "flex",
+            justifyContent: blocksJustify,
+            gap: blocksGap,
+            maxWidth: containerMaxWidth,
             width: "100%",
             alignItems: "center",
           }}
         >
           {isImageLeft && imageArea}
-          <div className="sg-hero__split-content" style={contentStyle}>
+          <div className="sg-hero__split-content" style={{ ...contentStyle, flex: "0 1 auto", maxWidth: blocksMaxWidth }}>
             {content}
           </div>
           {!isImageLeft && imageArea}
@@ -510,6 +535,7 @@ export function renderHero(block: any): React.ReactNode {
           boxShadow: "0 25px 50px rgba(0,0,0,0.25)",
           zIndex: 2,
           maxWidth: shouldShowImageGrid ? "500px" : contentMaxWidth,
+          flex: "0 1 auto",
         }}
       >
         {content}
@@ -548,13 +574,13 @@ export function renderHero(block: any): React.ReactNode {
             style={{
               display: "flex",
               width: "100%",
-              maxWidth: "1200px",
+              maxWidth: containerMaxWidth,
               alignItems: "center",
-              justifyContent: "space-between",
+              justifyContent: blocksJustify,
               position: "relative",
               zIndex: 2,
               padding: "0 2rem",
-              gap: "3rem",
+              gap: blocksGap,
             }}
           >
             {CardElement}
@@ -623,14 +649,14 @@ export function renderHero(block: any): React.ReactNode {
         )}
         {/* Wave decoration */}
         {WaveElement}
-        {/* Main content wrapper with grid layout */}
+        {/* Main content wrapper with flex layout */}
         <div
           className="sg-hero__grid-layout"
           style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "3rem",
-            maxWidth: "1200px",
+            display: "flex",
+            justifyContent: blocksJustify,
+            gap: blocksGap,
+            maxWidth: containerMaxWidth,
             width: "100%",
             alignItems: "center",
             position: "relative",
@@ -639,7 +665,7 @@ export function renderHero(block: any): React.ReactNode {
           }}
         >
           {isGridLeft && ImageGridElement}
-          <div className="sg-hero__content-side" style={contentStyle}>
+          <div className="sg-hero__content-side" style={{ ...contentStyle, flex: "0 1 auto", maxWidth: blocksMaxWidth }}>
             {content}
           </div>
           {!isGridLeft && ImageGridElement}
