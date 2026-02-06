@@ -428,6 +428,7 @@ export function renderHero(block: any): React.ReactNode {
         {config.positions.map((pos, idx) => {
           const img = images[idx];
           const imgSrc = img?.src || PLACEHOLDER_IMAGE_URL;
+          const imgScale = img?.scale ?? 1;
 
           return (
             <div
@@ -437,6 +438,8 @@ export function renderHero(block: any): React.ReactNode {
                 gridRow: pos.row,
                 overflow: "hidden",
                 borderRadius: `${radius}px`,
+                transform: imgScale !== 1 ? `scale(${imgScale})` : undefined,
+                zIndex: imgScale !== 1 ? 1 : undefined,
               }}
             >
               <img
@@ -445,8 +448,8 @@ export function renderHero(block: any): React.ReactNode {
                 style={{
                   width: "100%",
                   height: "100%",
-                  objectFit: "cover",
-                  boxShadow: shadowValue,
+                  objectFit: "contain",
+                  display: "block",
                 }}
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE_URL;
@@ -469,7 +472,7 @@ export function renderHero(block: any): React.ReactNode {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        flex: "0 1 auto",
+        flex: "1 1 0%",
         maxWidth: blocksMaxWidth,
       }}
     >
@@ -762,7 +765,7 @@ export function renderHero(block: any): React.ReactNode {
           }}
         >
           {isGridLeft && ImageGridElement}
-          <div className="sg-hero__content-side" style={{ ...contentStyle, flex: "0 1 auto", maxWidth: blocksMaxWidth }}>
+          <div className="sg-hero__content-side" style={{ ...contentStyle, flex: "1 1 0%", maxWidth: blocksMaxWidth }}>
             {content}
           </div>
           {!isGridLeft && ImageGridElement}

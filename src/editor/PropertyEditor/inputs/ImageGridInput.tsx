@@ -113,18 +113,21 @@ function PresetIcon({ preset, isActive }: { preset: ImageGridPreset; isActive: b
 }
 
 /**
- * Slot de imagem individual com preview e upload
+ * Slot de imagem individual com preview, upload e slider de escala
+ * Layout: row horizontal com preview à esquerda e slider à direita
  */
 function ImageSlot({
   index,
   image,
   onChange,
   onRemove,
+  onScaleChange,
 }: {
   index: number;
   image?: ImageGridItem;
   onChange: (image: ImageGridItem) => void;
   onRemove: () => void;
+  onScaleChange: (scale: number) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -144,10 +147,11 @@ function ImageSlot({
     }
 
     // Usar Data URL para preview (deferUpload mode)
+    // Preservar scale existente ao trocar imagem
     const reader = new FileReader();
     reader.onload = (evt) => {
       const dataUrl = evt.target?.result as string;
-      onChange({ src: dataUrl, alt: image?.alt || "" });
+      onChange({ src: dataUrl, alt: image?.alt || "", scale: image?.scale });
     };
     reader.readAsDataURL(file);
   };
@@ -159,8 +163,11 @@ function ImageSlot({
     }
   };
 
+  const hasImage = !!image?.src;
+  const scale = image?.scale ?? 1;
+
   return (
-    <div className="relative group">
+    <div className="flex items-center gap-3 group">
       <input
         ref={inputRef}
         type="file"
@@ -169,62 +176,83 @@ function ImageSlot({
         className="hidden"
       />
 
-      <button
-        type="button"
-        onClick={handleClick}
-        className={cn(
-          "w-16 h-16 rounded-lg overflow-hidden border-2 transition-all",
-          "flex items-center justify-center",
-          "bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700",
-          image?.src
-            ? "border-blue-400 dark:border-blue-500"
-            : "border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-400"
-        )}
-      >
-        {image?.src ? (
-          <img
-            src={image.src}
-            alt={image.alt || `Imagem ${index + 1}`}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <svg
-            className="w-6 h-6 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-        )}
-      </button>
-
-      {/* Botão de remover */}
-      {image?.src && (
+      {/* Preview da imagem */}
+      <div className="relative flex-shrink-0">
         <button
           type="button"
-          onClick={onRemove}
+          onClick={handleClick}
           className={cn(
-            "absolute -top-1 -right-1 w-5 h-5 rounded-full",
-            "bg-red-500 text-white",
+            "w-12 h-12 rounded-lg overflow-hidden border-2 transition-all",
             "flex items-center justify-center",
-            "opacity-0 group-hover:opacity-100 transition-opacity",
-            "text-xs font-bold"
+            "bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700",
+            hasImage
+              ? "border-blue-400 dark:border-blue-500"
+              : "border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-400"
           )}
         >
-          ×
+          {hasImage ? (
+            <img
+              src={image.src}
+              alt={image.alt || `Imagem ${index + 1}`}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <svg
+              className="w-5 h-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+          )}
         </button>
-      )}
 
-      {/* Número do slot */}
-      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] text-center py-0.5">
-        {index + 1}
+        {/* Botão de remover */}
+        {hasImage && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className={cn(
+              "absolute -top-1 -right-1 w-4 h-4 rounded-full",
+              "bg-red-500 text-white",
+              "flex items-center justify-center",
+              "opacity-0 group-hover:opacity-100 transition-opacity",
+              "text-[10px] font-bold leading-none"
+            )}
+          >
+            ×
+          </button>
+        )}
+
+        {/* Número do slot */}
+        <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[8px] text-center">
+          {index + 1}
+        </div>
       </div>
+
+      {/* Slider de escala — só aparece quando a imagem tem src */}
+      {hasImage && (
+        <div className="flex-1 flex items-center gap-2 min-w-0">
+          <input
+            type="range"
+            value={scale}
+            onChange={(e) => onScaleChange(Number(e.target.value))}
+            min={1}
+            max={3}
+            step={0.1}
+            className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+          />
+          <span className="text-[10px] text-gray-500 dark:text-gray-400 w-8 text-right tabular-nums flex-shrink-0">
+            {Math.round(scale * 100)}%
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -274,6 +302,16 @@ export function ImageGridInput({
     onImagesChange(newImages);
   };
 
+  // Atualiza a escala de uma imagem específica
+  const handleScaleChange = (index: number, scale: number) => {
+    const newImages = [...images];
+    while (newImages.length <= index) {
+      newImages.push({ src: "", alt: "" });
+    }
+    newImages[index] = { ...newImages[index], scale };
+    onImagesChange(newImages);
+  };
+
   return (
     <div className="space-y-3">
       {/* Label */}
@@ -312,12 +350,12 @@ export function ImageGridInput({
         </div>
       </div>
 
-      {/* Slots de Imagens */}
+      {/* Slots de Imagens — lista vertical */}
       <div className="space-y-1">
         <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">
           Imagens ({images.filter(img => img?.src).length}/{maxImages})
         </span>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2">
           {Array.from({ length: maxImages }).map((_, index) => (
             <ImageSlot
               key={index}
@@ -325,6 +363,7 @@ export function ImageGridInput({
               image={images[index]}
               onChange={(img) => handleImageChange(index, img)}
               onRemove={() => handleImageRemove(index)}
+              onScaleChange={(scale) => handleScaleChange(index, scale)}
             />
           ))}
         </div>

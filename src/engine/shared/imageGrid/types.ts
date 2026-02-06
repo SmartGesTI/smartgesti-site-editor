@@ -11,6 +11,8 @@ export interface ImageGridItem {
   src: string;
   /** Texto alternativo para acessibilidade */
   alt?: string;
+  /** Escala individual da imagem (1.0 = 100%, padrão) */
+  scale?: number;
 }
 
 /**

@@ -307,9 +307,11 @@ export function exportHero(
         const img = images[idx];
         const imgSrc = img?.src || PLACEHOLDER_IMAGE_URL;
         const imgAlt = img?.alt || `Imagem ${idx + 1}`;
+        const imgScale = img?.scale ?? 1;
+        const scaleStyle = imgScale !== 1 ? ` transform: scale(${imgScale}); z-index: 1;` : "";
 
-        return `<div class="sg-hero__grid-item" style="grid-column: ${pos.col}; grid-row: ${pos.row}; overflow: hidden; border-radius: ${radius}px;">
-          <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(imgAlt)}" style="width: 100%; height: 100%; object-fit: cover; box-shadow: ${shadowValue};" onerror="${imgFallback}" />
+        return `<div class="sg-hero__grid-item" style="grid-column: ${pos.col}; grid-row: ${pos.row}; overflow: hidden; border-radius: ${radius}px;${scaleStyle}">
+          <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(imgAlt)}" style="width: 100%; height: 100%; object-fit: contain; display: block;" onerror="${imgFallback}" />
         </div>`;
       })
       .join("");
@@ -488,8 +490,8 @@ export function exportHero(
       gridId
     );
 
-    const gridWrapperHtml = `<div class="sg-hero__grid-wrapper" style="position: relative; z-index: 3; display: flex; justify-content: center; align-items: center; flex: 0 1 auto; max-width: ${blocksMaxWidth};">${gridResult.html}</div>`;
-    const contentSideHtml = `<div class="sg-hero__content-side" style="max-width: ${blocksMaxWidth}; flex: 0 1 auto; text-align: ${align}; position: relative; z-index: 2;">${contentBlock}</div>`;
+    const gridWrapperHtml = `<div class="sg-hero__grid-wrapper" style="position: relative; z-index: 3; display: flex; justify-content: center; align-items: center; flex: 1 1 0%; max-width: ${blocksMaxWidth};">${gridResult.html}</div>`;
+    const contentSideHtml = `<div class="sg-hero__content-side" style="max-width: ${blocksMaxWidth}; flex: 1 1 0%; text-align: ${align}; position: relative; z-index: 2;">${contentBlock}</div>`;
 
     // Responsive CSS for the grid layout
     let layoutCss = `
