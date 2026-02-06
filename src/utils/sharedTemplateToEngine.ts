@@ -1,12 +1,12 @@
 /**
- * Converte documento no formato shared (templates) para o formato do engine V2.
+ * Converte documento no formato shared (templates) para o formato do engine.
  * Shared: meta, theme (SimpleThemeTokens), structure na raiz.
  * Engine: schemaVersion, theme (ThemeTokens), pages[].structure.
  */
 
-import type { SiteDocumentV2 as EngineDocument } from "../engine/schema/siteDocument";
+import type { SiteDocument as EngineDocument } from "../engine/schema/siteDocument";
 import type { ThemeTokens } from "../engine/schema/themeTokens";
-import type { SiteDocumentV2 as SharedDocument } from "../shared/schema";
+import type { SiteDocument as SharedDocument } from "../shared/schema";
 import { createNavbarBlock, createFooterBlock } from "./pageTemplateFactory";
 
 /** Slugs canônicos das páginas pré-fabricadas do site. Links do navbar/CTAs usam /site/p/:slug. */
@@ -86,7 +86,7 @@ const CANONICAL_PAGE_META: Record<
 
 /**
  * Converte um documento no formato shared (usado nos templates em shared/templates)
- * para o formato do engine (usado pelo LandingPageEditorV2 e PreviewV2).
+ * para o formato do engine (usado pelo LandingPageEditor e Preview).
  * Cria todas as páginas pré-fabricadas (home + avisos, cursos, contato, etc.) para que
  * os links do navbar (/site/p/:slug) tenham página correspondente.
  * Cada página criada automaticamente inclui navbar (com links para todas as páginas) e footer.

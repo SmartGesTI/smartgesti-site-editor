@@ -6,7 +6,7 @@
 
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { LandingPageEditorV2 } from "./editor/LandingPageEditorV2";
+import { LandingPageEditor } from "./editor/LandingPageEditor";
 import "./styles/landing-page.css";
 
 const root = document.getElementById("root");
@@ -24,7 +24,7 @@ createRoot(root).render(
         </p>
       </header>
       <main className="p-2">
-        <LandingPageEditorV2 />
+        <LandingPageEditor />
       </main>
     </div>
   </React.StrictMode>,

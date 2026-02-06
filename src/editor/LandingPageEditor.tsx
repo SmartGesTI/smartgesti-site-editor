@@ -1,6 +1,6 @@
 /**
- * Landing Page Editor V2 - Refatorado
- * Editor de landing pages usando engine V2
+ * Landing Page Editor
+ * Editor de landing pages usando block engine
  */
 
 import { useState, useCallback, useEffect, lazy, Suspense } from "react";
@@ -9,7 +9,7 @@ import { Toolbar, LeftPanel, CenterPanel, RightPanel } from "./components";
 import { useEditorState } from "../hooks/useEditorState";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 import { LoadingSpinner } from "./components/LoadingSpinner";
-import { SiteDocumentV2, PatchBuilder, Block } from "../engine";
+import { SiteDocument, PatchBuilder, Block } from "../engine";
 import { getTemplate } from "../shared/templates";
 import type { TemplateId } from "../shared/templates";
 import { sharedTemplateToEngineDocument } from "../utils/sharedTemplateToEngine";
@@ -29,12 +29,12 @@ export interface UploadConfig {
   authToken?: string;
 }
 
-export interface LandingPageEditorV2Props {
-  initialData?: SiteDocumentV2;
+export interface LandingPageEditorProps {
+  initialData?: SiteDocument;
   /** ID do template a carregar quando não houver initialData (ex.: "escola-edvi") */
   defaultTemplateId?: TemplateId;
-  onSave?: (data: SiteDocumentV2) => Promise<void>;
-  onPublish?: (data: SiteDocumentV2) => Promise<void>;
+  onSave?: (data: SiteDocument) => Promise<void>;
+  onPublish?: (data: SiteDocument) => Promise<void>;
   /** Configuração para upload seguro de imagens/vídeos */
   uploadConfig?: UploadConfig;
 }
@@ -43,13 +43,13 @@ export interface LandingPageEditorV2Props {
 // Component
 // ============================================================================
 
-export function LandingPageEditorV2({
+export function LandingPageEditor({
   initialData,
   defaultTemplateId,
   onSave,
   onPublish,
   uploadConfig,
-}: LandingPageEditorV2Props) {
+}: LandingPageEditorProps) {
   // Hook de estado do editor (edição por páginas; sem navegação)
   const {
     document,

@@ -1,5 +1,5 @@
 /**
- * Theme Tokens Schema V2
+ * Theme Tokens Schema
  * Define tokens semânticos para temas (cores, tipografia, espaçamento, efeitos, layout)
  * Inspirado em design systems modernos (Tailwind, Radix, shadcn/ui)
  */

@@ -1,17 +1,17 @@
 /**
- * Preview V2 - REFATORADO
+ * Preview
  * Sem dependências circulares, sem reloads desnecessários
  */
 
 import React, { useEffect, useRef, useState, useMemo } from "react";
-import { SiteDocumentV2, Block } from "../schema/siteDocument";
+import { SiteDocument, Block } from "../schema/siteDocument";
 import { exportPageToHtml, exportBlockToHtml } from "../export/exportHtml";
 import { detectChangedBlocks } from "../../utils/changeDetector";
 import { hashDocument } from "../../utils/documentHash";
 import { logger } from "../../utils/logger";
 
-export interface PreviewV2Props {
-  document: SiteDocumentV2;
+export interface PreviewProps {
+  document: SiteDocument;
   pageId?: string;
   className?: string;
   style?: React.CSSProperties;
@@ -54,16 +54,16 @@ function findBlockInPage(page: any, blockId: string): Block | null {
 /**
  * Componente de preview usando iframe isolado
  */
-export function PreviewV2({
+export function Preview({
   document,
   pageId,
   className,
   style,
   onBlockClick,
   selectedBlockId,
-}: PreviewV2Props) {
+}: PreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const previousDocRef = useRef<SiteDocumentV2 | null>(null);
+  const previousDocRef = useRef<SiteDocument | null>(null);
   const previousDocHashRef = useRef<string | null>(null);
   const isInitializedRef = useRef<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -131,7 +131,7 @@ export function PreviewV2({
   };
 
   // Atualizar preview completo (com srcdoc - causa reload)
-  const updateFullPreview = (doc: SiteDocumentV2, showLoading: boolean) => {
+  const updateFullPreview = (doc: SiteDocument, showLoading: boolean) => {
     if (!iframeRef.current || !page) return;
 
     try {
@@ -207,7 +207,7 @@ export function PreviewV2({
 
       iframe.srcdoc = html;
     } catch (error) {
-      logger.error("[PreviewV2] Error:", error);
+      logger.error("[Preview] Error:", error);
       if (showLoading) {
         setIsLoading(false);
       }
@@ -215,7 +215,7 @@ export function PreviewV2({
   };
 
   // Atualizar apenas um bloco (sem reload)
-  const updatePartialPreview = (blockId: string, doc: SiteDocumentV2) => {
+  const updatePartialPreview = (blockId: string, doc: SiteDocument) => {
     if (!iframeRef.current || !page) return;
 
     try {
@@ -271,7 +271,7 @@ export function PreviewV2({
             // Reaplicar highlight
             updateHighlight(selectedBlockIdRef.current || null);
           } catch (error) {
-            logger.error("[PreviewV2] Erro ao atualizar:", error);
+            logger.error("[Preview] Erro ao atualizar:", error);
             updateFullPreview(doc, false);
           }
         } else {
@@ -279,7 +279,7 @@ export function PreviewV2({
         }
       });
     } catch (error) {
-      logger.error("[PreviewV2] Erro:", error);
+      logger.error("[Preview] Erro:", error);
       updateFullPreview(doc, false);
     }
   };
@@ -318,7 +318,7 @@ export function PreviewV2({
     // Se não há mudanças detectadas mas o hash mudou, forçar reload
     if (changedBlocks.length === 0) {
       logger.debug(
-        "[PreviewV2] Hash changed but no changes detected, forcing reload",
+        "[Preview] Hash changed but no changes detected, forcing reload",
       );
       updateFullPreview(document, false);
       return;

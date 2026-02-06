@@ -1,15 +1,15 @@
 import React, { lazy, Suspense } from "react";
-import { SiteDocumentV2 } from "../../engine";
+import { SiteDocument } from "../../engine";
 import { PageTabBar } from "../PageTabBar";
 import { LoadingSpinner } from "./LoadingSpinner";
 
-// Lazy load PreviewV2 (componente pesado)
-const PreviewV2 = lazy(() =>
-  import("../../engine").then(module => ({ default: module.PreviewV2 }))
+// Lazy load Preview (componente pesado)
+const Preview = lazy(() =>
+  import("../../engine").then(module => ({ default: module.Preview }))
 );
 
 interface CenterPanelProps {
-  document: SiteDocumentV2;
+  document: SiteDocument;
   currentPageId: string;
   currentPage: any;
   selectedBlockId: string | null;
@@ -49,7 +49,7 @@ export const CenterPanel = React.memo(function CenterPanel({
       <div className="flex-1 overflow-hidden relative">
         {currentPage ? (
           <Suspense fallback={<LoadingSpinner />}>
-            <PreviewV2
+            <Preview
               document={document}
               pageId={currentPageId}
               style={{ height: "100%", width: "100%" }}

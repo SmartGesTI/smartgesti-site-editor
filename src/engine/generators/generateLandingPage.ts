@@ -1,9 +1,9 @@
 /**
  * Landing Page Generator
- * Gera uma landing page completa do zero usando engine V2 (estilo Lovable)
+ * Gera uma landing page completa do zero usando block engine
  */
 
-import { SiteDocumentV2, Block, SectionBlock } from '../schema/siteDocument'
+import { SiteDocument, Block, SectionBlock } from '../schema/siteDocument'
 import { ThemeTokens, defaultThemeTokens } from '../schema/themeTokens'
 import { createReplacePatch } from '../patch/applyPatch'
 
@@ -17,7 +17,7 @@ export function generateCompleteLandingPage(options: {
   description?: string
   primaryColor?: string
   theme?: 'light' | 'dark' | 'modern' | 'corporate'
-} = {}): SiteDocumentV2 {
+} = {}): SiteDocument {
   const {
     name = 'Landing Page',
     title = 'Bem-vindo à Nossa Solução',
@@ -1115,7 +1115,7 @@ function generateFooter(): SectionBlock {
 /**
  * Gera patches para aplicar mudanças (simulando IA)
  */
-export function generatePatchesForLandingPage(_document: SiteDocumentV2, changes: {
+export function generatePatchesForLandingPage(_document: SiteDocument, changes: {
   title?: string
   subtitle?: string
   primaryColor?: string
@@ -1156,7 +1156,7 @@ export function generateModernLandingPage(options: {
   }
   primaryColor?: string
   theme?: 'light' | 'dark' | 'gradient' | 'corporate'
-} = {}): SiteDocumentV2 {
+} = {}): SiteDocument {
   const {
     name = 'Landing Page Moderna',
     business = {

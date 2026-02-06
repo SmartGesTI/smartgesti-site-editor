@@ -1,10 +1,10 @@
 /**
- * Validadores para SiteDocumentV2
+ * Validadores para SiteDocument
  * Usados para garantir que documentos gerados por IA são válidos
  */
 
 import type {
-  SiteDocumentV2,
+  SiteDocument,
   Block,
   BlockType,
   SimpleThemeTokens,
@@ -24,7 +24,7 @@ export interface ValidationResult {
 }
 
 /**
- * Valida um documento SiteDocumentV2 completo
+ * Valida um documento SiteDocument completo
  */
 export function validateDocument(doc: unknown): ValidationResult {
   const errors: ValidationError[] = [];
@@ -478,7 +478,7 @@ function validateBlockProps(
 /**
  * Tenta corrigir erros comuns em documentos gerados por IA
  */
-export function sanitizeDocument(doc: unknown): SiteDocumentV2 | null {
+export function sanitizeDocument(doc: unknown): SiteDocument | null {
   if (!doc || typeof doc !== "object") {
     return null;
   }
@@ -486,7 +486,7 @@ export function sanitizeDocument(doc: unknown): SiteDocumentV2 | null {
   const document = doc as Record<string, any>;
 
   // Garantir estrutura básica com tema padrão
-  const sanitized: SiteDocumentV2 = {
+  const sanitized: SiteDocument = {
     meta: {
       title: "Untitled Site",
     },

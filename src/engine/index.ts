@@ -1,6 +1,6 @@
 /**
- * Engine V2 - Entry Point
- * Exporta todos os módulos do engine V2
+ * Engine - Entry Point
+ * Exporta todos os módulos do engine
  */
 
 // Schema
@@ -23,7 +23,7 @@ export * from "./export/exportHtml";
 export * from "./export/sanitizeHtml";
 
 // Preview
-export * from "./preview/PreviewV2";
+export * from "./preview/Preview";
 
 // Patch
 export * from "./patch/types";

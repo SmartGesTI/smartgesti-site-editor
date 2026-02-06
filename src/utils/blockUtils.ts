@@ -3,7 +3,7 @@
  * Funções utilitárias para manipulação de blocos
  */
 
-import { Block, SiteDocumentV2 } from '../engine'
+import { Block, SiteDocument } from '../engine'
 
 /**
  * Encontra um bloco na estrutura recursivamente
@@ -47,7 +47,7 @@ export function findBlockInStructure(blocks: Block[], blockId: string): Block | 
 /**
  * Limpa a estrutura de blocos inválidos
  */
-export function cleanDocumentStructure(doc: SiteDocumentV2): SiteDocumentV2 {
+export function cleanDocumentStructure(doc: SiteDocument): SiteDocument {
   const cleanBlocks = (blocks: Block[]): Block[] => {
     if (!blocks || !Array.isArray(blocks)) return []
 

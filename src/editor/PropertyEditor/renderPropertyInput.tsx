@@ -14,7 +14,7 @@ import {
   TypographyInput,
   ImageInput,
 } from "./inputs";
-import type { UploadConfig } from "../LandingPageEditorV2";
+import type { UploadConfig } from "../LandingPageEditor";
 
 /**
  * Extended context for special input types that need to update multiple props

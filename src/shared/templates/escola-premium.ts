@@ -17,10 +17,10 @@
  * - Footer completo multi-colunas
  */
 
-import type { SiteDocumentV2 } from "../schema";
+import type { SiteDocument } from "../schema";
 import { NAVBAR_DEFAULT_PROPS } from "../../engine/registry/blocks/sections/navbar";
 
-export const escolaPremiumTemplate: SiteDocumentV2 = {
+export const escolaPremiumTemplate: SiteDocument = {
   meta: {
     title: "Colégio Vanguarda",
     description: "Template premium e moderno para escolas e instituições de ensino de excelência",

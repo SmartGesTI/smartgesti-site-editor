@@ -4,15 +4,15 @@
  */
 
 import { memo, useMemo, useCallback } from "react";
-import { Block, SiteDocumentV2, componentRegistry, InspectorMeta } from "../../engine";
+import { Block, SiteDocument, componentRegistry, InspectorMeta } from "../../engine";
 import { VariationSelector } from "./VariationSelector";
 import { BlockHeader } from "./BlockHeader";
 import { CollapsiblePropertyGroup } from "./CollapsiblePropertyGroup";
-import type { UploadConfig } from "../LandingPageEditorV2";
+import type { UploadConfig } from "../LandingPageEditor";
 
 interface BlockPropertyEditorProps {
   block: Block | null;
-  document?: SiteDocumentV2;
+  document?: SiteDocument;
   currentPageId?: string;
   onUpdate: (updates: Record<string, any>) => void;
   uploadConfig?: UploadConfig;

@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { InspectorMeta } from "../../engine";
 import { renderPropertyInput } from "./renderPropertyInput";
-import type { UploadConfig } from "../LandingPageEditorV2";
+import type { UploadConfig } from "../LandingPageEditor";
 
 interface PropertyGroupProps {
   groupName: string;

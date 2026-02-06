@@ -3,7 +3,7 @@
  * Sistema que mantém os links do navbar atualizados com as páginas do documento
  */
 
-import { Block, NavbarBlock, SiteDocumentV2, SitePage } from "@/engine/schema/siteDocument";
+import { Block, NavbarBlock, SiteDocument, SitePage } from "@/engine/schema/siteDocument";
 import { Patch } from "@/engine/patch/types";
 import { PatchBuilder } from "@/engine/patch/PatchBuilder";
 import { logger } from "./logger";
@@ -76,7 +76,7 @@ function findNavbarBlocksInStructure(
 /**
  * Encontra todos os blocos navbar em todas as páginas do documento
  */
-export function findNavbarBlocks(document: SiteDocumentV2): NavbarBlockInfo[] {
+export function findNavbarBlocks(document: SiteDocument): NavbarBlockInfo[] {
   const navbars: NavbarBlockInfo[] = [];
 
   for (const page of document.pages) {
@@ -113,7 +113,7 @@ function shouldAutoSync(navbarBlock: NavbarBlock): boolean {
  * Sincroniza os links de todos os navbars com as páginas do documento
  * Retorna array de patches para aplicar
  */
-export function syncNavbarLinks(document: SiteDocumentV2): Patch {
+export function syncNavbarLinks(document: SiteDocument): Patch {
   const patches: Patch = [];
 
   // Gera links a partir das páginas

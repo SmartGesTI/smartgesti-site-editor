@@ -4,7 +4,7 @@
  * and uploading them to Supabase Storage
  */
 
-import { UploadConfig } from '../editor/LandingPageEditorV2';
+import { UploadConfig } from '../editor/LandingPageEditor';
 
 /**
  * Detect if a string is a Data URL

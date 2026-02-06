@@ -4,13 +4,13 @@
  */
 
 import React from 'react'
-import { SitePage, SiteDocumentV2 } from '../schema/siteDocument'
+import { SitePage, SiteDocument } from '../schema/siteDocument'
 import { renderBlockNode } from './renderNodeImpl'
 import { generateThemeCSSVariables } from '../schema/themeTokens'
 
 export interface RenderPageProps {
   page: SitePage
-  document?: SiteDocumentV2
+  document?: SiteDocument
   className?: string
 }
 
@@ -33,6 +33,6 @@ export function RenderPage({ page, document, className }: RenderPageProps) {
 /**
  * Função que renderiza uma página e retorna JSX
  */
-export function renderPage(page: SitePage, document?: SiteDocumentV2): React.ReactNode {
+export function renderPage(page: SitePage, document?: SiteDocument): React.ReactNode {
   return <RenderPage page={page} document={document} />
 }

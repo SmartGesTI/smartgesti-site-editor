@@ -1,6 +1,6 @@
 /**
- * Site Document V2 Schema
- * Documento componível baseado em blocos (Lovable-like)
+ * Site Document Schema
+ * Documento componível baseado em blocos
  */
 
 import { ThemeTokens } from "./themeTokens";
@@ -1118,9 +1118,9 @@ export interface ContentCollection {
 }
 
 /**
- * Documento completo do site V2
+ * Documento completo do site
  */
-export interface SiteDocumentV2 {
+export interface SiteDocument {
   schemaVersion: 2;
   theme: ThemeTokens;
   content?: {
@@ -1130,11 +1130,11 @@ export interface SiteDocumentV2 {
 }
 
 /**
- * Helper para criar um documento V2 vazio
+ * Helper para criar um documento vazio
  */
-export function createEmptySiteDocumentV2(
+export function createEmptySiteDocument(
   _name: string = "Novo Site",
-): SiteDocumentV2 {
+): SiteDocument {
   return {
     schemaVersion: 2,
     theme: {

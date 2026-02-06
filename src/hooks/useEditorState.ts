@@ -5,7 +5,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import {
-  SiteDocumentV2,
+  SiteDocument,
   SitePage,
   Block,
   BlockType,
@@ -27,12 +27,12 @@ import {
 import { useNavbarAutoSync } from "./useNavbarAutoSync";
 
 interface UseEditorStateOptions {
-  initialData?: SiteDocumentV2 | null;
+  initialData?: SiteDocument | null;
 }
 
 interface UseEditorStateReturn {
   // Estado
-  document: SiteDocumentV2 | null;
+  document: SiteDocument | null;
   currentPageId: string;
   currentPage: ReturnType<typeof useMemo>;
   selectedBlockId: string | null;
@@ -40,8 +40,8 @@ interface UseEditorStateReturn {
   history: HistoryManager;
 
   // Ações
-  setDocument: (doc: SiteDocumentV2) => void;
-  loadDocument: (doc: SiteDocumentV2) => void;
+  setDocument: (doc: SiteDocument) => void;
+  loadDocument: (doc: SiteDocument) => void;
   setCurrentPageId: (id: string) => void;
   addPage: (pageId: string, name: string, slug: string) => void;
   removePage: (pageId: string) => void;
@@ -81,7 +81,7 @@ export function useEditorState(
   }, [initialData]);
 
   // Estados
-  const [document, setDocument] = useState<SiteDocumentV2 | null>(
+  const [document, setDocument] = useState<SiteDocument | null>(
     initialDocument,
   );
   const [currentPageId, setCurrentPageIdState] = useState<string>("home");
@@ -281,7 +281,7 @@ export function useEditorState(
 
   // Carregar um documento completo (ex: gerado por IA)
   const loadDocument = useCallback(
-    (doc: SiteDocumentV2) => {
+    (doc: SiteDocument) => {
       setDocument(doc);
       setCurrentPageIdState(doc.pages?.[0]?.id ?? "home");
       history.clear();

@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import { SiteDocumentV2 } from "../engine/schema/siteDocument";
+import { SiteDocument } from "../engine/schema/siteDocument";
 import { syncNavbarLinks } from "../utils/navbarSync";
 
 /**
@@ -13,7 +13,7 @@ import { syncNavbarLinks } from "../utils/navbarSync";
  * Detecta mudanças nas páginas e atualiza navbar automaticamente
  */
 export function useNavbarAutoSync(
-  document: SiteDocumentV2 | null,
+  document: SiteDocument | null,
   applyChange: (patch: any[], description?: string) => void
 ) {
   const previousPagesRef = useRef<string>("");

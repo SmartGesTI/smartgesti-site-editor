@@ -6,7 +6,7 @@
  *
  * Uso:
  * import {
- *   SiteDocumentV2,
+ *   SiteDocument,
  *   validateDocument,
  *   templates
  * } from '@smartgesti/site-editor/shared'
@@ -20,7 +20,7 @@ export type {
   BlockType,
   BlockBase,
   Block,
-  SiteDocumentV2,
+  SiteDocument,
   DocumentMeta,
   // Layout blocks
   ContainerBlock,

@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from "react";
 import { LoadingSpinner } from "./LoadingSpinner";
-import type { UploadConfig } from "../LandingPageEditorV2";
+import type { UploadConfig } from "../LandingPageEditor";
 
 // Lazy load componentes pesados do editor
 const BlockPropertyEditor = lazy(() =>

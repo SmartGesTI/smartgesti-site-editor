@@ -1,14 +1,14 @@
 /**
- * Landing Page Viewer V2
- * Visualização pública da landing page usando engine V2.
+ * Landing Page Viewer
+ * Visualização pública da landing page.
  * Usa o mesmo mecanismo do Preview (editor): exportPageToHtml + iframe srcdoc.
  */
 
 import { useState, useEffect } from "react";
 import {
-  SiteDocumentV2,
+  SiteDocument,
   exportPageToHtml,
-  createEmptySiteDocumentV2,
+  createEmptySiteDocument,
   defaultThemeTokens,
 } from "../engine";
 
@@ -27,7 +27,7 @@ export interface SchoolData {
   logo_url?: string;
 }
 
-interface LandingPageViewerV2Props {
+interface LandingPageViewerProps {
   siteId: string;
   apiBaseUrl: string;
   projectId: string;
@@ -39,15 +39,15 @@ interface LandingPageViewerV2Props {
   schoolData?: SchoolData;
 }
 
-export function LandingPageViewerV2({
+export function LandingPageViewer({
   siteId,
   apiBaseUrl,
   projectId,
   pageSlug,
   schoolSlug,
   schoolData: _schoolData, // reservado para header/navbar dinâmico (logo, nome da escola)
-}: LandingPageViewerV2Props) {
-  const [document, setDocument] = useState<SiteDocumentV2 | null>(null);
+}: LandingPageViewerProps) {
+  const [document, setDocument] = useState<SiteDocument | null>(null);
   const [publishedHtml, setPublishedHtml] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +78,7 @@ export function LandingPageViewerV2({
         const isV2 = schemaVersion === 2 || schemaVersion === "2" || hasPages;
 
         if (isV2) {
-          const template = data.template as SiteDocumentV2;
+          const template = data.template as SiteDocument;
           if (!Array.isArray(template.pages)) {
             template.pages = [];
           }
@@ -164,7 +164,7 @@ export function LandingPageViewerV2({
     );
   }
 
-  // Renderizar documento V2 (template) — mesmo pipeline do editor
+  // Renderizar documento (template) — mesmo pipeline do editor
   if (!document) {
     return null;
   }
@@ -219,7 +219,7 @@ export function LandingPageViewerV2({
   };
 
   // Garantir theme completo para o export (merge com default evita theme parcial quebrar CSS)
-  const defaultDoc = createEmptySiteDocumentV2("");
+  const defaultDoc = createEmptySiteDocument("");
   const rawTheme =
     document.theme && typeof document.theme === "object"
       ? document.theme
@@ -239,7 +239,7 @@ export function LandingPageViewerV2({
       }
     : defaultDoc.theme;
 
-  const documentWithTheme: SiteDocumentV2 = {
+  const documentWithTheme: SiteDocument = {
     ...document,
     schemaVersion: 2,
     theme,

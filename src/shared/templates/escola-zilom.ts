@@ -17,10 +17,10 @@
  * - Footer multi-colunas
  */
 
-import type { SiteDocumentV2 } from "../schema";
+import type { SiteDocument } from "../schema";
 import { NAVBAR_DEFAULT_PROPS } from "../../engine/registry/blocks/sections/navbar";
 
-export const escolaZilomTemplate: SiteDocumentV2 = {
+export const escolaZilomTemplate: SiteDocument = {
   meta: {
     title: "Zilom",
     description:

@@ -3,7 +3,7 @@
  * Detecta mudanças entre documentos para atualização parcial
  */
 
-import { SiteDocumentV2, Block } from '../engine/schema/siteDocument'
+import { SiteDocument, Block } from '../engine/schema/siteDocument'
 
 
 /**
@@ -61,8 +61,8 @@ function blocksAreDifferent(block1: Block, block2: Block): { different: boolean;
  * @returns Array de objetos com blockId e changedProps
  */
 export function detectChangedBlocks(
-  oldDoc: SiteDocumentV2,
-  newDoc: SiteDocumentV2
+  oldDoc: SiteDocument,
+  newDoc: SiteDocument
 ): Array<{ blockId: string; changedProps?: string[] }> {
   const changedBlocks: Array<{ blockId: string; changedProps?: string[] }> = []
 

@@ -1,9 +1,9 @@
 /**
  * HTML Exporter
- * Exporta SiteDocumentV2 para HTML estático
+ * Exporta SiteDocument para HTML estático
  */
 
-import { SiteDocumentV2, SitePage, Block } from "../schema/siteDocument";
+import { SiteDocument, SitePage, Block } from "../schema/siteDocument";
 import { generateThemeCSSVariables, ThemeTokens } from "../schema/themeTokens";
 import { hashDocument } from "../../utils/documentHash";
 import { htmlExportRegistry, initializeExporters } from "./exporters";
@@ -412,7 +412,7 @@ export interface ExportPageToHtmlOptions {
  */
 export function exportPageToHtml(
   page: SitePage,
-  document: SiteDocumentV2,
+  document: SiteDocument,
   useCache: boolean = true,
   basePath?: string,
   options?: ExportPageToHtmlOptions,
@@ -558,7 +558,7 @@ export function clearHtmlCache(): void {
  * perdendo CSS de tema, hover effects e landing page styles.
  */
 export function exportDocumentToHtml(
-  document: SiteDocumentV2,
+  document: SiteDocument,
   pageId?: string,
 ): string {
   const page = pageId
@@ -576,7 +576,7 @@ export function exportDocumentToHtml(
  * Gera manifest de assets (imagens, fontes, etc)
  */
 export function generateAssetsManifest(
-  document: SiteDocumentV2,
+  document: SiteDocument,
 ): Array<{ type: string; url: string }> {
   const assets: Array<{ type: string; url: string }> = [];
 

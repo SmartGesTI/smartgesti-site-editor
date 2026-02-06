@@ -4,7 +4,7 @@
  */
 
 import { Patch, PatchOperation } from './types'
-import { SiteDocumentV2, Block, SitePage } from '../schema/siteDocument'
+import { SiteDocument, Block, SitePage } from '../schema/siteDocument'
 
 /**
  * Encontra o caminho JSON de um bloco na estrutura
@@ -56,7 +56,7 @@ function findBlockPath(
  * Encontra o caminho de um bloco em uma página específica
  */
 function findBlockPathInPage(
-  document: SiteDocumentV2,
+  document: SiteDocument,
   pageId: string,
   blockId: string
 ): { path: string; block: Block } | null {
@@ -79,7 +79,7 @@ export class PatchBuilder {
    * Cria patch para atualizar uma propriedade de um bloco
    */
   static updateBlockProp(
-    document: SiteDocumentV2,
+    document: SiteDocument,
     pageId: string,
     blockId: string,
     propName: string,
@@ -98,7 +98,7 @@ export class PatchBuilder {
    * Cria patch para atualizar múltiplas propriedades de um bloco
    */
   static updateBlockProps(
-    document: SiteDocumentV2,
+    document: SiteDocument,
     pageId: string,
     blockId: string,
     updates: Record<string, any>
@@ -131,7 +131,7 @@ export class PatchBuilder {
    * Cria patch para adicionar um bloco
    */
   static addBlock(
-    document: SiteDocumentV2,
+    document: SiteDocument,
     pageId: string,
     newBlock: Block,
     parentBlockId?: string,
@@ -178,7 +178,7 @@ export class PatchBuilder {
   /**
    * Cria patch para remover um bloco
    */
-  static removeBlock(document: SiteDocumentV2, pageId: string, blockId: string): Patch {
+  static removeBlock(document: SiteDocument, pageId: string, blockId: string): Patch {
     const blockInfo = findBlockPathInPage(document, pageId, blockId)
     if (!blockInfo) {
       throw new Error(`Block ${blockId} not found in page ${pageId}`)
@@ -191,7 +191,7 @@ export class PatchBuilder {
    * Cria patch para mover um bloco
    */
   static moveBlock(
-    document: SiteDocumentV2,
+    document: SiteDocument,
     pageId: string,
     blockId: string,
     newParentBlockId: string | null,
@@ -236,7 +236,7 @@ export class PatchBuilder {
   /**
    * Cria patch para atualizar tema
    */
-  static updateTheme(_document: SiteDocumentV2, themeUpdates: Partial<SiteDocumentV2['theme']>): Patch {
+  static updateTheme(_document: SiteDocument, themeUpdates: Partial<SiteDocument['theme']>): Patch {
     const patches: PatchOperation[] = []
 
     for (const [key, value] of Object.entries(themeUpdates)) {
@@ -257,7 +257,7 @@ export class PatchBuilder {
    * Cria patch para atualizar propriedade do tema
    */
   static updateThemeProp(
-    _document: SiteDocumentV2,
+    _document: SiteDocument,
     themePath: string,
     value: any
   ): Patch {
@@ -267,7 +267,7 @@ export class PatchBuilder {
   /**
    * Cria patch para adicionar uma nova página
    */
-  static addPage(document: SiteDocumentV2, newPage: SitePage): Patch {
+  static addPage(document: SiteDocument, newPage: SitePage): Patch {
     const position = document.pages.length
     return [{ op: 'add', path: `/pages/${position}`, value: newPage }]
   }
@@ -275,7 +275,7 @@ export class PatchBuilder {
   /**
    * Cria patch para remover uma página
    */
-  static removePage(document: SiteDocumentV2, pageId: string): Patch {
+  static removePage(document: SiteDocument, pageId: string): Patch {
     const pageIndex = document.pages.findIndex((p) => p.id === pageId)
     if (pageIndex === -1) {
       throw new Error(`Page ${pageId} not found`)
@@ -288,7 +288,7 @@ export class PatchBuilder {
    * Cria patch para atualizar propriedades de uma página
    */
   static updatePage(
-    document: SiteDocumentV2,
+    document: SiteDocument,
     pageId: string,
     updates: Partial<Omit<SitePage, 'structure'>>
   ): Patch {

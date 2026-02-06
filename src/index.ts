@@ -3,12 +3,12 @@
  * Editor de sites compartilhado para projetos SmartGesti
  */
 
-// Landing Page Builder V2 exports
-export { LandingPageEditorV2 } from './editor/LandingPageEditorV2'
-export type { UploadConfig, LandingPageEditorV2Props } from './editor/LandingPageEditorV2'
-export { LandingPageViewerV2 } from './viewer/LandingPageViewerV2'
+// Landing Page Builder exports
+export { LandingPageEditor } from './editor/LandingPageEditor'
+export type { UploadConfig, LandingPageEditorProps } from './editor/LandingPageEditor'
+export { LandingPageViewer } from './viewer/LandingPageViewer'
 
-// Engine V2 exports (Lovable-like)
+// Engine exports
 // Side-effect import to ensure blocks are registered
 import './engine/registry/blocks'
 
@@ -76,7 +76,7 @@ export type {
   InputBlock,
 
   // Document structure
-  SiteDocumentV2,
+  SiteDocument,
   SitePage,
 
   // Shared types
@@ -86,7 +86,7 @@ export type {
 } from './engine/schema/siteDocument'
 
 export {
-  createEmptySiteDocumentV2,
+  createEmptySiteDocument,
 } from './engine/schema/siteDocument'
 
 // Theme tokens
@@ -184,12 +184,12 @@ export {
 
 // Preview
 export type {
-  PreviewV2Props,
-} from './engine/preview/PreviewV2'
+  PreviewProps,
+} from './engine/preview/Preview'
 
 export {
-  PreviewV2,
-} from './engine/preview/PreviewV2'
+  Preview,
+} from './engine/preview/Preview'
 
 // Patch system
 export type {
@@ -302,3 +302,28 @@ export type {
   ImageGridItem as EngineImageGridItem,
   ImageGridPreset as EngineImageGridPreset,
 } from './engine/shared/imageGrid'
+
+// ============================================================================
+// Deprecated re-exports (backward compatibility)
+// ============================================================================
+
+/** @deprecated Use SiteDocument */
+export type { SiteDocument as SiteDocumentV2 } from './engine/schema/siteDocument'
+
+/** @deprecated Use createEmptySiteDocument */
+export { createEmptySiteDocument as createEmptySiteDocumentV2 } from './engine/schema/siteDocument'
+
+/** @deprecated Use LandingPageEditor */
+export { LandingPageEditor as LandingPageEditorV2 } from './editor/LandingPageEditor'
+
+/** @deprecated Use LandingPageEditorProps */
+export type { LandingPageEditorProps as LandingPageEditorV2Props } from './editor/LandingPageEditor'
+
+/** @deprecated Use LandingPageViewer */
+export { LandingPageViewer as LandingPageViewerV2 } from './viewer/LandingPageViewer'
+
+/** @deprecated Use Preview */
+export { Preview as PreviewV2 } from './engine/preview/Preview'
+
+/** @deprecated Use PreviewProps */
+export type { PreviewProps as PreviewV2Props } from './engine/preview/Preview'

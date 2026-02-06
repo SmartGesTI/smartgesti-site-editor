@@ -3,7 +3,7 @@
  * Funções para gerar hash de documentos para cache
  */
 
-import { SiteDocumentV2 } from '../engine/schema/siteDocument'
+import { SiteDocument } from '../engine/schema/siteDocument'
 import { logger } from './logger'
 
 /**
@@ -23,7 +23,7 @@ function simpleHash(str: string): string {
  * Gera hash do documento baseado em seu conteúdo
  * Usa JSON.stringify para serializar e depois hash
  */
-export function hashDocument(document: SiteDocumentV2): string {
+export function hashDocument(document: SiteDocument): string {
   try {
     // Serializar documento (sem espaços para consistência)
     const serialized = JSON.stringify(document, null, 0)

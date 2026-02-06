@@ -1,7 +1,7 @@
 /**
  * Templates estáticos para Landing Pages de Escolas
  *
- * Cada template é um SiteDocumentV2 completo pronto para uso
+ * Cada template é um SiteDocument completo pronto para uso
  */
 
 import { escolaPremiumTemplate } from "./escola-premium";

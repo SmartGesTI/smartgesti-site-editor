@@ -629,7 +629,7 @@ export interface DocumentMeta {
   language?: string;
 }
 
-export interface SiteDocumentV2 {
+export interface SiteDocument {
   meta: DocumentMeta;
   theme: SimpleThemeTokens;
   structure: Block[];

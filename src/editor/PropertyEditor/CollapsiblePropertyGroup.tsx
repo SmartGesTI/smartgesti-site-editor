@@ -3,7 +3,7 @@ import { ChevronDown } from "lucide-react";
 import { InspectorMeta } from "../../engine";
 import { renderPropertyInput, type RenderInputContext } from "./renderPropertyInput";
 import { cn } from "../../utils/cn";
-import type { UploadConfig } from "../LandingPageEditorV2";
+import type { UploadConfig } from "../LandingPageEditor";
 
 interface CollapsiblePropertyGroupProps {
   groupName: string;

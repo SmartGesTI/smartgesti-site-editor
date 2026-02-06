@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SmartGesti Site Editor is a shared React component library for building landing pages. Published as `@brunoalz/smartgesti-site-editor` on NPM, it provides a block-based site editor (V2 engine) with drag-and-drop, HTML export for static site generation, multi-tenant asset management with Supabase Storage, and pre-built templates for schools and portfolios.
+SmartGesti Site Editor is a shared React component library for building landing pages. Published as `@brunoalz/smartgesti-site-editor` on NPM, it provides a block-based site editor with drag-and-drop, HTML export for static site generation, multi-tenant asset management with Supabase Storage, and pre-built templates for schools and portfolios.
 
 **Consumer Projects**: SmartGesti-Ensino, SmartGesti-Portfólios
 
@@ -41,7 +41,7 @@ npm run dev
 
 ## Architecture
 
-### V2 Engine - Block System
+### Block System
 
 The editor uses a composable block architecture:
 
@@ -209,8 +209,8 @@ Always use `escapeHtml()` from `src/engine/export/shared/htmlHelpers.ts` when ge
 
 ```
 src/
-├── editor/                    # V2 Editor UI
-│   ├── LandingPageEditorV2.tsx   # Main editor component
+├── editor/                    # Editor UI
+│   ├── LandingPageEditor.tsx     # Main editor component
 │   ├── components/               # Panel components (Toolbar, LeftPanel, CenterPanel, RightPanel)
 │   │   └── LoadingSpinner.tsx    # Shared loading spinner
 │   ├── PropertyEditor/           # Block property editing
@@ -222,9 +222,9 @@ src/
 │   ├── PaletteSelector.tsx
 │   ├── PageTabBar.tsx
 │   └── TemplatePicker.tsx
-├── viewer/                    # V2 Viewer (read-only rendering)
-│   └── LandingPageViewerV2.tsx
-├── engine/                    # Core V2 engine
+├── viewer/                    # Viewer (read-only rendering)
+│   └── LandingPageViewer.tsx
+├── engine/                    # Core engine
 │   ├── schema/                   # Type definitions (siteDocument, themeTokens)
 │   ├── registry/                 # Block definitions and registry
 │   │   └── blocks/               # Block definitions by category (layout/, content/, sections/, forms/, composition/)
@@ -233,7 +233,7 @@ src/
 │   ├── export/                   # HTML export system
 │   │   ├── exporters/            # HTML exporters by category
 │   │   └── shared/               # Shared export utilities (htmlHelpers, sanitization)
-│   ├── preview/                  # PreviewV2 (iframe-based preview)
+│   ├── preview/                  # Preview (iframe-based preview)
 │   ├── patch/                    # JSON patch system (applyPatch, PatchBuilder, history)
 │   ├── presets/                  # Block variations (hero, navbar) and theme presets
 │   ├── shared/                   # Shared constants and utilities
@@ -281,8 +281,8 @@ src/
 | Hero variations | `src/engine/presets/heroVariations.ts` |
 | Property input renderer | `src/editor/PropertyEditor/renderPropertyInput.tsx` |
 | Variation selector | `src/editor/PropertyEditor/VariationSelector.tsx` |
-| Editor entry point | `src/editor/LandingPageEditorV2.tsx` |
-| Viewer entry point | `src/viewer/LandingPageViewerV2.tsx` |
+| Editor entry point | `src/editor/LandingPageEditor.tsx` |
+| Viewer entry point | `src/viewer/LandingPageViewer.tsx` |
 | Logger utility | `src/utils/logger.ts` |
 | Data URL utilities | `src/utils/dataURLUtils.ts` |
 | ESLint config | `eslint.config.js` |

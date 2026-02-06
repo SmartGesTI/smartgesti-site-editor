@@ -11,7 +11,7 @@ import {
   gridPresetMap,
   imageGridPresetIds,
 } from "../../../engine/shared/imageGrid";
-import type { UploadConfig } from "../../LandingPageEditorV2";
+import type { UploadConfig } from "../../LandingPageEditor";
 
 interface ImageGridInputProps {
   /** Preset atual */
