@@ -384,6 +384,35 @@ export const heroBlock: BlockDefinition = {
       group: "Efeitos Hover",
       showWhen: { field: "buttonHoverOverlay", equals: "icon" },
     },
+
+    // =========================================================================
+    // GRUPO: Carrossel
+    // =========================================================================
+    carouselImages: {
+      label: "Imagens do Carrossel",
+      inputType: "carousel-images",
+      group: "Carrossel",
+      description: "Imagens de fundo que alternam automaticamente",
+      showWhen: { field: "variation", equals: "hero-carousel" },
+    },
+    carouselInterval: {
+      label: "Intervalo (segundos)",
+      inputType: "slider",
+      min: 3,
+      max: 10,
+      step: 1,
+      group: "Carrossel",
+      showWhen: { field: "variation", equals: "hero-carousel" },
+    },
+    carouselTransition: {
+      label: "Transição",
+      inputType: "select",
+      options: [
+        { label: "Crossfade", value: "crossfade" },
+      ],
+      group: "Carrossel",
+      showWhen: { field: "variation", equals: "hero-carousel" },
+    },
   },
 };
 

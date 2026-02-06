@@ -253,6 +253,7 @@ const { text, variant, icon } = (block as any).props;
 | `image-upload` | ImageInput (modo upload) | Upload autenticado para Supabase |
 | `icon-grid` | IconGridInput | Grid visual de ícones |
 | `image-grid` | ImageGridInput | Grid de imagens com presets |
+| `carousel-images` | CarouselImagesInput | Array de imagens para carrossel (2-5 slots) |
 | `typography` | TypographyInput | Editor de tipografia (tamanho, peso, cor, efeitos) |
 
 ### Opções do InspectorMeta
@@ -366,7 +367,7 @@ export const myBlock: BlockDefinition = {
 };
 ```
 
-### Inputs Multi-Prop (`image-grid`)
+### Inputs Multi-Prop (`image-grid`, `carousel-images`)
 
 Alguns inputs manipulam múltiplas props simultaneamente. Eles recebem `context.allProps` e `context.onMultiUpdate`:
 
@@ -376,4 +377,179 @@ Alguns inputs manipulam múltiplas props simultaneamente. Eles recebem `context.
   allProps={context.allProps}
   onMultiUpdate={context.onMultiUpdate}  // Atualiza imageGridPreset, imageGridImages, imageGridGap
 />
+```
+
+### Shared Utilities (`src/engine/shared/`)
+
+Quando renderer e exporter precisam da **mesma lógica** (constantes, cálculos, geração de CSS), extraia para `src/engine/shared/`:
+
+```
+src/engine/shared/
+├── shadowConstants.ts       # imageShadowMap
+├── layoutConstants.ts       # contentPositionMap, blockGapConfig
+├── socialIcons.ts           # socialIconPaths
+├── carouselAnimation.ts     # generateCarouselCSS (keyframes + dots)
+├── hoverEffects/            # Geradores de hover CSS
+├── imageGrid/               # Presets e tipos do image grid
+└── typography/              # Config e geração de CSS tipográfico
+```
+
+**Atenção**: `spacingMap` é intencionalmente diferente entre renderer e exporter — NÃO extrair para shared.
+
+---
+
+## Adicionando Variações a Blocos Existentes
+
+Para adicionar uma nova variação a um bloco que já tem variações (ex: Hero, Navbar):
+
+### 1. Atualizar o union de IDs no Schema
+
+```typescript
+// src/engine/schema/siteDocument.ts
+export type HeroVariationId =
+  | "hero-split"
+  | "hero-parallax"
+  // ...existentes
+  | "hero-nova";  // ← NOVA
+```
+
+### 2. Adicionar novas props (se necessário)
+
+Se a variação precisa de props novas no bloco:
+
+```typescript
+export interface HeroBlock extends BlockBase {
+  type: "hero";
+  props: {
+    // ...existentes...
+    novasProp?: string;  // ← NOVA
+  };
+}
+```
+
+### 3. Adicionar o preset de variação
+
+```typescript
+// src/engine/presets/heroVariations.ts
+
+// Adicionar ao objeto heroVariations:
+"hero-nova": {
+  id: "hero-nova",
+  name: "Nova",
+  defaultProps: {
+    variation: "hero-nova",
+    variant: "image-bg",
+    title: "Título padrão",
+    // ... props visuais (NÃO incluir props editáveis como image)
+  },
+},
+
+// Adicionar ao array heroVariationIds:
+export const heroVariationIds: HeroVariationId[] = [
+  // ...existentes
+  "hero-nova",
+];
+```
+
+### 4. Adicionar inspectorMeta (se novas props)
+
+No arquivo de definition do bloco, adicionar grupo com `showWhen`:
+
+```typescript
+// src/engine/registry/blocks/sections/hero.ts
+novaProp: {
+  label: "Nova Prop",
+  inputType: "text",
+  group: "Novo Grupo",
+  showWhen: { field: "variation", equals: "hero-nova" },
+},
+```
+
+### 5. Render path no Renderer e Exporter
+
+Adicionar branch `if (isNova)` nos dois arquivos:
+- `src/engine/render/renderers/sections/HeroRenderer.tsx`
+- `src/engine/export/exporters/sections/HeroExporter.ts`
+
+### 6. Preservar props ao trocar variação
+
+Em `src/editor/PropertyEditor/VariationSelector.tsx`, adicionar `preserveIfDefined` para que as props customizadas sobrevivam ao trocar de variação:
+
+```typescript
+const newProps = {
+  ...HERO_VISUAL_PROPS_TO_RESET,
+  ...v.defaultProps,
+  ...preserveIfDefined(props, "title"),
+  // ...outros conteúdos...
+
+  // Preserva props da nova variação
+  ...preserveIfDefined(props, "novaProp"),
+};
+```
+
+**Regra**: Props de conteúdo do usuário (imagens uploadadas, textos, configurações) devem ser preservadas com `preserveIfDefined`. Props visuais que definem a aparência da variação (cores, alinhamento) devem estar no `HERO_VISUAL_PROPS_TO_RESET` para serem limpas ao trocar.
+
+---
+
+## Criando um Novo `inputType` Customizado
+
+Quando nenhum inputType existente atende, crie um novo:
+
+### 1. Adicionar ao union em `types.ts`
+
+```typescript
+// src/engine/registry/types.ts
+inputType?:
+  | "text"
+  | "textarea"
+  // ...existentes
+  | "meu-input";     // ← NOVO
+```
+
+### 2. Criar componente em `inputs/`
+
+```typescript
+// src/editor/PropertyEditor/inputs/MeuInput.tsx
+export function MeuInput({ value, onChange, label }: MeuInputProps) {
+  return (
+    <div>
+      <label>{label}</label>
+      {/* UI do input */}
+    </div>
+  );
+}
+```
+
+### 3. Exportar no barrel
+
+```typescript
+// src/editor/PropertyEditor/inputs/index.ts
+export { MeuInput } from "./MeuInput";
+```
+
+### 4. Adicionar case no `renderPropertyInput.tsx`
+
+```typescript
+// src/editor/PropertyEditor/renderPropertyInput.tsx
+case "meu-input":
+  return <MeuInput key={propName} value={value} onChange={onChange} label={label} />;
+```
+
+**Se o input manipula múltiplas props** (como `image-grid` e `carousel-images`), use o pattern multi-prop:
+
+```typescript
+case "meu-input":
+  if (context?.allProps && context?.onMultiUpdate) {
+    const myData = context.allProps.myData || [];
+    return (
+      <MeuInput
+        key={propName}
+        data={myData}
+        onDataChange={(newData) => {
+          context.onMultiUpdate!({ myData: newData });
+        }}
+      />
+    );
+  }
+  return null;
 ```

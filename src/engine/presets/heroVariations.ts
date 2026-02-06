@@ -9,6 +9,13 @@ import type { HeroVariationId } from "../schema/siteDocument";
 export const PLACEHOLDER_IMAGE_URL =
   "https://placehold.co/1200x800/e2e8f0/64748b?text=Imagem+Hero";
 
+/** Imagens placeholder para o carrossel de hero */
+export const CAROUSEL_PLACEHOLDER_IMAGES = [
+  "https://placehold.co/1920x1080/1e3a5f/ffffff?text=Slide+1",
+  "https://placehold.co/1920x1080/2d5016/ffffff?text=Slide+2",
+  "https://placehold.co/1920x1080/5a1a2e/ffffff?text=Slide+3",
+];
+
 export const HERO_IMAGE_NAMES = [
   "20221121_00_ensino_ciencias_molecula.jpg",
   "escolaweb-capas-artigos-5-maneiras-de-engajar-os-alunos-nas-atividades-escolares-1.jpg",
@@ -61,6 +68,10 @@ export interface HeroVariationPreset {
     // Decorative
     showWave?: boolean;
     waveColor?: string;
+    // Carousel
+    carouselImages?: string[];
+    carouselInterval?: number;
+    carouselTransition?: "crossfade" | "slide";
   };
 }
 
@@ -265,6 +276,46 @@ export const heroVariations: Record<HeroVariationId, HeroVariationPreset> = {
       imageShadow: "none",
     },
   },
+
+  // ============================================================================
+  // HERO CAROUSEL - Carrossel de imagens de fundo com crossfade
+  // ============================================================================
+  "hero-carousel": {
+    id: "hero-carousel",
+    name: "Carrossel",
+    defaultProps: {
+      variation: "hero-carousel",
+      variant: "image-bg",
+      title: "Descubra novas possibilidades",
+      subtitle: "Uma jornada de aprendizado envolvente",
+      description:
+        "Explore nossos programas e descubra como podemos ajudar você a alcançar seus objetivos educacionais.",
+      primaryButton: { text: "Explorar cursos", href: "#courses" },
+      secondaryButton: { text: "Saiba mais", href: "#about" },
+      overlay: true,
+      overlayColor: "linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 100%)",
+      align: "center",
+      minHeight: "90vh",
+      titleColor: "#ffffff",
+      subtitleColor: "#f3f4f6",
+      descriptionColor: "#e5e7eb",
+      contentMaxWidth: "800px",
+      primaryButtonVariant: "solid",
+      primaryButtonRadius: 8,
+      secondaryButtonVariant: "outline",
+      secondaryButtonColor: "#ffffff",
+      secondaryButtonTextColor: "#ffffff",
+      secondaryButtonRadius: 8,
+      // Carousel
+      carouselImages: [
+        "https://placehold.co/1920x1080/1e3a5f/ffffff?text=Slide+1",
+        "https://placehold.co/1920x1080/2d5016/ffffff?text=Slide+2",
+        "https://placehold.co/1920x1080/5a1a2e/ffffff?text=Slide+3",
+      ],
+      carouselInterval: 5,
+      carouselTransition: "crossfade",
+    },
+  },
 };
 
 export const heroVariationIds: HeroVariationId[] = [
@@ -274,6 +325,7 @@ export const heroVariationIds: HeroVariationId[] = [
   "hero-gradient",
   "hero-minimal",
   "hero-card",
+  "hero-carousel",
 ];
 
 export function getHeroVariation(id: HeroVariationId): HeroVariationPreset {

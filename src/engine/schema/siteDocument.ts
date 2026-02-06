@@ -366,7 +366,8 @@ export type HeroVariationId =
   | "hero-overlay"
   | "hero-gradient"
   | "hero-minimal"
-  | "hero-card";
+  | "hero-card"
+  | "hero-carousel";
 
 export interface HeroBlock extends BlockBase {
   type: "hero";
@@ -482,6 +483,14 @@ export interface HeroBlock extends BlockBase {
     imageGridImages?: ImageGridItem[];
     /** Espaçamento entre imagens em pixels */
     imageGridGap?: number;
+
+    // === Carousel System ===
+    /** Array de imagens do carrossel de fundo */
+    carouselImages?: string[];
+    /** Intervalo entre slides em segundos */
+    carouselInterval?: number;
+    /** Tipo de transição do carrossel */
+    carouselTransition?: "crossfade" | "slide";
   };
 }
 

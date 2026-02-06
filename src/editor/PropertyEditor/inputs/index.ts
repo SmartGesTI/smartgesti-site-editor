@@ -11,3 +11,4 @@ export { IconGridInput } from "./IconGridInput";
 export { ImageGridInput } from "./ImageGridInput";
 export { TypographyInput } from "./TypographyInput";
 export { ImageInput } from "./ImageInput";
+export { CarouselImagesInput } from "./CarouselImagesInput";

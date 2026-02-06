@@ -6,9 +6,10 @@
 
 import { Block } from "../../../schema/siteDocument";
 import { ThemeTokens } from "../../../schema/themeTokens";
-import { PLACEHOLDER_IMAGE_URL } from "../../../presets/heroVariations";
+import { PLACEHOLDER_IMAGE_URL, CAROUSEL_PLACEHOLDER_IMAGES } from "../../../presets/heroVariations";
 import { dataBlockIdAttr, blockIdAttr, escapeHtml, resolveHref, linkTargetAttr } from "../../shared/htmlHelpers";
 import { generateScopedId } from "../../shared/idGenerator";
+import { generateCarouselCSS } from "../../../shared/carouselAnimation";
 import {
   generateButtonHoverStyles,
   generateButtonOverlayCSS,
@@ -95,6 +96,10 @@ export function exportHero(
     imageGridPreset = "four-equal",
     imageGridImages = [],
     imageGridGap = 8,
+    // Carousel
+    carouselImages,
+    carouselInterval = 5,
+    carouselTransition = "crossfade",
   } = (block as any).props;
 
   // Determine variation types
@@ -105,11 +110,12 @@ export function exportHero(
   const isGradient = variation === "hero-gradient";
   const isMinimal = variation === "hero-minimal";
   const isCard = variation === "hero-card";
-  const isImageBg = (variant === "image-bg" || isOverlayVariant || isParallax || isCard) && heroImage;
+  const isCarousel = variation === "hero-carousel";
+  const isImageBg = (variant === "image-bg" || isOverlayVariant || isParallax || isCard || isCarousel) && heroImage;
   const isOverlay = isImageBg && overlay;
 
   // Determine if dark background context
-  const hasDarkBg = isOverlay || isGradient || isOverlayVariant;
+  const hasDarkBg = isOverlay || isGradient || isOverlayVariant || isCarousel;
 
   // Theme colors
   const themePrimaryColor = theme?.colors?.primary || "#3b82f6";
@@ -158,6 +164,7 @@ export function exportHero(
     isGradient ? "sg-hero--gradient" : "",
     isMinimal ? "sg-hero--minimal" : "",
     isCard ? "sg-hero--card" : "",
+    isCarousel ? "sg-hero--carousel" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -332,6 +339,47 @@ export function exportHero(
   // Determine if we should use image grid (works in ANY variation now)
   const hasValidGridImages = imageGridImages && imageGridImages.length > 0 && (imageGridImages as ImageGridItem[]).some((img: ImageGridItem) => img?.src);
   const shouldShowImageGrid = imageGridEnabled && hasValidGridImages;
+
+  // =========================================================================
+  // RENDER: Carousel Layout (crossfade image background)
+  // =========================================================================
+  if (isCarousel) {
+    const resolvedImages = (carouselImages && carouselImages.length >= 2)
+      ? (carouselImages as string[])
+      : CAROUSEL_PLACEHOLDER_IMAGES;
+    const carouselScopeId = generateScopedId(block.id || "", "hero-carousel");
+
+    const carouselCss = generateCarouselCSS(
+      `#${carouselScopeId}`,
+      resolvedImages.length,
+      carouselInterval as number,
+    );
+
+    // Generate carousel images HTML
+    const carouselImagesHtml = resolvedImages
+      .map((imgSrc: string, i: number) =>
+        `<img src="${escapeHtml(imgSrc)}" alt="Slide ${i + 1}" class="sg-carousel__img" ${i === 0 ? 'style="opacity: 1;"' : ''} onerror="${imgFallback}" />`
+      )
+      .join("");
+
+    // Dot indicators HTML
+    const dotsHtml = `<div class="sg-carousel__dots">${resolvedImages.map(() => '<span class="sg-carousel__dot"></span>').join("")}</div>`;
+
+    // Overlay for carousel
+    const carouselOverlayStyle = overlayColor
+      ? `position: absolute; inset: 0; background: ${overlayColor}; z-index: 1;`
+      : "position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 100%); z-index: 1;";
+    const carouselOverlayHtml = overlay
+      ? `<div class="sg-hero__overlay" style="${carouselOverlayStyle}"></div>`
+      : "";
+
+    const carouselContentHtml = `<div style="max-width: ${contentMaxWidth}; width: 100%; padding: 0 2rem; text-align: ${align}; position: relative; z-index: 2;">${contentBlock}</div>`;
+
+    // Combine all CSS (carousel animation + button hover effects)
+    const allCss = `<style>${carouselCss}${buttonStyles.css ? "\n" + buttonStyles.css : ""}</style>`;
+
+    return `<section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} class="${sectionClasses}" style="min-height: ${minHeight}; ${paddingStyle} display: flex; align-items: center; justify-content: ${justifyContent}; position: relative; overflow: hidden; background: #000;" data-variation="${escapeHtml(variation || variant || "")}">${allCss}<div id="${carouselScopeId}" style="position: absolute; inset: 0; z-index: 0;">${carouselImagesHtml}${dotsHtml}</div>${carouselOverlayHtml}${carouselContentHtml}</section>`;
+  }
 
   // =========================================================================
   // RENDER: Split Layout (without image grid)

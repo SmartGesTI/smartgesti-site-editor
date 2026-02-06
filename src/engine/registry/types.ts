@@ -24,7 +24,8 @@ export interface InspectorMeta {
     | "checkbox"
     | "icon-grid"       // Grid of icons for selection
     | "image-grid"      // Image grid editor with preset selector
-    | "typography";     // Typography editor (size, weight, color, effects)
+    | "typography"      // Typography editor (size, weight, color, effects)
+    | "carousel-images"; // Carousel images editor (array of image URLs)
   options?: Array<{ label: string; value: any }>;
   min?: number;
   max?: number;

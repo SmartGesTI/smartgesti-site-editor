@@ -168,6 +168,11 @@ export const VariationSelector = React.memo(function VariationSelector({ block, 
                     ...preserveIfDefined(props, "imageGridPreset"),
                     ...preserveIfDefined(props, "imageGridImages"),
                     ...preserveIfDefined(props, "imageGridGap"),
+
+                    // 5. Preserva configuração do Carousel
+                    ...preserveIfDefined(props, "carouselImages"),
+                    ...preserveIfDefined(props, "carouselInterval"),
+                    ...preserveIfDefined(props, "carouselTransition"),
                   };
 
                   onUpdate(newProps);

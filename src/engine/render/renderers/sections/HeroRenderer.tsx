@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { PLACEHOLDER_IMAGE_URL } from "../../../presets/heroVariations";
+import { PLACEHOLDER_IMAGE_URL, CAROUSEL_PLACEHOLDER_IMAGES } from "../../../presets/heroVariations";
 import { gridPresetMap, type ImageGridItem, type ImageGridPreset } from "../../../shared/imageGrid";
 import {
   generateTypographyStyles,
@@ -16,6 +16,7 @@ import {
 } from "../../../shared/typography";
 import { imageShadowMap } from "../../../shared/shadowConstants";
 import { contentPositionMap, blockGapConfig } from "../../../shared/layoutConstants";
+import { generateCarouselCSS } from "../../../shared/carouselAnimation";
 
 export function renderHero(block: any): React.ReactNode {
   const {
@@ -72,6 +73,10 @@ export function renderHero(block: any): React.ReactNode {
     imageGridPreset = "four-equal",
     imageGridImages = [],
     imageGridGap = 8,
+    // Carousel
+    carouselImages,
+    carouselInterval = 5,
+    carouselTransition = "crossfade",
   } = block.props;
 
   // Determine variation type
@@ -82,7 +87,8 @@ export function renderHero(block: any): React.ReactNode {
   const isGradient = variation === "hero-gradient";
   const isMinimal = variation === "hero-minimal";
   const isCard = variation === "hero-card";
-  const isImageBg = (variant === "image-bg" || isOverlayVariant || isParallax || isCard) && heroImage;
+  const isCarousel = variation === "hero-carousel";
+  const isImageBg = (variant === "image-bg" || isOverlayVariant || isParallax || isCard || isCarousel) && heroImage;
   const isOverlay = isImageBg && overlay;
 
   // Check if image grid should be shown (works in ANY variation now)
@@ -99,6 +105,7 @@ export function renderHero(block: any): React.ReactNode {
     isGradient && "sg-hero--gradient",
     isMinimal && "sg-hero--minimal",
     isCard && "sg-hero--card",
+    isCarousel && "sg-hero--carousel",
     shouldShowImageGrid && "sg-hero--with-grid",
   ]
     .filter(Boolean)
@@ -124,7 +131,7 @@ export function renderHero(block: any): React.ReactNode {
   };
 
   // Text colors - use custom or fallback based on context
-  const hasOverlayOrDarkBg = isOverlay || isGradient || isOverlayVariant;
+  const hasOverlayOrDarkBg = isOverlay || isGradient || isOverlayVariant || isCarousel;
   const defaultTextColor = hasOverlayOrDarkBg ? "#ffffff" : "var(--sg-text, #1f2937)";
   const defaultMutedColor = hasOverlayOrDarkBg ? "rgba(255,255,255,0.85)" : "var(--sg-muted-text, #6b7280)";
 
@@ -475,6 +482,84 @@ export function renderHero(block: any): React.ReactNode {
       )}
     </div>
   ) : null;
+
+  // =========================================================================
+  // RENDER: Carousel Layout (crossfade image background)
+  // =========================================================================
+  if (isCarousel) {
+    const resolvedImages = (carouselImages && carouselImages.length >= 2)
+      ? carouselImages as string[]
+      : CAROUSEL_PLACEHOLDER_IMAGES;
+    const carouselScopeId = `sg-carousel-${block.id}`;
+    const carouselCss = generateCarouselCSS(
+      `#${carouselScopeId}`,
+      resolvedImages.length,
+      carouselInterval as number,
+    );
+
+    return (
+      <section
+        key={block.id}
+        className={sectionClass}
+        style={{
+          minHeight,
+          padding: paddingY ? `${paddingY} 2rem` : "6rem 2rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: contentPositionMap[contentPosition] || "center",
+          position: "relative",
+          overflow: "hidden",
+          background: "#000",
+        }}
+        data-variation={variation || variant}
+        data-block-id={block.id}
+      >
+        {/* Carousel CSS */}
+        <style dangerouslySetInnerHTML={{ __html: carouselCss }} />
+
+        {/* Carousel images container + dots */}
+        <div
+          id={carouselScopeId}
+          style={{ position: "absolute", inset: 0, zIndex: 0 }}
+        >
+          {resolvedImages.map((imgSrc: string, i: number) => (
+            <img
+              key={i}
+              src={imgSrc}
+              alt={`Slide ${i + 1}`}
+              className="sg-carousel__img"
+              style={i === 0 ? { opacity: 1 } : undefined}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE_URL;
+              }}
+            />
+          ))}
+          {/* Dot indicators */}
+          <div className="sg-carousel__dots">
+            {resolvedImages.map((_: string, i: number) => (
+              <span key={i} className="sg-carousel__dot" />
+            ))}
+          </div>
+        </div>
+
+        {/* Overlay */}
+        {overlay && (
+          <div
+            className="sg-hero__overlay"
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: overlayColor || "linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 100%)",
+              zIndex: 1,
+            }}
+          />
+        )}
+
+        {/* Content */}
+        <div style={contentStyle}>{content}</div>
+      </section>
+    );
+  }
 
   // =========================================================================
   // RENDER: Split Layout (original behavior without grid)

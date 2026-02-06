@@ -13,6 +13,7 @@ import {
   ImageGridInput,
   TypographyInput,
   ImageInput,
+  CarouselImagesInput,
 } from "./inputs";
 import type { UploadConfig } from "../LandingPageEditor";
 
@@ -234,6 +235,26 @@ export function renderPropertyInput(
         );
       }
       // Fallback: single-value mode (shouldn't happen in practice)
+      return null;
+
+    case "carousel-images":
+      // Carousel images needs to read/write carouselImages via multi-prop context
+      if (context?.allProps && context?.onMultiUpdate) {
+        const images = context.allProps.carouselImages || [];
+
+        return (
+          <CarouselImagesInput
+            key={propName}
+            images={images}
+            onImagesChange={(newImages) => {
+              context.onMultiUpdate!({ carouselImages: newImages });
+            }}
+            label={label}
+            description={description}
+            uploadConfig={uploadConfig}
+          />
+        );
+      }
       return null;
 
     case "typography":

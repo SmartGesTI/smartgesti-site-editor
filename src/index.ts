@@ -278,6 +278,7 @@ export {
   getHeroVariation,
   HERO_IMAGE_NAMES,
   PLACEHOLDER_IMAGE_URL,
+  CAROUSEL_PLACEHOLDER_IMAGES,
 } from './engine/presets/heroVariations'
 
 export type {
