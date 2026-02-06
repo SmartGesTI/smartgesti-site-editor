@@ -5,7 +5,6 @@
 
 import { SiteDocumentV2, SitePage, Block } from "../schema/siteDocument";
 import { generateThemeCSSVariables, ThemeTokens } from "../schema/themeTokens";
-import { sanitizeHtml } from "./sanitizeHtml";
 import { hashDocument } from "../../utils/documentHash";
 import { htmlExportRegistry, initializeExporters } from "./exporters";
 
@@ -551,7 +550,12 @@ export function clearHtmlCache(): void {
 }
 
 /**
- * Exporta documento completo para HTML (sanitizado)
+ * Exporta documento completo para HTML
+ *
+ * Nota: Não sanitiza o HTML pois exportPageToHtml() já gera HTML seguro
+ * (conteúdo de usuário é escapado via escapeHtml nos exporters).
+ * A sanitização anterior (sanitizeHtml) removia o <head> inteiro,
+ * perdendo CSS de tema, hover effects e landing page styles.
  */
 export function exportDocumentToHtml(
   document: SiteDocumentV2,
@@ -565,8 +569,7 @@ export function exportDocumentToHtml(
     throw new Error("Page not found");
   }
 
-  const html = exportPageToHtml(page, document);
-  return sanitizeHtml(html);
+  return exportPageToHtml(page, document);
 }
 
 /**

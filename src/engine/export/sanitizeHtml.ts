@@ -39,6 +39,24 @@ const ALLOWED_TAGS = [
   'blockquote',
   'code',
   'pre',
+  // Inline styles (hover effects, responsive CSS)
+  'style',
+  // SVG (social icons, wave decoration, hover overlays)
+  'svg',
+  'path',
+  'circle',
+  'rect',
+  'line',
+  'polyline',
+  'polygon',
+  'g',
+  // Form elements
+  'form',
+  'input',
+  'textarea',
+  'select',
+  'option',
+  'label',
 ]
 
 /**
@@ -60,6 +78,35 @@ const ALLOWED_ATTRIBUTES = [
   'aria-label',
   'aria-labelledby',
   'data-*',
+  // SVG attributes
+  'viewBox',
+  'preserveAspectRatio',
+  'fill',
+  'stroke',
+  'stroke-width',
+  'stroke-linecap',
+  'stroke-linejoin',
+  'd',
+  'opacity',
+  'xmlns',
+  'cx',
+  'cy',
+  'r',
+  'x',
+  'y',
+  'x1',
+  'y1',
+  'x2',
+  'y2',
+  // Form attributes
+  'name',
+  'value',
+  'placeholder',
+  'required',
+  'disabled',
+  'for',
+  'action',
+  'method',
 ]
 
 /**

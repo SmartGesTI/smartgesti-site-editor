@@ -53,9 +53,10 @@ export function exportLink(
     });
 
     // Add base styles from hover effect
+    // Nota: O seletor usa apenas ${scope} pois o próprio <a> tem data-block-id
     if (hoverResult.base) {
       hoverCss += `
-        ${scope} .sg-link {
+        ${scope} {
           ${hoverResult.base}
         }
       `;
@@ -63,7 +64,7 @@ export function exportLink(
 
     // Hover styles
     hoverCss += `
-      ${scope} .sg-link:hover {
+      ${scope}:hover {
         ${hoverResult.hover}
       }
     `;

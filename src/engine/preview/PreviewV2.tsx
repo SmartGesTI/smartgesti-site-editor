@@ -238,12 +238,28 @@ export function PreviewV2({
         const element = iframeDoc.querySelector(`[data-block-id="${blockId}"]`);
         if (element) {
           try {
+            // Remover <style> tags antigas associadas a este bloco
+            const oldStyles = iframeDoc.querySelectorAll(`style[data-block-style="${blockId}"]`);
+            oldStyles.forEach(s => s.remove());
+
             const temp = iframeDoc.createElement("div");
             temp.innerHTML = blockHtml;
-            const newElement = temp.firstElementChild;
 
-            if (newElement) {
-              element.parentNode?.replaceChild(newElement, element);
+            // Marcar e extrair <style> tags para inserção separada
+            const styleTags = temp.querySelectorAll("style");
+            styleTags.forEach(style => {
+              style.setAttribute("data-block-style", blockId);
+            });
+
+            // Usar DocumentFragment para substituir com múltiplos elementos irmãos
+            // (ex: <style>hover CSS</style><button>text</button>)
+            const fragment = iframeDoc.createDocumentFragment();
+            while (temp.firstChild) {
+              fragment.appendChild(temp.firstChild);
+            }
+
+            if (fragment.childNodes.length > 0) {
+              element.parentNode?.replaceChild(fragment, element);
             } else {
               element.outerHTML = blockHtml;
             }

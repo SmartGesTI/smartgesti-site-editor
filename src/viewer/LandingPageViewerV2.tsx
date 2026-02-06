@@ -144,9 +144,12 @@ export function LandingPageViewerV2({
     );
   }
 
-  // Usar publishedHtml somente na home: quando há pageSlug (ex.: /site/p/avisos), sempre gerar a partir do template para URL e conteúdo coerentes
+  // Preferir renderização via template (client-side) quando disponível.
+  // Isso garante que o viewer usa exatamente o mesmo exportPageToHtml() do editor,
+  // evitando diferenças de hover effects, CSS, etc. entre editor e site publicado.
+  // publishedHtml do servidor é usado apenas como fallback quando não há template.
   const isHomeRoute = !pageSlug || pageSlug === "home";
-  if (publishedHtml && isHomeRoute) {
+  if (publishedHtml && isHomeRoute && !document) {
     return (
       <iframe
         srcDoc={publishedHtml}
@@ -161,7 +164,7 @@ export function LandingPageViewerV2({
     );
   }
 
-  // Caso contrário, renderizar documento V2 (template)
+  // Renderizar documento V2 (template) — mesmo pipeline do editor
   if (!document) {
     return null;
   }
