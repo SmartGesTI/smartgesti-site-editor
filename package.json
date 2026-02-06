@@ -23,6 +23,12 @@
     "dist",
     "README.md"
   ],
+  "sideEffects": [
+    "*.css",
+    "./src/engine/registry/blocks/**",
+    "./src/engine/render/renderers/**",
+    "./src/engine/export/exporters/**"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -53,7 +59,7 @@
     "build": "vite build",
     "dev": "vite build --watch",
     "demo": "vite",
-    "lint": "eslint . --ext ts,tsx",
+    "lint": "eslint .",
     "prepublishOnly": "npm run build",
     "version:patch": "npm version patch && git push && git push --tags && npm publish",
     "version:minor": "npm version minor && git push && git push --tags && npm publish",
@@ -64,12 +70,9 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@vanilla-extract/css": "^1.18.0",
-    "@vanilla-extract/vite-plugin": "^5.1.4",
     "clsx": "^2.1.1",
     "lucide-react": "^0.447.0",
-    "react": "^19.0.0",
     "react-colorful": "^5.6.1",
-    "react-dom": "^19.0.0",
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
@@ -77,6 +80,7 @@
     "@types/react-dom": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.50.1",
+    "@vanilla-extract/vite-plugin": "^5.1.4",
     "@vitejs/plugin-react": "^5.1.2",
     "eslint": "^9.15.0",
     "eslint-plugin-react-hooks": "^5.0.0",

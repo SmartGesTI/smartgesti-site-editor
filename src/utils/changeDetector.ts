@@ -102,19 +102,19 @@ export function detectChangedBlocks(
       for (const block of blocks) {
         if (!block || !block.id) continue
         map.set(block.id, block)
-        const props = block.props as any
+        const props = block.props as Record<string, any>
         if (props?.children && Array.isArray(props.children)) {
-          addToMap(props.children, map)
+          addToMap(props.children as Block[], map)
         }
         if (block.type === 'card') {
           if (props.header && Array.isArray(props.header)) {
-            addToMap(props.header, map)
+            addToMap(props.header as Block[], map)
           }
           if (props.content && Array.isArray(props.content)) {
-            addToMap(props.content, map)
+            addToMap(props.content as Block[], map)
           }
           if (props.footer && Array.isArray(props.footer)) {
-            addToMap(props.footer, map)
+            addToMap(props.footer as Block[], map)
           }
         }
       }

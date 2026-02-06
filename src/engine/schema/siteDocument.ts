@@ -1089,6 +1089,16 @@ export type Block =
   | FormSelectBlock;
 
 /**
+ * Utility type: extract the block interface for a given BlockType
+ */
+export type BlockOfType<T extends BlockType> = Extract<Block, { type: T }>;
+
+/**
+ * Utility type: extract the props type for a given BlockType
+ */
+export type BlockPropsFor<T extends BlockType> = BlockOfType<T>["props"];
+
+/**
  * Página do site
  */
 export interface SitePage {

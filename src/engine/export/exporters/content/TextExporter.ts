@@ -12,7 +12,8 @@ export function exportText(
   basePath?: string,
   theme?: ThemeTokens,
 ): string {
-  const { text, align = "left", color, size = "md" } = (block as any).props;
+  const props = block.props as Record<string, any>;
+  const { text, align = "left", color, size = "md" } = props;
 
   const fontSizeMap: Record<string, string> = {
     sm: "0.875rem",

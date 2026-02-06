@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
-import { LoadingSpinner } from "../../components/LoadingSpinner";
+import React, { lazy, Suspense } from "react";
+import { LoadingSpinner } from "./LoadingSpinner";
 import type { UploadConfig } from "../LandingPageEditorV2";
 
 // Lazy load componentes pesados do editor
@@ -18,7 +18,7 @@ interface RightPanelProps {
   uploadConfig?: UploadConfig;
 }
 
-export function RightPanel({
+export const RightPanel = React.memo(function RightPanel({
   isPaletteSelected,
   selectedBlock,
   onPaletteChange,
@@ -54,4 +54,4 @@ export function RightPanel({
       </Suspense>
     </div>
   );
-}
+});

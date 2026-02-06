@@ -52,7 +52,7 @@ export const heroBlock: BlockDefinition = {
     },
     {} as Record<
       string,
-      { id: string; name: string; defaultProps: Record<string, unknown> }
+      { id: string; name: string; defaultProps: Record<string, any> }
     >,
   ),
   inspectorMeta: {

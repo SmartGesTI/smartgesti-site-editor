@@ -52,7 +52,7 @@ export function renderBlockNode(
     case "categoryCardGrid":
       return renderCategoryCardGrid(block);
     default:
-      console.warn(`Unknown block type: ${(block as any).type}`);
+      console.warn(`Unknown block type: ${block.type}`);
       return (
         <div
           key={block.id}
@@ -63,7 +63,7 @@ export function renderBlockNode(
             borderRadius: "0.25rem",
           }}
         >
-          Bloco desconhecido: {(block as any).type}
+          Bloco desconhecido: {block.type}
         </div>
       );
   }
@@ -73,7 +73,8 @@ export function renderBlockNode(
 // RENDERIZADORES TEMPORÁRIOS (A SEREM MIGRADOS)
 // ============================================================================
 
-function renderCountdown(block: any): React.ReactNode {
+function renderCountdown(block: Block): React.ReactNode {
+  const props = block.props as Record<string, any>;
   const {
     title,
     description,
@@ -84,7 +85,7 @@ function renderCountdown(block: any): React.ReactNode {
     variant = "default",
     badgeText,
     bg,
-  } = block.props;
+  } = props;
   const isBanner = variant === "banner";
 
   const sectionStyle: React.CSSProperties = {
@@ -175,8 +176,9 @@ function renderCountdown(block: any): React.ReactNode {
   );
 }
 
-function renderCarousel(block: any): React.ReactNode {
-  const { items = [], showDots = true, autoplay = false } = block.props;
+function renderCarousel(block: Block): React.ReactNode {
+  const props = block.props as Record<string, any>;
+  const { items = [], showDots = true, autoplay = false } = props;
 
   return (
     <div
@@ -188,7 +190,7 @@ function renderCarousel(block: any): React.ReactNode {
       }}
     >
       <div style={{ display: "flex", transition: "transform 0.3s" }}>
-        {items.map((item: any, index: number) => (
+        {(items as unknown[]).map((item: Record<string, any>, index: number) => (
           <div
             key={index}
             style={{
@@ -220,7 +222,7 @@ function renderCarousel(block: any): React.ReactNode {
             gap: "0.5rem",
           }}
         >
-          {items.map((_: any, index: number) => (
+          {(items as unknown[]).map((_: unknown, index: number) => (
             <div
               key={index}
               style={{
@@ -237,7 +239,8 @@ function renderCarousel(block: any): React.ReactNode {
   );
 }
 
-function renderBlogCard(block: any): React.ReactNode {
+function renderBlogCard(block: Block): React.ReactNode {
+  const props = block.props as Record<string, any>;
   const {
     title,
     excerpt,
@@ -247,7 +250,7 @@ function renderBlogCard(block: any): React.ReactNode {
     category,
     readTime,
     href,
-  } = block.props;
+  } = props;
 
   return (
     <article
@@ -316,8 +319,9 @@ function renderBlogCard(block: any): React.ReactNode {
   );
 }
 
-function renderBlogCardGrid(block: any): React.ReactNode {
-  const { title, subtitle, columns = 3, posts = [] } = block.props;
+function renderBlogCardGrid(block: Block): React.ReactNode {
+  const props = block.props as Record<string, any>;
+  const { title, subtitle, columns = 3, posts = [] } = props;
 
   return (
     <section
@@ -340,9 +344,10 @@ function renderBlogCardGrid(block: any): React.ReactNode {
             gap: "2rem",
           }}
         >
-          {posts.map((post: any, index: number) =>
+          {(posts as unknown[]).map((post: Record<string, any>, index: number) =>
             renderBlogCard({
               id: `${block.id}-post-${index}`,
+              type: 'blogCard',
               props: post,
             }),
           )}
@@ -352,8 +357,9 @@ function renderBlogCardGrid(block: any): React.ReactNode {
   );
 }
 
-function renderTeamCard(block: any): React.ReactNode {
-  const { name, role, bio, image, social = [] } = block.props;
+function renderTeamCard(block: Block): React.ReactNode {
+  const props = block.props as Record<string, any>;
+  const { name, role, bio, image, social = [] } = props;
 
   return (
     <div
@@ -387,7 +393,7 @@ function renderTeamCard(block: any): React.ReactNode {
           {bio}
         </p>
       )}
-      {social.length > 0 && (
+      {Array.isArray(social) && social.length > 0 && (
         <div
           style={{
             display: "flex",
@@ -396,7 +402,7 @@ function renderTeamCard(block: any): React.ReactNode {
             marginTop: "1rem",
           }}
         >
-          {social.map((link: any, index: number) => (
+          {social.map((link: Record<string, any>, index: number) => (
             <a
               key={index}
               href={link.url}
@@ -411,8 +417,9 @@ function renderTeamCard(block: any): React.ReactNode {
   );
 }
 
-function renderTeamGrid(block: any): React.ReactNode {
-  const { title, subtitle, columns = 4, members = [] } = block.props;
+function renderTeamGrid(block: Block): React.ReactNode {
+  const props = block.props as Record<string, any>;
+  const { title, subtitle, columns = 4, members = [] } = props;
 
   return (
     <section
@@ -435,9 +442,10 @@ function renderTeamGrid(block: any): React.ReactNode {
             gap: "2rem",
           }}
         >
-          {members.map((member: any, index: number) =>
+          {(members as unknown[]).map((member: Record<string, any>, index: number) =>
             renderTeamCard({
               id: `${block.id}-member-${index}`,
+              type: 'teamCard',
               props: member,
             }),
           )}
@@ -447,8 +455,9 @@ function renderTeamGrid(block: any): React.ReactNode {
   );
 }
 
-function renderCourseCardGrid(block: any): React.ReactNode {
-  const { title, subtitle, columns = 3, courses = [] } = block.props;
+function renderCourseCardGrid(block: Block): React.ReactNode {
+  const props = block.props as Record<string, any>;
+  const { title, subtitle, columns = 3, courses = [] } = props;
 
   return (
     <section
@@ -472,7 +481,7 @@ function renderCourseCardGrid(block: any): React.ReactNode {
             gap: "2rem",
           }}
         >
-          {courses.map((course: any, index: number) => (
+          {(courses as unknown[]).map((course: Record<string, any>, index: number) => (
             <div
               key={index}
               style={{
@@ -511,8 +520,9 @@ function renderCourseCardGrid(block: any): React.ReactNode {
   );
 }
 
-function renderCategoryCardGrid(block: any): React.ReactNode {
-  const { title, subtitle, columns = 4, categories = [] } = block.props;
+function renderCategoryCardGrid(block: Block): React.ReactNode {
+  const props = block.props as Record<string, any>;
+  const { title, subtitle, columns = 4, categories = [] } = props;
 
   return (
     <section
@@ -533,7 +543,7 @@ function renderCategoryCardGrid(block: any): React.ReactNode {
             gap: "1.5rem",
           }}
         >
-          {categories.map((category: any, index: number) => (
+          {(categories as unknown[]).map((category: Record<string, any>, index: number) => (
             <a
               key={index}
               href={category.href || "#"}

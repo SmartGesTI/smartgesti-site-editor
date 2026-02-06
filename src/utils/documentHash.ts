@@ -4,6 +4,7 @@
  */
 
 import { SiteDocumentV2 } from '../engine/schema/siteDocument'
+import { logger } from './logger'
 
 /**
  * Gera hash simples de uma string
@@ -28,7 +29,7 @@ export function hashDocument(document: SiteDocumentV2): string {
     const serialized = JSON.stringify(document, null, 0)
     return simpleHash(serialized)
   } catch (error) {
-    console.error('Error hashing document:', error)
+    logger.error('Error hashing document:', error)
     // Fallback: usar timestamp se houver erro
     return Date.now().toString(36)
   }
@@ -43,7 +44,7 @@ export function hashBlock(block: any): string {
     const serialized = JSON.stringify(block, null, 0)
     return simpleHash(serialized)
   } catch (error) {
-    console.error('Error hashing block:', error)
+    logger.error('Error hashing block:', error)
     return Date.now().toString(36)
   }
 }

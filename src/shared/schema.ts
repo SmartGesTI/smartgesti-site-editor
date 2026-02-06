@@ -122,7 +122,7 @@ export interface BlockBase {
 }
 
 export interface Block extends BlockBase {
-  props: Record<string, unknown>;
+  props: Record<string, any>;
 }
 
 // ============================================================================
@@ -713,8 +713,8 @@ export type TypographyTokens = SimpleTypographyTokens;
 export type SpacingTokens = SimpleSpacingTokens;
 export type EffectTokens = SimpleEffectTokens;
 export type ThemeTokens = SimpleThemeTokens;
-export type LayoutTokens = Record<string, unknown>;
-export type ComponentTokens = Record<string, unknown>;
+export type LayoutTokens = Record<string, any>;
+export type ComponentTokens = Record<string, any>;
 export type ThemePreset = string;
 export const themePresets: Record<string, SimpleThemeTokens> = {
   default: defaultThemeTokens,

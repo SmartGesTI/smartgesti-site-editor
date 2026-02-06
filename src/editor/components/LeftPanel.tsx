@@ -1,3 +1,4 @@
+import React from "react";
 import { cn } from "../../utils/cn";
 import { BlockSelector } from "../BlockSelector";
 
@@ -9,7 +10,7 @@ interface LeftPanelProps {
   onDeleteBlock: (id: string) => void;
 }
 
-export function LeftPanel({
+export const LeftPanel = React.memo(function LeftPanel({
   currentPage,
   selectedBlockId,
   isPaletteSelected,
@@ -47,4 +48,4 @@ export function LeftPanel({
       )}
     </div>
   );
-}
+});

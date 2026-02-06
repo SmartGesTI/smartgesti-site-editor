@@ -268,7 +268,7 @@ export function applyPatch(document: any, patch: Patch): PatchResult {
         result = applyTest(clonedDoc, operation)
         break
       default:
-        result = { success: false, error: `Unknown operation: ${(operation as any).op}` }
+        result = { success: false, error: `Unknown operation: ${(operation as Record<string, any>).op}` }
     }
 
     if (!result.success) {

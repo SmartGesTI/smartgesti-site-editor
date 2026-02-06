@@ -19,6 +19,7 @@ import {
   findBlockInStructure,
   cleanDocumentStructure,
 } from "../utils/blockUtils";
+import { logger } from "../utils/logger";
 import {
   createDefaultPageStructure,
   generateUniqueSlug,
@@ -97,11 +98,7 @@ export function useEditorState(
       history.push(document, patch, description || "User edit");
 
       const result = applyPatch(document, patch);
-      console.log("[applyChange] Patch result:", result);
-      console.log(
-        "[applyChange] Result document structure length:",
-        result.document?.pages[0]?.structure?.length,
-      );
+      logger.debug("[applyChange] Patch result:", result);
 
       if (result.success && result.document) {
         const cleanedDocument = cleanDocumentStructure(result.document);
@@ -111,7 +108,7 @@ export function useEditorState(
         if (history.canUndo()) {
           const undoResult = history.undo(document);
           if (!undoResult.success) {
-            console.error("[applyChange] Failed to undo after patch error");
+            logger.error("[applyChange] Failed to undo after patch error");
           }
         }
       }
@@ -171,12 +168,8 @@ export function useEditorState(
     (blockType: BlockType): Block | null => {
       const definition = componentRegistry.get(blockType);
       if (!definition) {
-        console.error(
+        logger.error(
           `[createBlockFromType] Block type "${blockType}" not found in registry`,
-        );
-        console.log(
-          "[createBlockFromType] Available types:",
-          componentRegistry.getAll().map((d) => d.type),
         );
         return null;
       }
@@ -205,14 +198,10 @@ export function useEditorState(
       try {
         const newBlock = createBlockFromType(blockType);
         if (!newBlock) {
-          console.error(
-            "[handleAddBlock] Failed to create block of type:",
-            blockType,
-          );
+          logger.error("[handleAddBlock] Failed to create block:", blockType);
           return;
         }
 
-        console.log("[handleAddBlock] Created block:", newBlock.id);
         const patch = PatchBuilder.addBlock(
           document,
           currentPage.id,
@@ -220,13 +209,11 @@ export function useEditorState(
           parentBlockId,
           position,
         );
-        console.log("[handleAddBlock] Patch:", patch);
 
         applyChange(patch, `Add ${blockType} block`);
         setSelectedBlockId(newBlock.id);
-        console.log("[handleAddBlock] Block added successfully");
       } catch (error) {
-        console.error("[handleAddBlock] Error adding block:", error);
+        logger.error("[handleAddBlock] Error adding block:", error);
       }
     },
     [currentPage, document, createBlockFromType, applyChange],
@@ -248,7 +235,7 @@ export function useEditorState(
         );
         applyChange(patch, "Delete block");
       } catch (error) {
-        console.error("Error deleting block:", error);
+        logger.error("Error deleting block:", error);
         if (selectedBlockId === blockId) {
           setSelectedBlockId(null);
         }
@@ -278,7 +265,7 @@ export function useEditorState(
           applyChange(patch, "Update block properties");
         }
       } catch (error) {
-        console.error("Error updating block:", error);
+        logger.error("Error updating block:", error);
       }
     },
     [document, selectedBlockId, currentPage, applyChange],

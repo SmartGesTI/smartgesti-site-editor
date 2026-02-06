@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { cn } from '../../utils/cn'
+import { cn } from '../../../utils/cn'
+import { logger } from '../../../utils/logger'
 
 interface ImageInputProps {
   value?: string
@@ -8,13 +9,11 @@ interface ImageInputProps {
   size?: { width: number; height: number }
   showUrlInput?: boolean
   maxSizeMB?: number
-  // Novos: Contexto para upload seguro
   tenantId?: string
   schoolId?: string
   siteId?: string
   authToken?: string
   assetType?: 'image' | 'video' | 'icon' | 'logo'
-  // Novo: Modo de preview (Data URL) sem upload imediato
   deferUpload?: boolean
   onPendingFile?: (file: File | null) => void
 }
@@ -38,18 +37,16 @@ export function ImageInput({
   const [error, setError] = useState<string | null>(null)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('[ImageInput] Upload config:', { tenantId, schoolId, siteId, hasAuthToken: !!authToken, assetType })
+    logger.debug('[ImageInput] Upload config:', { tenantId, schoolId, siteId, hasAuthToken: !!authToken, assetType })
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Validação de tamanho
     const maxBytes = maxSizeMB * 1024 * 1024
     if (file.size > maxBytes) {
       setError(`Arquivo muito grande. Máximo: ${maxSizeMB}MB`)
       return
     }
 
-    // Validação de tipo
     if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
       setError('Apenas imagens e vídeos são permitidos')
       return
@@ -57,15 +54,14 @@ export function ImageInput({
 
     setError(null)
 
-    // MODO PREVIEW: Usar Data URL sem fazer upload imediato
     if (deferUpload) {
       try {
         const reader = new FileReader()
         reader.onload = (e) => {
           const dataUrl = e.target?.result as string
-          onChange(dataUrl) // Passa Data URL para preview
+          onChange(dataUrl)
           if (onPendingFile) {
-            onPendingFile(file) // Notifica que há upload pendente
+            onPendingFile(file)
           }
         }
         reader.onerror = () => {
@@ -73,14 +69,12 @@ export function ImageInput({
         }
         reader.readAsDataURL(file)
       } catch (err) {
-        console.error("Erro ao criar preview:", err)
+        logger.error("Erro ao criar preview:", err)
         setError(err instanceof Error ? err.message : "Erro ao processar imagem")
       }
       return
     }
 
-    // MODO NORMAL: Upload imediato (comportamento original)
-    // Verificar se tem autenticação (novo endpoint requer)
     if (!authToken) {
       setError('Autenticação necessária para upload')
       return
@@ -97,9 +91,10 @@ export function ImageInput({
       const formData = new FormData()
       formData.append('file', file)
 
-      const apiUrl = (import.meta as any).env.VITE_API_URL || 'http://localhost:3001'
+      const apiUrl = (import.meta as any).env
+        ? ((import.meta as any).env as Record<string, string>).VITE_API_URL || 'http://localhost:3001'
+        : 'http://localhost:3001'
 
-      // Construir query parameters
       const params = new URLSearchParams({ tenantId, assetType })
       if (schoolId) params.append('schoolId', schoolId)
       if (siteId) params.append('siteId', siteId)
@@ -117,15 +112,14 @@ export function ImageInput({
         if (res.status === 401) {
           throw new Error('Sessão expirada. Faça login novamente.')
         }
-        throw new Error(errorData.message || 'Upload falhou')
+        throw new Error((errorData as Record<string, string>).message || 'Upload falhou')
       }
 
       const data = await res.json()
-      // Usar a URL pública retornada do Supabase Storage
-      onChange(data.url)
+      onChange((data as Record<string, string>).url)
       setError(null)
     } catch (err) {
-      console.error("Erro no upload:", err)
+      logger.error("Erro no upload:", err)
       setError(err instanceof Error ? err.message : "Erro ao fazer upload da imagem")
     } finally {
       setUploading(false)
@@ -134,14 +128,12 @@ export function ImageInput({
 
   return (
     <div className="space-y-2 flex flex-col items-center">
-      {/* Label */}
       {label && (
         <label className="block text-xs font-medium text-gray-800 dark:text-gray-100 text-center">
           {label}
         </label>
       )}
 
-      {/* Input file oculto */}
       <input
         ref={(el) => {
           if (el) (window as any).__imageInputRef = el;
@@ -154,13 +146,12 @@ export function ImageInput({
         id={`image-input-${Math.random()}`}
       />
 
-      {/* Preview clicável - Funciona como botão */}
       <button
         type="button"
         onClick={() => {
           const input = document.querySelector('input[type="file"][accept="image/*"]') as HTMLInputElement;
           if (input) {
-            input.value = ''; // Limpar valor para permitir selecionar o mesmo arquivo novamente
+            input.value = '';
             input.click();
           }
         }}
@@ -201,7 +192,6 @@ export function ImageInput({
         )}
       </button>
 
-      {/* Botão remover - APENAS SE HOUVER IMAGEM */}
       {value && !uploading && (
         <button
           onClick={() => onChange(undefined)}
@@ -212,7 +202,6 @@ export function ImageInput({
         </button>
       )}
 
-      {/* Campo URL manual - CONDICIONAL */}
       {showUrlInput && (
         <input
           type="text"
@@ -229,7 +218,6 @@ export function ImageInput({
         />
       )}
 
-      {/* Mensagem de erro */}
       {error && (
         <div className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded border border-red-200 dark:border-red-800">
           {error}

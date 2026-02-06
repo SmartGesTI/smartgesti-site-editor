@@ -38,9 +38,10 @@ class ComponentRegistryImpl implements ComponentRegistry {
     const constraints = definition.constraints
 
     if (constraints) {
+      const props = block.props as Record<string, any>;
+
       // Validar required
       if (constraints.required) {
-        const props = block.props as Record<string, any>
         for (const prop of constraints.required) {
           if (!(prop in props) || props[prop] === undefined || props[prop] === '') {
             errors.push(`Required property '${prop}' is missing or empty`)
@@ -51,7 +52,7 @@ class ComponentRegistryImpl implements ComponentRegistry {
       // Validar min/max
       if (constraints.min) {
         for (const [prop, min] of Object.entries(constraints.min)) {
-          const value = (block.props as Record<string, any>)[prop]
+          const value = props[prop]
           if (typeof value === 'number' && value < min) {
             errors.push(`Property '${prop}' must be at least ${min}`)
           }
@@ -60,7 +61,7 @@ class ComponentRegistryImpl implements ComponentRegistry {
 
       if (constraints.max) {
         for (const [prop, max] of Object.entries(constraints.max)) {
-          const value = (block.props as Record<string, any>)[prop]
+          const value = props[prop]
           if (typeof value === 'number' && value > max) {
             errors.push(`Property '${prop}' must be at most ${max}`)
           }
@@ -70,7 +71,7 @@ class ComponentRegistryImpl implements ComponentRegistry {
       // Validar pattern
       if (constraints.pattern) {
         for (const [prop, pattern] of Object.entries(constraints.pattern)) {
-          const value = (block.props as any)[prop]
+          const value = props[prop]
           if (typeof value === 'string' && !pattern.test(value)) {
             errors.push(`Property '${prop}' does not match required pattern`)
           }

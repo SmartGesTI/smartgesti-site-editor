@@ -43,7 +43,7 @@ function ToolbarButton({
   );
 }
 
-export function Toolbar({
+export const Toolbar = React.memo(function Toolbar({
   history,
   isSaving,
   onUndo,
@@ -115,4 +115,4 @@ export function Toolbar({
       </div>
     </div>
   );
-}
+});

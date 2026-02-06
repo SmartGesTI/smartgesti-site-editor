@@ -19,6 +19,7 @@ import {
     type ButtonHoverConfig,
     type ButtonHoverOverlay,
 } from "../shared/hoverEffects";
+import { logger } from "../../utils/logger";
 
 // Re-export for backwards compatibility
 export { hexToRgb, hexToRgba, adjustColor };
@@ -242,7 +243,6 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
         }
     } else if (sticky) {
         // Sticky navbar - fixed at top, scrolls content only
-        console.log('[NavbarStyles] Applying fixed position: sticky=true, floating=false');
         navStyles.push("position: fixed");
         navStyles.push("top: 0");
         navStyles.push("left: 0");
@@ -256,7 +256,6 @@ export function resolveNavbarStyles(props: Record<string, any>, blockId: string,
         }
     } else {
         // Non-sticky navbar - absolute position, scrolls with page but stays on top of hero
-        console.log('[NavbarStyles] Applying absolute position: sticky=false, floating=false');
         navStyles.push("position: absolute");
         navStyles.push("top: 0");
         navStyles.push("left: 0");

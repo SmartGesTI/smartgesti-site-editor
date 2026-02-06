@@ -1,3 +1,4 @@
+import React from "react";
 import { cn } from "../../utils/cn";
 import { Block } from "../../engine";
 import {
@@ -121,11 +122,11 @@ const NAVBAR_VISUAL_PROPS_TO_RESET: Record<string, any> = {
  * Componente para selecionar variações de Hero e Navbar
  * Preserva props customizadas ao trocar variação
  */
-export function VariationSelector({ block, onUpdate }: VariationSelectorProps) {
+export const VariationSelector = React.memo(function VariationSelector({ block, onUpdate }: VariationSelectorProps) {
   // Hero variations
   if (block.type === "hero") {
-    const currentVariation = (block.props as any).variation;
-    const props = block.props as any;
+    const props = block.props as Record<string, any>;
+    const currentVariation = props.variation;
 
     return (
       <div className="space-y-2">
@@ -191,8 +192,8 @@ export function VariationSelector({ block, onUpdate }: VariationSelectorProps) {
 
   // Navbar variations
   if (block.type === "navbar") {
-    const currentVariation = (block.props as any).variation;
-    const props = block.props as any;
+    const props = block.props as Record<string, any>;
+    const currentVariation = props.variation;
 
     return (
       <div className="space-y-2">
@@ -249,4 +250,4 @@ export function VariationSelector({ block, onUpdate }: VariationSelectorProps) {
   }
 
   return null;
-}
+});

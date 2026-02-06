@@ -40,7 +40,7 @@ export function validateDocument(doc: unknown): ValidationResult {
     return { valid: false, errors, warnings };
   }
 
-  const document = doc as Record<string, unknown>;
+  const document = doc as Record<string, any>;
 
   // Validar meta
   if (!document.meta || typeof document.meta !== "object") {
@@ -50,7 +50,7 @@ export function validateDocument(doc: unknown): ValidationResult {
       severity: "error",
     });
   } else {
-    const meta = document.meta as Record<string, unknown>;
+    const meta = document.meta as Record<string, any>;
     if (!meta.title || typeof meta.title !== "string") {
       errors.push({
         path: "meta.title",
@@ -68,7 +68,7 @@ export function validateDocument(doc: unknown): ValidationResult {
       severity: "warning",
     });
   } else {
-    validateTheme(document.theme as Record<string, unknown>, errors, warnings);
+    validateTheme(document.theme as Record<string, any>, errors, warnings);
   }
 
   // Validar structure
@@ -93,13 +93,13 @@ export function validateDocument(doc: unknown): ValidationResult {
  * Valida tema
  */
 function validateTheme(
-  theme: Record<string, unknown>,
+  theme: Record<string, any>,
   _errors: ValidationError[],
   warnings: ValidationError[],
 ): void {
   // Validar colors
   if (theme.colors && typeof theme.colors === "object") {
-    const colors = theme.colors as Record<string, unknown>;
+    const colors = theme.colors as Record<string, any>;
     const requiredColors = ["primary", "background", "text"];
     for (const color of requiredColors) {
       if (!colors[color]) {
@@ -114,7 +114,7 @@ function validateTheme(
 
   // Validar typography
   if (theme.typography && typeof theme.typography === "object") {
-    const typo = theme.typography as Record<string, unknown>;
+    const typo = theme.typography as Record<string, any>;
     if (!typo.fontFamily) {
       warnings.push({
         path: "theme.typography.fontFamily",
@@ -148,7 +148,7 @@ function validateBlocks(
       return;
     }
 
-    const b = block as Record<string, unknown>;
+    const b = block as Record<string, any>;
 
     // Validar id
     if (!b.id || typeof b.id !== "string") {
@@ -189,7 +189,7 @@ function validateBlocks(
 
     // Validar props
     if (b.props && typeof b.props === "object") {
-      const props = b.props as Record<string, unknown>;
+      const props = b.props as Record<string, any>;
 
       // Validar children recursivamente
       if (props.children && Array.isArray(props.children)) {
@@ -212,7 +212,7 @@ function validateBlocks(
  */
 function validateBlockProps(
   type: string,
-  props: Record<string, unknown>,
+  props: Record<string, any>,
   path: string,
   errors: ValidationError[],
   warnings: ValidationError[],
@@ -483,7 +483,7 @@ export function sanitizeDocument(doc: unknown): SiteDocumentV2 | null {
     return null;
   }
 
-  const document = doc as Record<string, unknown>;
+  const document = doc as Record<string, any>;
 
   // Garantir estrutura básica com tema padrão
   const sanitized: SiteDocumentV2 = {
@@ -496,7 +496,7 @@ export function sanitizeDocument(doc: unknown): SiteDocumentV2 | null {
 
   // Merge meta
   if (document.meta && typeof document.meta === "object") {
-    const meta = document.meta as Record<string, unknown>;
+    const meta = document.meta as Record<string, any>;
     if (meta.title && typeof meta.title === "string") {
       sanitized.meta.title = meta.title;
     }
@@ -513,7 +513,7 @@ export function sanitizeDocument(doc: unknown): SiteDocumentV2 | null {
 
   // Merge theme
   if (document.theme && typeof document.theme === "object") {
-    const theme = document.theme as Record<string, unknown>;
+    const theme = document.theme as Record<string, any>;
 
     if (theme.colors && typeof theme.colors === "object") {
       sanitized.theme.colors = {
@@ -563,7 +563,7 @@ function sanitizeBlocks(blocks: unknown[]): Block[] {
   for (const block of blocks) {
     if (!block || typeof block !== "object") continue;
 
-    const b = block as Record<string, unknown>;
+    const b = block as Record<string, any>;
 
     // Garantir type válido
     const type =
@@ -584,7 +584,7 @@ function sanitizeBlocks(blocks: unknown[]): Block[] {
     // Sanitizar props
     const props =
       b.props && typeof b.props === "object"
-        ? sanitizeProps(b.props as Record<string, unknown>)
+        ? sanitizeProps(b.props as Record<string, any>)
         : {};
 
     sanitized.push({
@@ -601,9 +601,9 @@ function sanitizeBlocks(blocks: unknown[]): Block[] {
  * Sanitiza props de um bloco
  */
 function sanitizeProps(
-  props: Record<string, unknown>,
-): Record<string, unknown> {
-  const sanitized: Record<string, unknown> = {};
+  props: Record<string, any>,
+): Record<string, any> {
+  const sanitized: Record<string, any> = {};
 
   for (const [key, value] of Object.entries(props)) {
     if (key === "children" && Array.isArray(value)) {
@@ -635,7 +635,7 @@ export function ensureBlockIds(blocks: Block[]): Block[] {
     usedIds.add(id);
 
     // Processar children
-    const props = { ...block.props } as Record<string, unknown>;
+    const props = { ...block.props } as Record<string, any>;
     if (props.children && Array.isArray(props.children)) {
       props.children = (props.children as Block[]).map(processBlock);
     }

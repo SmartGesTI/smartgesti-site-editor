@@ -3,7 +3,7 @@
  * Permite customizar: tamanho, peso, cor e efeitos de texto
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import { ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react';
 import { cn } from '../../../utils/cn';
@@ -61,21 +61,21 @@ export function TypographyInput({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const updateConfig = (updates: Partial<TypographyConfig>) => {
+  const updateConfig = useCallback((updates: Partial<TypographyConfig>) => {
     onChange({ ...config, ...updates });
-  };
+  }, [config, onChange]);
 
-  const handleFontSizeChange = (delta: number) => {
+  const handleFontSizeChange = useCallback((delta: number) => {
     const newSize = Math.max(8, Math.min(200, (config.fontSize || defaultFontSize) + delta));
     updateConfig({ fontSize: newSize });
-  };
+  }, [config.fontSize, defaultFontSize, updateConfig]);
 
-  const handleFontSizeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFontSizeInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value, 10);
     if (!isNaN(val) && val >= 8 && val <= 200) {
       updateConfig({ fontSize: val });
     }
-  };
+  }, [updateConfig]);
 
   const summary = generateTypographySummary(config);
 

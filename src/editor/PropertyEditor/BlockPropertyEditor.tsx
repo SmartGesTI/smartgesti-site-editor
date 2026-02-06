@@ -87,6 +87,16 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
     return groups;
   }, [block, blockDefinition]);
 
+  // IMPORTANTE: todos os hooks devem ser chamados ANTES de qualquer early return
+  const handlePropChange = useCallback((propName: string, value: any) => {
+    // Se remover o logo (definir como undefined), resetar logoHeight para padrão
+    if (propName === "logo" && (value === undefined || value === "")) {
+      onUpdate({ [propName]: value, logoHeight: 70 });
+    } else {
+      onUpdate({ [propName]: value });
+    }
+  }, [onUpdate]);
+
   if (!block) {
     return (
       <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
@@ -102,15 +112,6 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
       </div>
     );
   }
-
-  const handlePropChange = useCallback((propName: string, value: any) => {
-    // Se remover o logo (definir como undefined), resetar logoHeight para padrão
-    if (propName === "logo" && (value === undefined || value === "")) {
-      onUpdate({ [propName]: value, logoHeight: 70 });
-    } else {
-      onUpdate({ [propName]: value });
-    }
-  }, [onUpdate]);
 
   return (
     <div className="p-3 space-y-4">

@@ -10,3 +10,4 @@ export { ButtonGroupInput } from "./ButtonGroupInput";
 export { IconGridInput } from "./IconGridInput";
 export { ImageGridInput } from "./ImageGridInput";
 export { TypographyInput } from "./TypographyInput";
+export { ImageInput } from "./ImageInput";

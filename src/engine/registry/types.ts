@@ -2,7 +2,7 @@
  * Types for Component Registry
  */
 
-import { Block, BlockType } from "../schema/siteDocument";
+import { Block, BlockType, BlockPropsFor } from "../schema/siteDocument";
 
 /**
  * Metadata for property panel (como exibir no editor)
@@ -60,24 +60,24 @@ export interface SlotDefinition {
 /**
  * Variação de bloco (preset com nome e props)
  */
-export interface BlockVariation {
+export interface BlockVariation<T extends BlockType = BlockType> {
   id: string;
   name: string;
-  defaultProps: Partial<Block["props"]>;
+  defaultProps: T extends BlockType ? Partial<BlockPropsFor<T>> : Record<string, any>;
 }
 
 /**
  * Block Definition - Metadados completos de um bloco
  */
-export interface BlockDefinition {
-  type: BlockType;
+export interface BlockDefinition<T extends BlockType = BlockType> {
+  type: T;
   name: string;
   description: string;
   icon?: string;
   category: "layout" | "content" | "composition" | "sections" | "forms";
-  defaultProps: Partial<Block["props"]>;
+  defaultProps: T extends BlockType ? Partial<BlockPropsFor<T>> : Record<string, any>;
   /** Variações pré-definidas (ex.: Hero Dividido, Hero Parallax) */
-  variations?: Record<string, BlockVariation>;
+  variations?: Record<string, BlockVariation<T>>;
   slots?: SlotDefinition[]; // Para blocos compostos (Card, Section)
   constraints?: BlockConstraint;
   inspectorMeta?: Record<string, InspectorMeta>; // Como exibir cada prop no editor

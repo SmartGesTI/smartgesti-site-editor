@@ -28,13 +28,13 @@ function getBlockTypeName(type: Block['type']): string {
  * Obtém preview do bloco (texto ou propriedade relevante)
  */
 function getBlockPreview(block: Block): string {
-  const props = block.props as any
+  const props = block.props as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- dynamic access for preview
 
   switch (block.type) {
     case 'heading':
       return props.text || 'Heading'
     case 'text':
-      return props.text ? props.text.substring(0, 30) + (props.text.length > 30 ? '...' : '') : 'Text'
+      return props.text ? String(props.text).substring(0, 30) + (String(props.text).length > 30 ? '...' : '') : 'Text'
     case 'button':
       return props.text || 'Button'
     case 'link':
@@ -45,7 +45,7 @@ function getBlockPreview(block: Block): string {
     case 'stack':
     case 'grid':
     case 'box':
-      return `${getBlockTypeName(block.type)} (${props.children?.length || 0} children)`
+      return `${getBlockTypeName(block.type)} (${Array.isArray(props.children) ? props.children.length : 0} children)`
     case 'section':
       return props.id ? `Section: ${props.id}` : 'Section'
     case 'card':
@@ -53,8 +53,7 @@ function getBlockPreview(block: Block): string {
     case 'divider':
       return 'Divider'
     default:
-      // TypeScript não consegue inferir que todos os casos foram cobertos
-      return getBlockTypeName((block as Block).type)
+      return getBlockTypeName(block.type)
   }
 }
 
@@ -74,7 +73,7 @@ function renderBlockTree(
   }
 
   const isSelected = block.id === selectedBlockId
-  const props = block.props as any
+  const props = block.props as Record<string, any>
   const hasChildren = props && typeof props === 'object' && props.children && Array.isArray(props.children) && props.children.length > 0
 
   return (
@@ -158,7 +157,7 @@ function renderBlockTree(
   )
 }
 
-export function BlockSelector({
+export const BlockSelector = React.memo(function BlockSelector({
   structure,
   selectedBlockId,
   onSelectBlock,
@@ -194,11 +193,11 @@ export function BlockSelector({
           
           const props = block.props
           if (props && typeof props === 'object' && !Array.isArray(props)) {
-            const children = (props as any).children
+            const children = (props as Record<string, any>).children
             if (children && Array.isArray(children) && children.length > 0) {
               // Filtrar children inválidos antes de contar recursivamente
               const validChildren = children.filter(
-                (child: any) => child && typeof child === 'object' && child.id && child.type
+                (child: unknown) => child && typeof child === 'object' && (child as Block).id && (child as Block).type
               )
               if (validChildren.length > 0) {
                 total += count(validChildren)
@@ -240,4 +239,4 @@ export function BlockSelector({
       </div>
     </div>
   )
-}
+});

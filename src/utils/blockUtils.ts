@@ -16,7 +16,7 @@ export function findBlockInStructure(blocks: Block[], blockId: string): Block | 
 
     if (block.id === blockId) return block
 
-    const props = block.props as any
+    const props = block.props as Record<string, any>
     
     // Verificar children
     if (props?.children && Array.isArray(props.children)) {
@@ -54,7 +54,7 @@ export function cleanDocumentStructure(doc: SiteDocumentV2): SiteDocumentV2 {
     return blocks
       .filter((block) => block && typeof block === 'object' && block.id && block.type)
       .map((block) => {
-        const props = block.props as any
+        const props = block.props as Record<string, any>
         if (props && typeof props === 'object' && !Array.isArray(props)) {
           const children = props.children
           if (children && Array.isArray(children)) {
@@ -92,7 +92,7 @@ export function countBlocks(blocks: Block[]): number {
 
     total++
 
-    const props = block.props as any
+    const props = block.props as Record<string, any>
     if (props?.children && Array.isArray(props.children)) {
       total += countBlocks(props.children)
     }
@@ -125,7 +125,7 @@ export function getBlockTypeName(type: Block['type']): string {
  * Obtém preview do conteúdo de um bloco
  */
 export function getBlockPreview(block: Block): string {
-  const props = block.props as any
+  const props = block.props as Record<string, any>
 
   switch (block.type) {
     case 'heading':

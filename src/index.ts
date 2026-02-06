@@ -3,42 +3,302 @@
  * Editor de sites compartilhado para projetos SmartGesti
  */
 
-// CSS será importado pelos componentes que precisam dele
-// SiteViewer e PreviewPanel importam diretamente
-
-// Legacy exports (mantidos para compatibilidade)
-export { SiteEditor } from './components/SiteEditor'
-export { SiteViewer } from './components/SiteViewer'
-export { exportSiteToHtml } from './utils/htmlExporter'
-export { applySiteTheme, removeSiteTheme } from './utils/themeApplier'
-export { PaletteSelector, defaultColorPalettes } from './components/editors/PaletteSelector'
-export { SectionGlow } from './components/effects/SectionGlow'
-export * from './components/inputs'
-export { moduleRegistry, createModule } from './modules/registry'
-
 // Landing Page Builder V2 exports
 export { LandingPageEditorV2 } from './editor/LandingPageEditorV2'
 export type { UploadConfig, LandingPageEditorV2Props } from './editor/LandingPageEditorV2'
 export { LandingPageViewerV2 } from './viewer/LandingPageViewerV2'
-export type {
-  Site,
-  Page,
-  Component,
-  ComponentType,
-  ComponentDefinition,
-  Template,
-  SiteEditorProps,
-  SiteViewerProps,
-  ColorPalette,
-  SiteTheme,
-  GlowVariant,
-  GlowSettings,
-  ComponentGlow,
-} from './types'
-export type {
-  SiteModule,
-  ModuleRegistry,
-} from './types/module'
 
 // Engine V2 exports (Lovable-like)
-export * from './engine'
+// Side-effect import to ensure blocks are registered
+import './engine/registry/blocks'
+
+// Schema - Core types and interfaces
+export type {
+  // Block types and union
+  BlockType,
+  Block,
+  BlockBase,
+
+  // Layout blocks
+  ContainerBlock,
+  StackBlock,
+  GridBlock,
+  BoxBlock,
+  SpacerBlock,
+
+  // Content blocks
+  HeadingBlock,
+  TextBlock,
+  ImageBlock,
+  ButtonBlock,
+  LinkBlock,
+  DividerBlock,
+  BadgeBlock,
+  IconBlock,
+  AvatarBlock,
+  VideoBlock,
+
+  // Composition blocks
+  CardBlock,
+  SectionBlock,
+
+  // Section blocks
+  HeroBlock,
+  HeroVariationId,
+  NavbarBlock,
+  NavbarLink,
+  NavbarVariationId,
+  FooterBlock,
+  FeatureBlock,
+  FeatureGridBlock,
+  PricingCardBlock,
+  PricingBlock,
+  TestimonialBlock,
+  TestimonialGridBlock,
+  FaqItemBlock,
+  FaqBlock,
+  CtaBlock,
+  StatItemBlock,
+  StatsBlock,
+  LogoCloudBlock,
+  CountdownBlock,
+  CarouselBlock,
+  BlogCardBlock,
+  BlogCardGridBlock,
+  TeamCardBlock,
+  TeamGridBlock,
+  CourseCardGridBlock,
+  CategoryCardGridBlock,
+  SocialLinksBlock,
+
+  // Form blocks
+  FormBlock,
+  InputBlock,
+
+  // Document structure
+  SiteDocumentV2,
+  SitePage,
+
+  // Shared types
+  ImageGridItem,
+  ImageGridPreset,
+  TypographyConfig,
+} from './engine/schema/siteDocument'
+
+export {
+  createEmptySiteDocumentV2,
+} from './engine/schema/siteDocument'
+
+// Theme tokens
+export type {
+  // Scale types
+  RadiusScale,
+  ShadowScale,
+  SpacingScale,
+  MotionLevel,
+  BackgroundStyle,
+  GradientDirection,
+
+  // Token interfaces
+  ColorTokens,
+  TypographyTokens,
+  EffectTokens,
+  LayoutTokens,
+  ComponentTokens,
+  ThemeTokens,
+} from './engine/schema/themeTokens'
+
+export {
+  // Scale maps
+  radiusScaleMap,
+  shadowScaleMap,
+  spacingScaleMap,
+  gradientDirectionMap,
+
+  // Default tokens
+  defaultEffectTokens,
+  defaultLayoutTokens,
+  defaultComponentTokens,
+  defaultThemeTokens,
+  darkThemeTokens,
+  gradientThemeTokens,
+  corporateThemeTokens,
+  playfulThemeTokens,
+
+  // Functions
+  generateThemeCSSVariables,
+} from './engine/schema/themeTokens'
+
+// Registry
+export type {
+  InspectorMeta,
+  BlockConstraint,
+  SlotDefinition,
+  BlockVariation,
+  BlockDefinition,
+  ComponentRegistry,
+} from './engine/registry/types'
+
+export { componentRegistry } from './engine/registry/registry'
+
+// Re-export from blocks index for convenience
+export type { BlockDefinition as BlockDef } from './engine/registry/blocks'
+export { componentRegistry as blockRegistry } from './engine/registry/blocks'
+
+// Render
+export type {
+  RenderNodeProps,
+} from './engine/render/renderNode'
+
+export type {
+  RenderPageProps,
+} from './engine/render/renderPage'
+
+export {
+  RenderNode,
+  renderNode,
+} from './engine/render/renderNode'
+
+export {
+  RenderPage,
+  renderPage,
+} from './engine/render/renderPage'
+
+// Export
+export type {
+  ExportPageToHtmlOptions,
+} from './engine/export/exportHtml'
+
+export {
+  exportPageToHtml,
+  exportBlockToHtml,
+  clearHtmlCache,
+  exportDocumentToHtml,
+  generateAssetsManifest,
+} from './engine/export/exportHtml'
+
+export {
+  sanitizeHtml,
+  isSafeUrl,
+} from './engine/export/sanitizeHtml'
+
+// Preview
+export type {
+  PreviewV2Props,
+} from './engine/preview/PreviewV2'
+
+export {
+  PreviewV2,
+} from './engine/preview/PreviewV2'
+
+// Patch system
+export type {
+  PatchOperation,
+  AddOperation,
+  RemoveOperation,
+  ReplaceOperation,
+  MoveOperation,
+  CopyOperation,
+  TestOperation,
+  Patch,
+  PatchResult,
+} from './engine/patch/types'
+
+export {
+  applyPatch,
+  createAddPatch,
+  createRemovePatch,
+  createReplacePatch,
+  createMovePatch,
+  createCopyPatch,
+} from './engine/patch/applyPatch'
+
+export type {
+  HistoryEntry,
+} from './engine/patch/history'
+
+export {
+  HistoryManager,
+  createHistoryManager,
+} from './engine/patch/history'
+
+export {
+  PatchBuilder,
+} from './engine/patch/PatchBuilder'
+
+// Theme system (renamed exports to avoid conflicts)
+export type {
+  SiteThemeTokens,
+  PartialSiteThemeTokens,
+  SiteThemeColors,
+  SiteThemeSpacing,
+  SiteThemeTypography,
+  SiteThemeBorderRadius,
+  SiteThemeShadows,
+  SiteThemeBreakpoints,
+} from './engine/theme'
+
+export {
+  siteDefaultTheme,
+  siteDarkTheme,
+  generateSiteCSSVariables,
+  generateSiteCSSVariablesObject,
+  createSiteThemeStyle,
+  mergeSiteThemeTokens,
+} from './engine/theme'
+
+// Presets
+export type {
+  ThemePreset,
+} from './engine/presets/themePresets'
+
+export {
+  cleanPreset,
+  neonPreset,
+  pastelPreset,
+  corporatePreset,
+  playfulKidsPreset,
+  glassPreset,
+  minimalPreset,
+  classicPreset,
+  themePresets,
+  getPreset,
+  getAllPresets,
+  applyOverrides,
+  validateContrast,
+} from './engine/presets/themePresets'
+
+export type {
+  HeroVariationPreset,
+} from './engine/presets/heroVariations'
+
+export {
+  heroVariations,
+  heroVariationIds,
+  getHeroVariation,
+  HERO_IMAGE_NAMES,
+  PLACEHOLDER_IMAGE_URL,
+} from './engine/presets/heroVariations'
+
+export type {
+  NavbarVariationPreset,
+} from './engine/presets/navbarVariations'
+
+export {
+  navbarVariations,
+  navbarVariationIds,
+  getNavbarVariation,
+} from './engine/presets/navbarVariations'
+
+// Generators
+export {
+  generateCompleteLandingPage,
+  generatePatchesForLandingPage,
+  generateModernLandingPage,
+} from './engine/generators/generateLandingPage'
+
+// Shared modules - Image grid
+export type {
+  ImageGridItem as EngineImageGridItem,
+  ImageGridPreset as EngineImageGridPreset,
+} from './engine/shared/imageGrid'

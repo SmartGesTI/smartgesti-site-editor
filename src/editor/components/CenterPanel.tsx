@@ -1,7 +1,7 @@
-import { lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import { SiteDocumentV2 } from "../../engine";
 import { PageTabBar } from "../PageTabBar";
-import { LoadingSpinner } from "../../components/LoadingSpinner";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 // Lazy load PreviewV2 (componente pesado)
 const PreviewV2 = lazy(() =>
@@ -22,7 +22,7 @@ interface CenterPanelProps {
   onUpdateBlock?: (blockId: string, updates: Record<string, any>) => void;
 }
 
-export function CenterPanel({
+export const CenterPanel = React.memo(function CenterPanel({
   document,
   currentPageId,
   currentPage,
@@ -65,4 +65,4 @@ export function CenterPanel({
       </div>
     </div>
   );
-}
+});

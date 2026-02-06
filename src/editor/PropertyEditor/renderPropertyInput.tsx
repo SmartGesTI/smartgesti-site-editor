@@ -12,8 +12,8 @@ import {
   IconGridInput,
   ImageGridInput,
   TypographyInput,
+  ImageInput,
 } from "./inputs";
-import { ImageInput } from "../../components/inputs/ImageInput";
 import type { UploadConfig } from "../LandingPageEditorV2";
 
 /**

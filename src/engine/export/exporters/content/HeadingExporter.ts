@@ -12,7 +12,8 @@ export function exportHeading(
   basePath?: string,
   theme?: ThemeTokens,
 ): string {
-  const { level, text, align = "left", color } = (block as any).props;
+  const props = block.props as Record<string, any>;
+  const { level, text, align = "left", color } = props;
 
   const style = [
     `text-align: ${align}`,

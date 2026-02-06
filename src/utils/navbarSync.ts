@@ -6,6 +6,7 @@
 import { Block, NavbarBlock, SiteDocumentV2, SitePage } from "@/engine/schema/siteDocument";
 import { Patch } from "@/engine/patch/types";
 import { PatchBuilder } from "@/engine/patch/PatchBuilder";
+import { logger } from "./logger";
 
 /**
  * Informação sobre um bloco navbar encontrado
@@ -43,7 +44,7 @@ function findNavbarBlocksInStructure(
     }
 
     // Busca recursiva em children
-    const props = block.props as any;
+    const props = block.props as Record<string, any>;
     if (props?.children && Array.isArray(props.children)) {
       findNavbarBlocksInStructure(props.children, pageId, navbars);
     }
@@ -99,7 +100,7 @@ export function generateNavbarLinks(pages: SitePage[]): NavbarLink[] {
  * Verifica se um bloco navbar deve ter sincronização automática
  */
 function shouldAutoSync(navbarBlock: NavbarBlock): boolean {
-  const props = navbarBlock.props as any;
+  const props = navbarBlock.props as Record<string, any>;
   // Se _autoSync foi explicitamente setado como false, respeitar
   if (props._autoSync === false) {
     return false;
@@ -140,7 +141,7 @@ export function syncNavbarLinks(document: SiteDocumentV2): Patch {
 
       patches.push(...patch);
     } catch (error) {
-      console.warn(
+      logger.warn(
         `Failed to sync navbar ${navbarInfo.blockId} in page ${navbarInfo.pageId}:`,
         error
       );

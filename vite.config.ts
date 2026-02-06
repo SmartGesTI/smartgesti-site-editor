@@ -53,7 +53,19 @@ export default defineConfig({
       fileName: (format, entryName) => `${entryName}.js`,
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime'],
+      external: [
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
+        'lucide-react',
+        '@dnd-kit/core',
+        '@dnd-kit/sortable',
+        '@dnd-kit/utilities',
+        'clsx',
+        'tailwind-merge',
+        'react-colorful',
+        '@vanilla-extract/css',
+      ],
       output: {
         preserveModules: true,
         preserveModulesRoot: 'src',

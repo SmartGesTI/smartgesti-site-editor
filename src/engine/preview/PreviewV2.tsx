@@ -8,6 +8,7 @@ import { SiteDocumentV2, Block } from "../schema/siteDocument";
 import { exportPageToHtml, exportBlockToHtml } from "../export/exportHtml";
 import { detectChangedBlocks } from "../../utils/changeDetector";
 import { hashDocument } from "../../utils/documentHash";
+import { logger } from "../../utils/logger";
 
 export interface PreviewV2Props {
   document: SiteDocumentV2;
@@ -25,7 +26,7 @@ function findBlockInPage(page: any, blockId: string): Block | null {
   const findInBlocks = (blocks: Block[]): Block | null => {
     for (const block of blocks) {
       if (block.id === blockId) return block;
-      const props = block.props as any;
+      const props = block.props as Record<string, any>;
       if (props?.children && Array.isArray(props.children)) {
         const found = findInBlocks(props.children);
         if (found) return found;
@@ -206,7 +207,7 @@ export function PreviewV2({
 
       iframe.srcdoc = html;
     } catch (error) {
-      console.error("[PreviewV2] Error:", error);
+      logger.error("[PreviewV2] Error:", error);
       if (showLoading) {
         setIsLoading(false);
       }
@@ -254,7 +255,7 @@ export function PreviewV2({
             // Reaplicar highlight
             updateHighlight(selectedBlockIdRef.current || null);
           } catch (error) {
-            console.error("[PreviewV2] Erro ao atualizar:", error);
+            logger.error("[PreviewV2] Erro ao atualizar:", error);
             updateFullPreview(doc, false);
           }
         } else {
@@ -262,7 +263,7 @@ export function PreviewV2({
         }
       });
     } catch (error) {
-      console.error("[PreviewV2] Erro:", error);
+      logger.error("[PreviewV2] Erro:", error);
       updateFullPreview(doc, false);
     }
   };
@@ -300,7 +301,7 @@ export function PreviewV2({
 
     // Se não há mudanças detectadas mas o hash mudou, forçar reload
     if (changedBlocks.length === 0) {
-      console.log(
+      logger.debug(
         "[PreviewV2] Hash changed but no changes detected, forcing reload",
       );
       updateFullPreview(document, false);
@@ -315,7 +316,6 @@ export function PreviewV2({
           c.changedProps?.includes("children"),
       )
     ) {
-      console.log("[PreviewV2] Structural change detected, full reload");
       updateFullPreview(document, false);
       return;
     }

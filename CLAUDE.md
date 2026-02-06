@@ -4,35 +4,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SmartGesti Site Editor is a shared React component library for building landing pages. Published as `@brunoalz/smartgesti-site-editor` on NPM, it provides:
-
-- **Block-based site editor** (V2 engine) with drag-and-drop interface
-- **HTML export** system for static site generation
-- **Multi-tenant asset management** with Supabase Storage isolation
-- **Responsive preview** with device switching
-- **Pre-built templates** for schools and portfolios
+SmartGesti Site Editor is a shared React component library for building landing pages. Published as `@brunoalz/smartgesti-site-editor` on NPM, it provides a block-based site editor (V2 engine) with drag-and-drop, HTML export for static site generation, multi-tenant asset management with Supabase Storage, and pre-built templates for schools and portfolios.
 
 **Consumer Projects**: SmartGesti-Ensino, SmartGesti-Portfólios
 
 ## Development Commands
 
-### Build and Development
 ```bash
-npm run build          # Production build (creates dist/)
+npm run build          # Production build (Vite library mode → dist/)
 npm run dev            # Watch mode for development
-npm run demo           # Start Vite dev server with demo
-npm run lint           # ESLint check
+npm run demo           # Start Vite dev server with demo app
+npm run lint           # ESLint 9 flat config check (ts,tsx)
 ```
+
+There is no test suite. Validation is manual via `npm run demo`.
 
 ### Publishing
+
 ```bash
-npm run version:patch  # Bump patch version, tag, push, publish
-npm run version:minor  # Bump minor version, tag, push, publish
-npm run version:major  # Bump major version, tag, push, publish
+npm run version:patch  # Bump patch, tag, push, publish
+npm run version:minor  # Bump minor, tag, push, publish
+npm run version:major  # Bump major, tag, push, publish
 ```
 
-### Local Development Workflow
-When developing locally alongside consumer projects:
+### Local Development with Consumer Projects
 
 ```bash
 # In smartgesti-site-editor/
@@ -48,245 +43,247 @@ npm run dev
 
 ### V2 Engine - Block System
 
-The editor uses a **Lovable-like** composable block architecture:
+The editor uses a composable block architecture:
 
-- **Schema**: [siteDocument.ts](src/engine/schema/siteDocument.ts) defines all block types and their props
-- **Registry**: [registry.ts](src/engine/registry/registry.ts) - central registry for block definitions with metadata
-- **Blocks**: Defined in [src/engine/registry/blocks/](src/engine/registry/blocks/) organized by category:
-  - `layout/` - Container, Stack, Grid, Box, Spacer
-  - `content/` - Heading, Text, Image, Button, Video, etc.
-  - `sections/` - Hero, Navbar, Footer, FeatureGrid, Pricing, etc.
-  - `forms/` - Form, Input, Textarea, FormSelect
+- **Schema**: `src/engine/schema/siteDocument.ts` — all block types and their props as TypeScript interfaces
+- **Registry**: `src/engine/registry/registry.ts` — central registry mapping block types to definitions
+- **Block definitions**: `src/engine/registry/blocks/` organized by category: `layout/`, `content/`, `sections/`, `forms/`, `composition/`
+- **Presets/Variations**: `src/engine/presets/` — heroVariations.ts, navbarVariations.ts
+- **Type utilities**: `BlockOfType<T>`, `BlockPropsFor<T>` in siteDocument.ts — generic type-safe block access
+- **Type guards**: `src/engine/shared/typeGuards.ts` — `isBlockType()` and `getBlockProps()` for runtime narrowing
 
-### Block Definition Structure
+### Dual Rendering System (CRITICAL)
 
-Each block has:
-- `type` - Unique identifier (matches BlockType in schema)
-- `defaultProps` - Default property values
-- `inspectorMeta` - Property editor metadata (labels, input types, grouping)
-- `variations` - Pre-configured visual variations (optional)
-- `constraints` - Validation rules
+The editor has **two separate rendering pipelines** that must stay in sync:
 
-Example:
-```typescript
-export const heroBlock: BlockDefinition = {
-  type: "hero",
-  name: "Hero Section",
-  category: "sections",
-  defaultProps: {
-    title: "Welcome",
-    variant: "centered",
-  },
-  variations: {
-    "hero-split": { /* variation config */ },
-  },
-  inspectorMeta: {
-    image: {
-      label: "Background Image",
-      inputType: "image-upload",  // Enables authenticated upload
-      group: "Mídia",
-    },
-  },
-};
-```
+1. **Editor Preview** (React): `src/engine/render/renderers/` — React components for live preview in editor
+2. **HTML Export** (Static): `src/engine/export/exporters/` — generates standalone HTML with inline CSS
 
-### Dual Rendering System
+**When adding or modifying blocks, you MUST update BOTH systems.**
 
-The editor has TWO separate rendering pipelines:
+### HTML Export Flow
 
-1. **Editor Preview** (React components):
-   - Path: [src/engine/render/renderers/](src/engine/render/renderers/)
-   - Uses `renderRegistry.ts` to map block types to React components
-   - Renders blocks in editor with drag-and-drop, selection, etc.
-
-2. **HTML Export** (Static HTML):
-   - Path: [src/engine/export/exporters/](src/engine/export/exporters/)
-   - Uses `HtmlExporter.ts` registry pattern
-   - Generates standalone HTML with inline CSS
-   - Entry point: [exportHtml.ts](src/engine/export/exportHtml.ts#L223-L246)
-
-**CRITICAL**: When adding or modifying blocks, you MUST update BOTH rendering systems.
-
-### HTML Export System
-
-Export flow:
-1. `exportPageToHtml()` in [exportHtml.ts](src/engine/export/exportHtml.ts) generates full HTML document
-2. `blockToHtmlDirect()` uses registry to dispatch to specific exporters
-3. Each exporter in [exporters/](src/engine/export/exporters/) handles one block type
-4. Theme CSS variables are inlined in `<head>`
-5. Navbar-specific styles from `landingPageCSS` constant
-
-**Key files**:
-- [exportHtml.ts](src/engine/export/exportHtml.ts) - Main export logic with caching
-- [exporters/HtmlExporter.ts](src/engine/export/exporters/HtmlExporter.ts) - Registry
-- [shared/htmlHelpers.ts](src/engine/export/shared/htmlHelpers.ts) - HTML escaping, sanitization
-- [styleResolver.ts](src/engine/export/styleResolver.ts) - CSS style generation for navbar
+1. `exportPageToHtml()` in `src/engine/export/exportHtml.ts` — generates full HTML document
+2. `blockToHtmlDirect()` dispatches to specific exporters via `src/engine/export/exporters/HtmlExporter.ts` registry
+3. Theme CSS variables inlined in `<head>`
+4. Navbar-specific responsive CSS from `landingPageCSS` constant in exportHtml.ts
+5. Style resolver: `src/engine/export/styleResolver.ts` computes CSS custom properties for navbar
 
 ### Multi-Tenant Asset System
 
-**Structure**: `tenant-{uuid}/school-{uuid}/site-{uuid}/filename.jpg`
+**Storage path**: `tenant-{uuid}/school-{uuid}/site-{uuid}/filename.jpg`
 
-**Upload Flow**:
-1. Frontend uses `ImageInput` component with `uploadConfig` prop
-2. POST to `/api/site-assets/upload` with JWT auth
-3. Backend validates tenant ownership via `TenantAccessGuard`
-4. Supabase Storage + RLS policies enforce isolation
-5. Metadata stored in `site_assets` table
+Upload flow: `ImageInput` component → POST `/api/site-assets/upload` with JWT → Backend validates tenant ownership → Supabase Storage + RLS → Metadata in `site_assets` table.
 
-**Automatic Cleanup**: When saving sites, the system detects removed assets and deletes them in background.
-
-See [docs/ASSETS.md](docs/ASSETS.md) for complete documentation.
+Automatic cleanup detects removed assets when saving and deletes them in background.
 
 ### Theme System
 
-- [ThemeTokens](src/engine/schema/themeTokens.ts) - Design tokens (colors, typography, spacing)
+- `src/engine/schema/themeTokens.ts` — design tokens (colors, typography, spacing)
 - CSS variables generated via `generateThemeCSSVariables()`
-- Applied globally in exported HTML and editor preview
+- Applied globally in both exported HTML and editor preview
+
+### Shared Constants
+
+Duplicated constants between renderers and exporters are extracted to `src/engine/shared/`:
+
+- `shadowConstants.ts` — `imageShadowMap` (shared by HeroRenderer/HeroExporter)
+- `layoutConstants.ts` — `contentPositionMap`, `blockGapConfig` (shared by Hero renderer/exporter)
+- `socialIcons.ts` — `socialIconPaths` (shared by FooterRenderer, FooterExporter, SocialLinksRenderer)
+
+**Note**: `spacingMap` is intentionally different between renderer and exporter (different rem values) — do NOT extract it.
+
+### Build Configuration
+
+- **Vite library mode** with multiple entry points: `index`, `shared`, `site-styles`, `site/index`
+- **ESM-only** output with `preserveModules: true`
+- **Externals**: All dependencies externalized (react, react-dom, lucide-react, @dnd-kit/*, clsx, tailwind-merge, react-colorful, @vanilla-extract/css)
+- React is a **peer dependency only** (not in `dependencies`)
+- `@vanilla-extract/vite-plugin` is a **devDependency** (build-time only)
+- Path alias: `@/*` → `./src/*`
+- Custom Vite plugin copies static CSS files to dist
+
+### sideEffects Configuration (CRITICAL)
+
+The `sideEffects` field in `package.json` uses **glob patterns** to prevent tree-shaking from removing block registration code:
+
+```json
+"sideEffects": [
+  "*.css",
+  "./src/engine/registry/blocks/**",
+  "./src/engine/render/renderers/**",
+  "./src/engine/export/exporters/**"
+]
+```
+
+**Why globs, not just index.ts**: Each block file (e.g., `hero.ts`) calls `componentRegistry.register()` as a side effect. With `preserveModules: true`, Rollup evaluates each file independently — if only `index.ts` is marked as side-effectful, individual block files get tree-shaken away because their exports aren't directly consumed.
+
+### Exports Configuration
+
+`src/index.ts` uses **explicit named exports** (not `export *`) for tree-shaking. When adding new public APIs, add them to `src/index.ts` manually.
+
+### Logger Utility
+
+Use `logger` from `src/utils/logger.ts` instead of `console.log/debug`. It silences in production, only keeping `warn` and `error`. ESLint enforces `no-console` rule.
+
+```typescript
+import { logger } from '../utils/logger';
+logger.debug('dev only');  // Silenced in production
+logger.error('always');    // Always visible
+```
 
 ## Critical Rules
 
-### Block Variations - NEVER Include Editable Props in defaultProps
+### Block Variations — NEVER Include Editable Props in defaultProps
 
 When creating block variations, **DO NOT** include user-editable fields like `image`, `logo`, `avatar` in `defaultProps`:
 
 ```typescript
-// ❌ WRONG - Will overwrite user's image when switching variations
-defaultProps: {
-  image: "placeholder.jpg",  // BAD
-  variant: "split",
-}
+// WRONG - Will overwrite user's image when switching variations
+defaultProps: { image: "placeholder.jpg", variant: "split" }
 
-// ✅ CORRECT - Preserves user's image
-defaultProps: {
-  variant: "split",
-  align: "left",
-  // image is NOT here
-}
+// CORRECT - Preserves user's image
+defaultProps: { variant: "split", align: "left" }
 ```
 
-**Why**: Variation switching merges `defaultProps` into existing block, overwriting user's custom values.
+**Why**: Variation switching merges `defaultProps` into existing block, overwriting user's custom values. Visual props must be reset explicitly — see `HERO_VISUAL_PROPS_TO_RESET` in `src/editor/PropertyEditor/VariationSelector.tsx`.
 
-**Files to check**:
-- [heroVariations.ts](src/engine/presets/heroVariations.ts)
-- [navbarVariations.ts](src/engine/presets/navbarVariations.ts)
+### React Hooks — ALL Hooks Before Early Returns
 
-### Adding Image Upload to Blocks
+All `useState`, `useMemo`, `useCallback`, etc. must be called **before** any early return statement. React requires hooks to be called in the same order every render.
 
-To enable authenticated image upload in any block:
+```typescript
+// WRONG - useCallback after early return
+const Component = memo(({ block }) => {
+  const data = useMemo(() => ..., [block]);
+  if (!block) return null;           // early return
+  const handler = useCallback(...);  // BREAKS HOOKS RULES
+});
+
+// CORRECT - all hooks before returns
+const Component = memo(({ block }) => {
+  const data = useMemo(() => ..., [block]);
+  const handler = useCallback(...);  // before early return
+  if (!block) return null;
+});
+```
+
+### Adding New Blocks — Checklist
+
+> **Guia completo com exemplos de código**: [docs/CREATING-BLOCKS.md](docs/CREATING-BLOCKS.md)
+
+1. Define interface in `src/engine/schema/siteDocument.ts` and add to `BlockType` + `Block` unions
+2. Create definition in `src/engine/registry/blocks/{category}/` with `componentRegistry.register()` call
+3. Export from `src/engine/registry/blocks/{category}/index.ts`
+4. Create React renderer in `src/engine/render/renderers/{category}/`
+5. Create HTML exporter in `src/engine/export/exporters/{category}/`
+6. Register exporter in `src/engine/export/exporters/{category}/index.ts`
+7. Add to `src/index.ts` if it should be part of the public API
+
+### Image Upload in Blocks
+
+Use `inputType: "image-upload"` (not `"image"`) in `inspectorMeta` to enable authenticated upload to Supabase:
 
 ```typescript
 inspectorMeta: {
-  myImage: {
-    label: "Image",
-    inputType: "image-upload",  // 👈 This enables upload
-    group: "Mídia",
-  },
+  myImage: { label: "Image", inputType: "image-upload", group: "Mídia" }
 }
 ```
 
-**Input Types**:
-- `"image"` - Simple URL input (no upload)
-- `"image-upload"` - File picker with authenticated upload to Supabase
+### XSS Prevention
 
-### Export System: Registry Pattern
+Always use `escapeHtml()` from `src/engine/export/shared/htmlHelpers.ts` when generating HTML in exporters.
 
-The HTML export was refactored from a giant 1200-line switch statement to modular exporters:
+### Navbar/Footer Special Handling
 
-**Before**: All export logic in `blockToHtmlDirect()` switch
-**After**: Separate exporter files per block type
-
-When adding new blocks:
-1. Create block definition in `registry/blocks/`
-2. Create React renderer in `render/renderers/`
-3. Create HTML exporter in `export/exporters/`
-4. Register in respective index files
-
-### Navbar Styling Specifics
-
-Navbar has complex responsive styling handled in:
-1. Export: [NavbarExporter.ts](src/engine/export/exporters/sections/NavbarExporter.ts) generates HTML + inline styles
-2. CSS: Inline `landingPageCSS` in [exportHtml.ts](src/engine/export/exportHtml.ts#L16-L193)
-3. Style resolver: [styleResolver.ts](src/engine/export/styleResolver.ts) computes CSS custom properties
-
-**Key features**:
-- Sticky positioning with backdrop-filter blur
-- Floating mode with margins and rounded corners
+- Non-home pages can inherit navbar/footer from the home page
+- Navbar has complex responsive styling: sticky positioning, backdrop-filter blur, floating mode
 - CSS variables for customization (opacity, blur, colors)
 - Layout variants: expanded, centered, compact
+
+### renderPropertyInput Multi-Prop Pattern
+
+`src/editor/PropertyEditor/renderPropertyInput.tsx` uses `context.allProps` and `context.onMultiUpdate` for input types that manipulate multiple props simultaneously (e.g., `"image-grid"`).
 
 ## File Organization
 
 ```
 src/
-├── components/           # Legacy V1 components (SiteEditor, SiteViewer)
-├── editor/              # V2 Editor (LandingPageEditorV2)
-│   ├── BlockPalette.tsx
-│   ├── BlockPropertyEditor.tsx
-│   └── components/RightPanel.tsx
-├── viewer/              # V2 Viewer (LandingPageViewerV2)
-├── engine/              # Core V2 engine
-│   ├── schema/          # Type definitions (siteDocument, themeTokens)
-│   ├── registry/        # Block definitions and registry
-│   │   └── blocks/      # Block definitions by category
-│   ├── render/          # React renderers for editor preview
-│   │   └── renderers/   # Renderer components by category
-│   ├── export/          # HTML export system
-│   │   ├── exporters/   # HTML exporters by category
-│   │   └── shared/      # Shared export utilities
-│   ├── presets/         # Block variations (hero, navbar)
-│   └── theme/           # Theme utilities
-├── shared/              # Shared utilities and templates
-│   └── templates/       # Pre-built site templates
-└── styles/              # Global CSS
+├── editor/                    # V2 Editor UI
+│   ├── LandingPageEditorV2.tsx   # Main editor component
+│   ├── components/               # Panel components (Toolbar, LeftPanel, CenterPanel, RightPanel)
+│   │   └── LoadingSpinner.tsx    # Shared loading spinner
+│   ├── PropertyEditor/           # Block property editing
+│   │   ├── inputs/               # Input components (Text, Color, Image, ImageGrid, Typography, etc.)
+│   │   ├── renderPropertyInput.tsx
+│   │   ├── VariationSelector.tsx
+│   │   └── BlockPropertyEditor.tsx
+│   ├── BlockSelector.tsx
+│   ├── PaletteSelector.tsx
+│   ├── PageTabBar.tsx
+│   └── TemplatePicker.tsx
+├── viewer/                    # V2 Viewer (read-only rendering)
+│   └── LandingPageViewerV2.tsx
+├── engine/                    # Core V2 engine
+│   ├── schema/                   # Type definitions (siteDocument, themeTokens)
+│   ├── registry/                 # Block definitions and registry
+│   │   └── blocks/               # Block definitions by category (layout/, content/, sections/, forms/, composition/)
+│   ├── render/                   # React renderers for editor preview
+│   │   └── renderers/            # Renderer components by category
+│   ├── export/                   # HTML export system
+│   │   ├── exporters/            # HTML exporters by category
+│   │   └── shared/               # Shared export utilities (htmlHelpers, sanitization)
+│   ├── preview/                  # PreviewV2 (iframe-based preview)
+│   ├── patch/                    # JSON patch system (applyPatch, PatchBuilder, history)
+│   ├── presets/                  # Block variations (hero, navbar) and theme presets
+│   ├── shared/                   # Shared constants and utilities
+│   │   ├── shadowConstants.ts       # Image shadow maps
+│   │   ├── layoutConstants.ts       # Content position and gap maps
+│   │   ├── socialIcons.ts           # Social media SVG icon paths
+│   │   ├── typeGuards.ts            # isBlockType(), getBlockProps()
+│   │   ├── hoverEffects/            # Button/link hover effect generators
+│   │   ├── imageGrid/              # Image grid presets and types
+│   │   └── typography/             # Typography config and CSS generation
+│   └── theme/                    # Theme utilities
+├── hooks/                     # React hooks (useEditorState, useKeyboardShortcuts, useNavbarAutoSync)
+├── shared/                    # Shared templates and validators
+│   └── templates/                # Pre-built site templates (escola-edvi, escola-premium, escola-zilom)
+├── site/                      # Site rendering components (for consumer use)
+├── utils/                     # Utility functions
+│   ├── logger.ts                 # Production-safe logger (silences debug/log in prod)
+│   ├── dataURLUtils.ts           # Data URL → Supabase upload utilities
+│   ├── cn.ts                     # className utility (clsx + tailwind-merge)
+│   ├── colorUtils.ts             # Color analysis (isLightColor, etc.)
+│   ├── blockUtils.ts             # Block structure traversal
+│   ├── navbarSync.ts             # Navbar auto-sync across pages
+│   ├── changeDetector.ts         # Document change detection for preview
+│   ├── documentHash.ts           # Export cache invalidation
+│   ├── pageTemplateFactory.ts    # Default page structure generator
+│   ├── blockIcons.ts             # Block type icon mapping
+│   └── sharedTemplateToEngine.ts # Template format conversion
+└── styles/                    # Global CSS files
 ```
 
-## Testing and Quality
+## Key Files
 
-- **Type checking**: `tsc --noEmit` (run via lint)
-- **No test suite**: Manual testing in demo mode
-- **Build validation**: Ensure both CJS and ESM builds work
-
-## Common Patterns
-
-### Adding a New Block
-
-1. **Define schema** in [siteDocument.ts](src/engine/schema/siteDocument.ts):
-   ```typescript
-   export interface MyBlockBlock extends BlockBase {
-     type: "myBlock";
-     props: { title: string; };
-   }
-   ```
-
-2. **Add to BlockType union** and **Block union** in same file
-
-3. **Create definition** in `registry/blocks/{category}/myBlock.ts`:
-   ```typescript
-   export const myBlockBlock: BlockDefinition = { /* ... */ };
-   ```
-
-4. **Create React renderer** in `render/renderers/{category}/MyBlockRenderer.tsx`
-
-5. **Create HTML exporter** in `export/exporters/{category}/MyBlockExporter.ts`
-
-6. **Register** in respective `index.ts` files
-
-### Modifying Navbar/Footer
-
-These blocks have special handling:
-- **Layout sharing**: Non-home pages can inherit navbar/footer from home page
-- **Export logic**: Check [exportHtml.ts](src/engine/export/exportHtml.ts#L318-L337)
-- **Styling**: Navbar uses CSS custom properties extensively
-
-## Browser Compatibility
-
-- Modern browsers (ES2020+)
-- Uses React 19
-- CSS: Flexbox, Grid, CSS Variables, backdrop-filter
-
-## Important Notes
-
-- **Asset URLs**: Always use Supabase public URLs, never local paths
-- **XSS Prevention**: Use `escapeHtml()` from [htmlHelpers.ts](src/engine/export/shared/htmlHelpers.ts) in exporters
-- **Cache management**: HTML export has LRU cache (max 50 entries), cleared on document changes
-- **Version bumping**: Use npm scripts (`version:patch`, etc.) to maintain changelog and tags
+| Purpose | Path |
+|---------|------|
+| Schema (all block types) | `src/engine/schema/siteDocument.ts` |
+| Type utilities (BlockOfType, BlockPropsFor) | `src/engine/schema/siteDocument.ts` (bottom) |
+| Block registry | `src/engine/registry/registry.ts` |
+| Registry types (BlockDefinition\<T\>) | `src/engine/registry/types.ts` |
+| Type guards | `src/engine/shared/typeGuards.ts` |
+| Main export logic | `src/engine/export/exportHtml.ts` |
+| Export registry | `src/engine/export/exporters/HtmlExporter.ts` |
+| HTML helpers (escaping) | `src/engine/export/shared/htmlHelpers.ts` |
+| Navbar style resolver | `src/engine/export/styleResolver.ts` |
+| Theme tokens | `src/engine/schema/themeTokens.ts` |
+| Hero variations | `src/engine/presets/heroVariations.ts` |
+| Property input renderer | `src/editor/PropertyEditor/renderPropertyInput.tsx` |
+| Variation selector | `src/editor/PropertyEditor/VariationSelector.tsx` |
+| Editor entry point | `src/editor/LandingPageEditorV2.tsx` |
+| Viewer entry point | `src/viewer/LandingPageViewerV2.tsx` |
+| Logger utility | `src/utils/logger.ts` |
+| Data URL utilities | `src/utils/dataURLUtils.ts` |
+| ESLint config | `eslint.config.js` |
+| Vite config | `vite.config.ts` |

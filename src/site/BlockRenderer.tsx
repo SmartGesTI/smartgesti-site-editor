@@ -14,7 +14,7 @@ import { Hero, Features, Navbar, Footer, Section, Card } from './blocks';
 export interface BlockData {
   id: string;
   type: string;
-  props: Record<string, unknown>;
+  props: Record<string, any>;
 }
 
 /**

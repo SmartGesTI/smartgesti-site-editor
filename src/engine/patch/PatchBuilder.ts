@@ -23,10 +23,10 @@ function findBlockPath(
     }
 
     // Verificar children recursivamente
-    const props = block.props as any
+    const props = block.props as Record<string, any>;
     if (props?.children && Array.isArray(props.children)) {
       const childPath = `${currentPath}/props/children`
-      const found = findBlockPath(props.children, blockId, childPath)
+      const found = findBlockPath(props.children as Block[], blockId, childPath)
       if (found) {
         return found
       }
@@ -34,17 +34,16 @@ function findBlockPath(
 
     // Verificar slots (para Card)
     if (block.type === 'card') {
-      const cardProps = props as any
-      if (cardProps.header && Array.isArray(cardProps.header)) {
-        const found = findBlockPath(cardProps.header, blockId, `${currentPath}/props/header`)
+      if (props.header && Array.isArray(props.header)) {
+        const found = findBlockPath(props.header as Block[], blockId, `${currentPath}/props/header`)
         if (found) return found
       }
-      if (cardProps.content && Array.isArray(cardProps.content)) {
-        const found = findBlockPath(cardProps.content, blockId, `${currentPath}/props/content`)
+      if (props.content && Array.isArray(props.content)) {
+        const found = findBlockPath(props.content as Block[], blockId, `${currentPath}/props/content`)
         if (found) return found
       }
-      if (cardProps.footer && Array.isArray(cardProps.footer)) {
-        const found = findBlockPath(cardProps.footer, blockId, `${currentPath}/props/footer`)
+      if (props.footer && Array.isArray(props.footer)) {
+        const found = findBlockPath(props.footer as Block[], blockId, `${currentPath}/props/footer`)
         if (found) return found
       }
     }
@@ -158,7 +157,7 @@ export class PatchBuilder {
 
     // Verificar se parent tem children
     const parentBlock = parentInfo.block
-    const props = parentBlock.props as any
+    const props = parentBlock.props as Record<string, any>
 
     if (!props.children || !Array.isArray(props.children)) {
       // Criar array de children primeiro
@@ -218,7 +217,7 @@ export class PatchBuilder {
       throw new Error(`New parent block ${newParentBlockId} not found`)
     }
 
-    const newParentProps = newParentInfo.block.props as any
+    const newParentProps = newParentInfo.block.props as Record<string, any>
     const childrenPath = `${newParentInfo.path}/props/children`
 
     // Se parent não tem children, criar array primeiro

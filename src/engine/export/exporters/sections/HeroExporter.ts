@@ -25,15 +25,8 @@ import {
   heroDescriptionDefaults,
   type TypographyConfig,
 } from "../../../shared/typography";
-
-// Mapa de sombras
-const shadowMap: Record<string, string> = {
-  none: "none",
-  sm: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
-  md: "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)",
-  lg: "0 10px 25px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05)",
-  xl: "0 25px 50px rgba(0,0,0,0.25)",
-};
+import { imageShadowMap } from "../../../shared/shadowConstants";
+import { contentPositionMap, blockGapConfig } from "../../../shared/layoutConstants";
 
 export function exportHero(
   block: Block,
@@ -184,11 +177,6 @@ export function exportHero(
   const paddingStyle = paddingY ? `padding: ${paddingY} 2rem;` : "padding: 6rem 2rem;";
 
   // Content position mapping for flexbox justify-content
-  const contentPositionMap: Record<string, string> = {
-    left: "flex-start",
-    center: "center",
-    right: "flex-end",
-  };
   const justifyContent = contentPositionMap[contentPosition] || "center";
 
   // Determine if layout has two blocks (content + image) - these should always be centered
@@ -203,12 +191,7 @@ export function exportHero(
   };
   const spacing = spacingMap[contentSpacing] || spacingMap.default;
 
-  // Block gap map - controls justify-content, block max-width, container max-width, and gap
-  const blockGapConfig: Record<string, { justify: string; blockMaxWidth: string; containerMaxWidth: string; gap: string }> = {
-    default: { justify: "center", blockMaxWidth: "45%", containerMaxWidth: "1200px", gap: "4rem" },
-    wide: { justify: "space-between", blockMaxWidth: "45%", containerMaxWidth: "1400px", gap: "2rem" },
-    "x-wide": { justify: "space-between", blockMaxWidth: "43%", containerMaxWidth: "100%", gap: "2rem" },
-  };
+  // Block gap configuration
   const blocksConfig = blockGapConfig[blockGap] || blockGapConfig.default;
   const blocksJustify = blocksConfig.justify;
   const blocksMaxWidth = blocksConfig.blockMaxWidth;
@@ -309,7 +292,7 @@ export function exportHero(
     gridId: string
   ): { html: string; css: string } => {
     const config = gridPresetMap[preset];
-    const shadowValue = shadowMap[shadow] || shadowMap.lg;
+    const shadowValue = imageShadowMap[shadow] || imageShadowMap.lg;
 
     // Generate grid items HTML
     const itemsHtml = config.positions
@@ -356,7 +339,7 @@ export function exportHero(
   if (isSplit && heroImage && !shouldShowImageGrid) {
     const splitId = generateScopedId(block.id || "", "hero-split");
     const isImageLeft = imagePosition === "left";
-    const imgShadow = shadowMap[imageShadow] || shadowMap.lg;
+    const imgShadow = imageShadowMap[imageShadow] || imageShadowMap.lg;
 
     const splitCss = `
       @media (max-width: 1023px) {
