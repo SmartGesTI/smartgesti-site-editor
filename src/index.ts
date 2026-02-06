@@ -304,6 +304,16 @@ export type {
   ImageGridPreset as EngineImageGridPreset,
 } from './engine/shared/imageGrid'
 
+// Shared modules - ShowWhen (conditional visibility)
+export { evaluateShowWhen } from './engine/shared/showWhen'
+export type {
+  ShowWhenCondition,
+  ShowWhenFieldCondition,
+  ShowWhenAndCondition,
+  ShowWhenOrCondition,
+  ShowWhenContext,
+} from './engine/shared/showWhen'
+
 // ============================================================================
 // Deprecated re-exports (backward compatibility)
 // ============================================================================

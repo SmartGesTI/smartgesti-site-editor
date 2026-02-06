@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from "react";
 import { LoadingSpinner } from "./LoadingSpinner";
 import type { UploadConfig } from "../LandingPageEditor";
+import type { SiteDocument } from "../../engine";
 
 // Lazy load componentes pesados do editor
 const BlockPropertyEditor = lazy(() =>
@@ -16,6 +17,8 @@ interface RightPanelProps {
   onPaletteChange: (palette: any) => void;
   onUpdateBlock: (updates: Record<string, any>) => void;
   uploadConfig?: UploadConfig;
+  document?: SiteDocument;
+  currentPageId?: string;
 }
 
 export const RightPanel = React.memo(function RightPanel({
@@ -24,6 +27,8 @@ export const RightPanel = React.memo(function RightPanel({
   onPaletteChange,
   onUpdateBlock,
   uploadConfig,
+  document,
+  currentPageId,
 }: RightPanelProps) {
   return (
     <div className="w-80 flex-shrink-0 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden flex flex-col">
@@ -42,6 +47,8 @@ export const RightPanel = React.memo(function RightPanel({
           <div className="overflow-y-auto overflow-x-hidden flex-1">
             <BlockPropertyEditor
               block={selectedBlock}
+              document={document}
+              currentPageId={currentPageId}
               onUpdate={onUpdateBlock}
               uploadConfig={uploadConfig}
             />

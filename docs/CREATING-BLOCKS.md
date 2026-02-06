@@ -268,17 +268,17 @@ interface InspectorMeta {
   min?: number;                     // Para "slider" e "number"
   max?: number;                     // Para "slider" e "number"
   step?: number;                    // Para "slider"
-  showWhen?: {                      // Visibilidade condicional
-    field: string;                  // Nome da prop a observar
-    equals?: any;                   // Mostrar quando field === equals
-    notEquals?: any;                // Mostrar quando field !== notEquals
-  };
+  showWhen?: ShowWhenCondition;      // Visibilidade condicional (ver seção abaixo)
 }
 ```
 
 ### Visibilidade Condicional (`showWhen`)
 
-Mostrar um campo apenas quando outro campo tem um valor específico:
+O sistema `showWhen` controla quando um campo é exibido no painel de propriedades. Importar tipos: `ShowWhenCondition` de `@brunoalz/smartgesti-site-editor`.
+
+#### 1. Igualdade simples
+
+Mostrar um campo quando outro campo tem um valor específico:
 
 ```typescript
 // Mostrar "overlayColor" apenas quando "overlay" é true
@@ -295,6 +295,103 @@ contentMaxWidth: {
   inputType: "select",
   options: [...],
   showWhen: { field: "variant", notEquals: "split" },
+},
+```
+
+#### 2. OR de valores (`oneOf`)
+
+Mostrar quando o campo é um de vários valores:
+
+```typescript
+// Mostrar apenas para variações de carrossel
+autoplaySpeed: {
+  label: "Velocidade",
+  inputType: "slider",
+  showWhen: { field: "variation", oneOf: ["hero-carousel", "hero-slideshow"] },
+},
+```
+
+#### 3. Truthiness
+
+Mostrar quando um campo tem valor truthy (não vazio, não undefined, não false):
+
+```typescript
+// Mostrar "logoHeight" apenas quando há um logo definido
+logoHeight: {
+  label: "Tamanho do Logo",
+  inputType: "slider",
+  showWhen: { field: "logo", truthy: true },
+},
+```
+
+#### 4. AND — múltiplas condições
+
+Todas as condições devem ser verdadeiras:
+
+```typescript
+// Mostrar apenas quando variant é "image-bg" E overlay está ativo
+overlayOpacity: {
+  label: "Opacidade do Overlay",
+  inputType: "slider",
+  showWhen: {
+    and: [
+      { field: "variant", equals: "image-bg" },
+      { field: "overlay", equals: true },
+    ],
+  },
+},
+```
+
+#### 5. OR — pelo menos uma condição
+
+```typescript
+showWhen: {
+  or: [
+    { field: "variant", equals: "image-bg" },
+    { field: "variant", equals: "parallax" },
+  ],
+},
+// Equivalente a: showWhen: { field: "variant", oneOf: ["image-bg", "parallax"] }
+```
+
+#### 6. Cross-block
+
+Verificar props de outro bloco na mesma página (busca top-level):
+
+```typescript
+// Mostrar apenas quando a navbar tem floating ativo
+heroTopPadding: {
+  label: "Padding Superior",
+  inputType: "slider",
+  showWhen: { field: "floating", equals: true, blockType: "navbar" },
+},
+```
+
+#### 7. Comparações numéricas e array
+
+```typescript
+// Mostrar quando array tem mais de 2 itens
+carouselNavigation: {
+  label: "Navegação",
+  inputType: "select",
+  showWhen: { field: "carouselImages", arrayLengthGt: 2 },
+},
+
+// Comparações: gt, gte, lt, lte
+advancedOption: {
+  label: "Opção Avançada",
+  showWhen: { field: "columns", gte: 3 },
+},
+```
+
+#### Combinando operadores no mesmo campo
+
+Múltiplos operadores no mesmo objeto são combinados com AND implícito:
+
+```typescript
+// Mostrar quando columns >= 2 E columns <= 4
+specialLayout: {
+  showWhen: { field: "columns", gte: 2, lte: 4 },
 },
 ```
 

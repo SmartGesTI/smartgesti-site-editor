@@ -300,6 +300,8 @@ export function LandingPageEditor({
           onPaletteChange={handlePaletteChange}
           onUpdateBlock={handleUpdateBlock}
           uploadConfig={uploadConfig}
+          document={document}
+          currentPageId={currentPageId}
         />
       </div>
     </div>

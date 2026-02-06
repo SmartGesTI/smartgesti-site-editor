@@ -4,7 +4,8 @@
  */
 
 import { memo, useMemo, useCallback } from "react";
-import { Block, SiteDocument, componentRegistry, InspectorMeta } from "../../engine";
+import { Block, SiteDocument, componentRegistry, InspectorMeta, evaluateShowWhen } from "../../engine";
+import type { ShowWhenContext } from "../../engine";
 import { VariationSelector } from "./VariationSelector";
 import { BlockHeader } from "./BlockHeader";
 import { CollapsiblePropertyGroup } from "./CollapsiblePropertyGroup";
@@ -24,6 +25,8 @@ interface BlockPropertyEditorProps {
  */
 export const BlockPropertyEditor = memo(function BlockPropertyEditor({
   block,
+  document,
+  currentPageId,
   onUpdate,
   uploadConfig,
 }: BlockPropertyEditorProps) {
@@ -32,6 +35,12 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
     if (!block) return null;
     return componentRegistry.get(block.type);
   }, [block]);
+
+  // Contexto para cross-block showWhen
+  const showWhenContext = useMemo<ShowWhenContext>(
+    () => ({ document, currentPageId }),
+    [document, currentPageId],
+  );
 
   // Agrupar propriedades por grupo
   const groupedProps = useMemo(() => {
@@ -47,21 +56,10 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
     for (const [propName, meta] of Object.entries(
       blockDefinition.inspectorMeta,
     )) {
-      // Lógica condicional: só mostrar logoHeight se houver logo
-      if (propName === "logoHeight" && !props.logo) {
-        continue; // Pular este campo
-      }
-
-      // Lógica condicional genérica: showWhen
+      // Visibilidade condicional via showWhen
       if (meta.showWhen) {
-        const { field, equals, notEquals } = meta.showWhen;
-        const fieldValue = props[field] ?? defaultProps[field];
-        // Suporta equals (mostrar quando igual) e notEquals (mostrar quando diferente)
-        if (equals !== undefined && fieldValue !== equals) {
-          continue; // Pular se não for igual ao valor esperado
-        }
-        if (notEquals !== undefined && fieldValue === notEquals) {
-          continue; // Pular se for igual ao valor que deve ser evitado
+        if (!evaluateShowWhen(meta.showWhen, props, defaultProps, showWhenContext)) {
+          continue;
         }
       }
 
@@ -85,7 +83,7 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
     }
 
     return groups;
-  }, [block, blockDefinition]);
+  }, [block, blockDefinition, showWhenContext]);
 
   // IMPORTANTE: todos os hooks devem ser chamados ANTES de qualquer early return
   const handlePropChange = useCallback((propName: string, value: any) => {

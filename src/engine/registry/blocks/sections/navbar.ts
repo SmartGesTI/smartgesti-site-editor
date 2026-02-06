@@ -172,6 +172,7 @@ export const navbarBlock: BlockDefinition = {
       max: 130,
       step: 5,
       group: "Logo e Marca",
+      showWhen: { field: "logo", truthy: true },
     },
     logoText: {
       label: "Texto Alternativo",

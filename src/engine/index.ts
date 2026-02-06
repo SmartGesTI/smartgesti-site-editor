@@ -56,3 +56,11 @@ export * from "./generators/generateLandingPage";
 
 // Shared modules
 export * from "./shared/imageGrid";
+export { evaluateShowWhen } from "./shared/showWhen";
+export type {
+  ShowWhenCondition,
+  ShowWhenFieldCondition,
+  ShowWhenAndCondition,
+  ShowWhenOrCondition,
+  ShowWhenContext,
+} from "./shared/showWhen";

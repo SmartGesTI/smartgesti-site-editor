@@ -103,6 +103,7 @@ export const heroBlock: BlockDefinition = {
       inputType: "image-upload",
       group: "Mídia",
       description: "Imagem de fundo ou lateral",
+      showWhen: { field: "imageGridEnabled", notEquals: true },
     },
     imagePosition: {
       label: "Inverter Layout",
@@ -112,7 +113,13 @@ export const heroBlock: BlockDefinition = {
         { label: "Imagem à Esquerda / Conteúdo à Direita", value: "left" },
       ],
       group: "Layout",
-      description: "Inverte a posição do conteúdo e da imagem em layouts divididos",
+      description: "Inverte a posição do conteúdo e da imagem",
+      showWhen: {
+        or: [
+          { field: "image", truthy: true },
+          { field: "imageGridEnabled", equals: true },
+        ],
+      },
     },
     imageRadius: {
       label: "Cantos da Imagem",
@@ -121,6 +128,12 @@ export const heroBlock: BlockDefinition = {
       max: 32,
       step: 2,
       group: "Mídia",
+      showWhen: {
+        and: [
+          { field: "image", truthy: true },
+          { field: "imageGridEnabled", notEquals: true },
+        ],
+      },
     },
     imageShadow: {
       label: "Sombra da Imagem",
@@ -133,6 +146,12 @@ export const heroBlock: BlockDefinition = {
         { label: "Extra Grande", value: "xl" },
       ],
       group: "Mídia",
+      showWhen: {
+        and: [
+          { field: "image", truthy: true },
+          { field: "imageGridEnabled", notEquals: true },
+        ],
+      },
     },
 
     // =========================================================================
@@ -142,7 +161,7 @@ export const heroBlock: BlockDefinition = {
       label: "Usar Grid de Imagens",
       inputType: "checkbox",
       group: "Grid de Imagens",
-      description: "Substituir imagem única por grid de até 4 imagens (split layout)",
+      description: "Substituir imagem única por grid de até 4 imagens",
     },
     imageGridConfig: {
       label: "Configuração da Grid",
@@ -196,7 +215,13 @@ export const heroBlock: BlockDefinition = {
         { label: "X. Largo", value: "x-wide" },
       ],
       group: "Layout",
-      description: "Distância entre o bloco de conteúdo e a imagem",
+      description: "Distância entre o bloco de conteúdo e a mídia",
+      showWhen: {
+        or: [
+          { field: "image", truthy: true },
+          { field: "imageGridEnabled", equals: true },
+        ],
+      },
     },
     minHeight: {
       label: "Altura",
