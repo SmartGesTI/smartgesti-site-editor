@@ -1,6 +1,6 @@
 {
   "name": "@brunoalz/smartgesti-site-editor",
-  "version": "0.2.2",
+  "version": "1.0.0",
   "private": false,
   "type": "module",
   "description": "Site editor component for SmartGesti platform",
