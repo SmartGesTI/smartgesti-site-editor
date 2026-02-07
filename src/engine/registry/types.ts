@@ -35,6 +35,10 @@ export interface InspectorMeta {
   size?: "sm" | "md";
   /** Condição para exibir o campo (visibilidade condicional) */
   showWhen?: ShowWhenCondition;
+  /** Campo somente leitura (exibido mas não editável) */
+  readOnly?: boolean;
+  /** Campo desabilitado (cinza, não interativo) */
+  disabled?: boolean;
 }
 
 /**
@@ -85,6 +89,8 @@ export interface BlockDefinition<T extends BlockType = BlockType> {
   inspectorMeta?: Record<string, InspectorMeta>; // Como exibir cada prop no editor
   canHaveChildren?: boolean;
   defaultChildren?: Block[]; // Blocos padrão quando criado
+  /** Plugin que contribuiu este bloco (blocos nativos não têm) */
+  pluginId?: string;
 }
 
 /**
@@ -95,5 +101,6 @@ export interface ComponentRegistry {
   get(type: BlockType): BlockDefinition | undefined;
   getAll(): BlockDefinition[];
   getByCategory(category: string): BlockDefinition[];
+  getByPlugin(pluginId: string): BlockDefinition[];
   validate(block: Block): { valid: boolean; errors: string[] };
 }

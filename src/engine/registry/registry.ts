@@ -5,13 +5,14 @@
 
 import { Block, BlockType } from '../schema/siteDocument'
 import { BlockDefinition, ComponentRegistry } from './types'
+import { logger } from '../../utils/logger'
 
 class ComponentRegistryImpl implements ComponentRegistry {
   private definitions: Map<BlockType, BlockDefinition> = new Map()
 
   register(definition: BlockDefinition): void {
     if (this.definitions.has(definition.type)) {
-      console.warn(`Block ${definition.type} is already registered. Overwriting...`)
+      logger.warn(`Block ${definition.type} is already registered. Overwriting...`)
     }
     this.definitions.set(definition.type, definition)
   }
@@ -26,6 +27,10 @@ class ComponentRegistryImpl implements ComponentRegistry {
 
   getByCategory(category: string): BlockDefinition[] {
     return this.getAll().filter((def) => def.category === category)
+  }
+
+  getByPlugin(pluginId: string): BlockDefinition[] {
+    return this.getAll().filter((def) => def.pluginId === pluginId)
   }
 
   validate(block: Block): { valid: boolean; errors: string[] } {

@@ -32,6 +32,7 @@ export function PageTabBar({
       <div className="flex-1 flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
         {pages.map((page) => {
           const isActive = page.id === currentPageId;
+          const isPluginPage = !!page.pluginId;
 
           return (
             <div
@@ -41,35 +42,41 @@ export function PageTabBar({
                 rounded-md cursor-pointer transition-all duration-150 flex-shrink-0
                 ${
                   isActive
-                    ? "bg-blue-500 text-white shadow-sm"
+                    ? isPluginPage
+                      ? "bg-purple-500 text-white shadow-sm"
+                      : "bg-blue-500 text-white shadow-sm"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                 }
               `}
               onClick={() => onSelectPage(page.id)}
-              title={`Módulo: ${page.name} (${page.slug})`}
+              title={`${isPluginPage ? "Plugin" : "Módulo"}: ${page.name} (${page.slug})`}
             >
-              {/* Ícone de módulo */}
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="2" y="2" width="12" height="12" rx="2" />
-                <path d="M2 6h12M6 2v12" />
-              </svg>
+              {/* Ícone de módulo ou plugin */}
+              {isPluginPage ? (
+                <span className="text-xs flex-shrink-0">🧩</span>
+              ) : (
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="2" y="2" width="12" height="12" rx="2" />
+                  <path d="M2 6h12M6 2v12" />
+                </svg>
+              )}
 
               {/* Nome da página */}
               <span className="text-xs font-medium whitespace-nowrap">
                 {page.name}
               </span>
 
-              {/* Botão de remover (apenas para páginas removíveis) */}
-              {canRemovePage(page.id) && (
+              {/* Botão de remover (não para plugin pages nem home) */}
+              {canRemovePage(page.id) && !isPluginPage && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

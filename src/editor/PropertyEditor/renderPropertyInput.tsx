@@ -40,6 +40,26 @@ export function renderPropertyInput(
 ): React.ReactNode {
   const { label, description, inputType, options, min, max, step, size } = meta;
 
+  // Campo readOnly: mostrar valor com overlay de bloqueio
+  if (meta.readOnly) {
+    return (
+      <div key={propName} className="relative">
+        <div className="flex items-center gap-1 mb-1">
+          <svg className="w-3 h-3 text-gray-400" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 1a4 4 0 0 0-4 4v2H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V5a4 4 0 0 0-4-4zm2 6H6V5a2 2 0 1 1 4 0v2z"/>
+          </svg>
+          <span className="text-xs font-medium text-gray-400">{label}</span>
+        </div>
+        <div className="px-2 py-1.5 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 cursor-not-allowed select-none truncate">
+          {value !== undefined && value !== null ? String(value) : "—"}
+        </div>
+        {description && (
+          <p className="text-xs text-gray-400 mt-0.5 italic">{description}</p>
+        )}
+      </div>
+    );
+  }
+
   switch (inputType) {
     case "text":
       return (

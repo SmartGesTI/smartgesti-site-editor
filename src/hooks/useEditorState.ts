@@ -14,6 +14,7 @@ import {
   applyPatch,
   PatchBuilder,
   componentRegistry,
+  pluginRegistry,
 } from "../engine";
 import {
   findBlockInStructure,
@@ -62,6 +63,11 @@ interface UseEditorStateReturn {
   isPaletteSelected: boolean;
   isTemplateSelected: boolean;
   canRemovePage: (pageId: string) => boolean;
+
+  // Plugins
+  activePlugins: string[];
+  activatePlugin: (pluginId: string) => void;
+  deactivatePlugin: (pluginId: string) => void;
 }
 
 /**
@@ -356,6 +362,36 @@ export function useEditorState(
     [document],
   );
 
+  // Plugins: estado derivado
+  const activePlugins = useMemo(
+    () => document?.plugins?.active ?? [],
+    [document],
+  );
+
+  // Ativar plugin
+  const activatePlugin = useCallback(
+    (pluginId: string) => {
+      if (!document) return;
+      const updatedDocument = pluginRegistry.activate(document, pluginId);
+      if (updatedDocument !== document) {
+        setDocument(updatedDocument);
+      }
+    },
+    [document],
+  );
+
+  // Desativar plugin
+  const deactivatePlugin = useCallback(
+    (pluginId: string) => {
+      if (!document) return;
+      const updatedDocument = pluginRegistry.deactivate(document, pluginId);
+      if (updatedDocument !== document) {
+        setDocument(updatedDocument);
+      }
+    },
+    [document],
+  );
+
   return {
     // Estado
     document,
@@ -384,5 +420,10 @@ export function useEditorState(
     isPaletteSelected,
     isTemplateSelected,
     canRemovePage,
+
+    // Plugins
+    activePlugins,
+    activatePlugin,
+    deactivatePlugin,
   };
 }

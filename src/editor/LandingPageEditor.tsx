@@ -71,6 +71,9 @@ export function LandingPageEditor({
     resetToTemplate,
     isPaletteSelected,
     loadDocument,
+    activePlugins,
+    activatePlugin,
+    deactivatePlugin,
   } = useEditorState({ initialData });
 
   // Estado local da UI
@@ -271,6 +274,9 @@ export function LandingPageEditor({
           isPaletteSelected={isPaletteSelected}
           onSelectBlock={setSelectedBlockId}
           onDeleteBlock={handleDeleteBlock}
+          activePlugins={activePlugins}
+          onActivatePlugin={activatePlugin}
+          onDeactivatePlugin={deactivatePlugin}
         />
 
         {/* Center: Preview (apenas a página em edição) */}

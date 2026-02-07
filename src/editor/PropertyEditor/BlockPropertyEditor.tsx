@@ -4,7 +4,7 @@
  */
 
 import { memo, useMemo, useCallback } from "react";
-import { Block, SiteDocument, componentRegistry, InspectorMeta, evaluateShowWhen } from "../../engine";
+import { Block, SiteDocument, componentRegistry, InspectorMeta, evaluateShowWhen, pluginRegistry } from "../../engine";
 import type { ShowWhenContext } from "../../engine";
 import { VariationSelector } from "./VariationSelector";
 import { BlockHeader } from "./BlockHeader";
@@ -42,6 +42,14 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
     [document, currentPageId],
   );
 
+  // Obter restrições de edição do plugin (se houver)
+  const lockedFields = useMemo(() => {
+    if (!block || !document) return new Set<string>();
+    const restriction = pluginRegistry.getEditorRestrictions(document, block.type);
+    if (!restriction?.lockedFields) return new Set<string>();
+    return new Set(restriction.lockedFields);
+  }, [block, document]);
+
   // Agrupar propriedades por grupo
   const groupedProps = useMemo(() => {
     if (!block || !blockDefinition?.inspectorMeta) return {};
@@ -75,15 +83,20 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
       const shouldUseFallback = currentValue === undefined || (isColorInput && currentValue === "");
       const value = shouldUseFallback ? defaultProps[propName] : currentValue;
 
+      // Aplicar readOnly de plugin restrictions
+      const effectiveMeta = lockedFields.has(propName)
+        ? { ...meta, readOnly: true }
+        : meta;
+
       groups[group].push({
         propName,
-        meta,
+        meta: effectiveMeta,
         value,
       });
     }
 
     return groups;
-  }, [block, blockDefinition, showWhenContext]);
+  }, [block, blockDefinition, showWhenContext, lockedFields]);
 
   // IMPORTANTE: todos os hooks devem ser chamados ANTES de qualquer early return
   const handlePropChange = useCallback((propName: string, value: any) => {

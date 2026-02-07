@@ -21,3 +21,6 @@ export * from "./teamCard";
 export * from "./teamGrid";
 export * from "./courseCardGrid";
 export * from "./categoryCardGrid";
+export * from "./blogPostCard";
+export * from "./blogPostGrid";
+export * from "./blogPostDetail";

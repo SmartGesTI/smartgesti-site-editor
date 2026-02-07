@@ -30,6 +30,11 @@ import {
   exportCountdown,
   exportCarousel,
 } from "./ContentGridExporters";
+import {
+  exportBlogPostCard,
+  exportBlogPostGrid,
+  exportBlogPostDetail,
+} from "./BlogPostExporters";
 
 // Referência para renderChild
 import { Block } from "../../../schema/siteDocument";
@@ -57,6 +62,8 @@ htmlExportRegistry.register("statItem", exportStatItem);
 htmlExportRegistry.register("logoCloud", exportLogoCloud);
 htmlExportRegistry.register("socialLinks", exportSocialLinks);
 htmlExportRegistry.register("blogCard", exportBlogCard);
+htmlExportRegistry.register("blogPostCard", exportBlogPostCard);
+htmlExportRegistry.register("blogPostDetail", exportBlogPostDetail);
 htmlExportRegistry.register("teamCard", exportTeamCard);
 htmlExportRegistry.register("courseCardGrid", exportCourseCardGrid);
 htmlExportRegistry.register("countdown", exportCountdown);
@@ -86,6 +93,11 @@ htmlExportRegistry.register("faq", (block, depth, basePath, theme) => {
 htmlExportRegistry.register("blogCardGrid", (block, depth, basePath, theme) => {
   if (!renderChildRef) throw new Error("renderChild not initialized");
   return exportBlogCardGrid(block, depth, basePath, theme, renderChildRef);
+});
+
+htmlExportRegistry.register("blogPostGrid", (block, depth, basePath, theme) => {
+  if (!renderChildRef) throw new Error("renderChild not initialized");
+  return exportBlogPostGrid(block, depth, basePath, theme, renderChildRef);
 });
 
 htmlExportRegistry.register("teamGrid", (block, depth, basePath, theme) => {

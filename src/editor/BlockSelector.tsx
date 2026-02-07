@@ -103,11 +103,13 @@ function renderBlockTree(
             'flex-shrink-0 w-6 h-6 rounded text-xs font-semibold flex items-center justify-center',
             isSelected
               ? 'bg-white/20 text-white'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+              : componentRegistry.get(block.type)?.pluginId
+                ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
           )}
           title={getBlockTypeName(block.type)}
         >
-          {block.type.substring(0, 2).toUpperCase()}
+          {componentRegistry.get(block.type)?.pluginId ? '🧩' : block.type.substring(0, 2).toUpperCase()}
         </div>
 
         {/* Nome e preview */}

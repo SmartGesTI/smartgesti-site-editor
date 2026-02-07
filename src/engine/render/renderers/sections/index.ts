@@ -19,6 +19,9 @@ import { renderStatItem } from "./StatItemRenderer";
 import { renderLogoCloud } from "./LogoCloudRenderer";
 import { renderNavbar } from "./NavbarRenderer";
 import { renderFooter } from "./FooterRenderer";
+import { renderBlogPostCard } from "./BlogPostCardRenderer";
+import { renderBlogPostGrid } from "./BlogPostGridRenderer";
+import { renderBlogPostDetail } from "./BlogPostDetailRenderer";
 
 // Registrar renderizadores
 renderRegistry.register("hero", renderHero);
@@ -36,3 +39,6 @@ renderRegistry.register("statItem", renderStatItem);
 renderRegistry.register("logoCloud", renderLogoCloud);
 renderRegistry.register("navbar", renderNavbar);
 renderRegistry.register("footer", renderFooter);
+renderRegistry.register("blogPostCard", renderBlogPostCard);
+renderRegistry.register("blogPostGrid", renderBlogPostGrid);
+renderRegistry.register("blogPostDetail", renderBlogPostDetail);

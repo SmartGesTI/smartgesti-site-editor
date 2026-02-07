@@ -70,6 +70,9 @@ export type {
   CourseCardGridBlock,
   CategoryCardGridBlock,
   SocialLinksBlock,
+  BlogPostCardBlock,
+  BlogPostGridBlock,
+  BlogPostDetailBlock,
 
   // Form blocks
   FormBlock,
@@ -313,6 +316,29 @@ export type {
   ShowWhenOrCondition,
   ShowWhenContext,
 } from './engine/shared/showWhen'
+
+// Plugin System
+export { pluginRegistry } from './engine/plugins/pluginRegistry'
+export type { PluginRegistry } from './engine/plugins/pluginRegistry'
+
+export type {
+  DataSchemaField,
+  DataSchema,
+  ContentListParams,
+  ContentItem,
+  ContentListResult,
+  ContentProvider,
+  PageDataSource,
+  PageEditRestrictions,
+  PageTemplate,
+  EditorRestriction,
+  PluginManifest,
+  PluginRegistration,
+  SitePluginsConfig,
+} from './engine/plugins/types'
+
+// Built-in plugins
+export { blogPlugin } from './engine/plugins/builtin/blog'
 
 // ============================================================================
 // Deprecated re-exports (backward compatibility)

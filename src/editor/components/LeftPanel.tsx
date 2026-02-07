@@ -1,6 +1,7 @@
 import React from "react";
 import { cn } from "../../utils/cn";
 import { BlockSelector } from "../BlockSelector";
+import { PluginPanel } from "../PluginPanel";
 
 interface LeftPanelProps {
   currentPage: any;
@@ -8,6 +9,9 @@ interface LeftPanelProps {
   isPaletteSelected: boolean;
   onSelectBlock: (id: string | null) => void;
   onDeleteBlock: (id: string) => void;
+  activePlugins: string[];
+  onActivatePlugin: (pluginId: string) => void;
+  onDeactivatePlugin: (pluginId: string) => void;
 }
 
 export const LeftPanel = React.memo(function LeftPanel({
@@ -16,6 +20,9 @@ export const LeftPanel = React.memo(function LeftPanel({
   isPaletteSelected,
   onSelectBlock,
   onDeleteBlock,
+  activePlugins,
+  onActivatePlugin,
+  onDeactivatePlugin,
 }: LeftPanelProps) {
   return (
     <div className="w-64 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
@@ -33,6 +40,12 @@ export const LeftPanel = React.memo(function LeftPanel({
           🎨 Paletas de Cores
         </button>
       </div>
+      {/* Plugins */}
+      <PluginPanel
+        activePlugins={activePlugins}
+        onActivate={onActivatePlugin}
+        onDeactivate={onDeactivatePlugin}
+      />
       {/* Lista de blocos da página atual */}
       {currentPage && (
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">

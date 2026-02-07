@@ -54,6 +54,9 @@ export {
 // Generators
 export * from "./generators/generateLandingPage";
 
+// Plugins
+export * from "./plugins";
+
 // Shared modules
 export * from "./shared/imageGrid";
 export { evaluateShowWhen } from "./shared/showWhen";

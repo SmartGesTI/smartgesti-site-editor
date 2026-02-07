@@ -6,6 +6,7 @@
 import { ThemeTokens } from "./themeTokens";
 import type { ImageGridItem, ImageGridPreset } from "../shared/imageGrid";
 import type { TypographyConfig } from "../shared/typography";
+import type { SitePluginsConfig, PageDataSource, PageEditRestrictions } from "../plugins/types";
 
 // Re-export shared types for convenience
 export type { ImageGridItem, ImageGridPreset } from "../shared/imageGrid";
@@ -62,6 +63,10 @@ export type BlockType =
   | "teamGrid"
   | "courseCardGrid"
   | "categoryCardGrid"
+  // Blog plugin (dinâmico)
+  | "blogPostCard"
+  | "blogPostGrid"
+  | "blogPostDetail"
   // Formulários
   | "form"
   | "input"
@@ -978,6 +983,96 @@ export interface CategoryCardGridBlock extends BlockBase {
 }
 
 // ============================================================================
+// BLOCOS DE PLUGIN - BLOG (dinâmico, conectado a ContentProvider)
+// ============================================================================
+
+/**
+ * BlogPostCard - Card individual de post (versão dinâmica do blogCard)
+ * Pode receber dados de ContentProvider ou ter conteúdo estático
+ */
+export interface BlogPostCardBlock extends BlockBase {
+  type: "blogPostCard";
+  props: {
+    title: string;
+    excerpt?: string;
+    image?: string;
+    date?: string;
+    category?: string;
+    authorName?: string;
+    authorAvatar?: string;
+    readingTime?: string;
+    linkHref?: string;
+    linkText?: string;
+    variant?: "default" | "horizontal" | "minimal";
+    showImage?: boolean;
+    showCategory?: boolean;
+    showDate?: boolean;
+    showAuthor?: boolean;
+    showReadingTime?: boolean;
+  };
+}
+
+/**
+ * BlogPostGrid - Grid de posts com suporte a dados dinâmicos
+ * Pode usar dataSource para buscar do ContentProvider ou cards estáticos
+ */
+export interface BlogPostGridBlock extends BlockBase {
+  type: "blogPostGrid";
+  props: {
+    title?: string;
+    subtitle?: string;
+    columns?: 2 | 3 | 4;
+    /** Cards estáticos (quando não há dataSource) */
+    cards?: Array<{
+      title: string;
+      excerpt?: string;
+      image?: string;
+      date?: string;
+      category?: string;
+      authorName?: string;
+      linkHref?: string;
+      linkText?: string;
+    }>;
+    /** Fonte de dados dinâmica (ContentProvider) */
+    dataSource?: {
+      provider: string;
+      limit?: number;
+      filter?: Record<string, unknown>;
+    };
+    variant?: "default" | "featured" | "minimal";
+    showViewAll?: boolean;
+    viewAllText?: string;
+    viewAllHref?: string;
+  };
+}
+
+/**
+ * BlogPostDetail - Conteúdo completo de um post (para página blog/:slug)
+ * Recebe dados do ContentProvider na página dinâmica
+ */
+export interface BlogPostDetailBlock extends BlockBase {
+  type: "blogPostDetail";
+  props: {
+    title: string;
+    content: string;
+    featuredImage?: string;
+    date?: string;
+    category?: string;
+    authorName?: string;
+    authorAvatar?: string;
+    authorBio?: string;
+    readingTime?: string;
+    tags?: string[];
+    showFeaturedImage?: boolean;
+    showAuthor?: boolean;
+    showDate?: boolean;
+    showTags?: boolean;
+    showReadingTime?: boolean;
+    contentMaxWidth?: string;
+  };
+}
+
+// ============================================================================
 // NOVOS BLOCOS - FORMULÁRIOS
 // ============================================================================
 
@@ -1091,6 +1186,10 @@ export type Block =
   | TeamGridBlock
   | CourseCardGridBlock
   | CategoryCardGridBlock
+  // Blog plugin (dinâmico)
+  | BlogPostCardBlock
+  | BlogPostGridBlock
+  | BlogPostDetailBlock
   // Formulários
   | FormBlock
   | InputBlock
@@ -1115,6 +1214,16 @@ export interface SitePage {
   name: string;
   slug: string;
   structure: Block[]; // Árvore de blocos
+  /** ID do plugin que criou esta página (se for uma página de plugin) */
+  pluginId?: string;
+  /** ID do template de página do plugin */
+  pageTemplateId?: string;
+  /** Página dinâmica com dados de backend (ex.: blog/:slug) */
+  isDynamic?: boolean;
+  /** Configuração de dados dinâmicos (provider, modo, mapeamento) */
+  dataSource?: PageDataSource;
+  /** Restrições de edição impostas pelo plugin */
+  editRestrictions?: PageEditRestrictions;
 }
 
 /**
@@ -1136,6 +1245,8 @@ export interface SiteDocument {
     collections?: ContentCollection[];
   };
   pages: SitePage[];
+  /** Configuração de plugins ativos e suas opções */
+  plugins?: SitePluginsConfig;
 }
 
 /**
