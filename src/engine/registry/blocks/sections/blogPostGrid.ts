@@ -1,6 +1,40 @@
 import { BlockDefinition } from "../../types";
 import { componentRegistry } from "../../registry";
 
+/**
+ * Sample cards for editor preview.
+ * In production, these are replaced by ContentProvider data.
+ */
+const sampleCards = [
+  {
+    title: "Bem-vindo ao nosso blog!",
+    excerpt: "Estamos animados em lançar nosso blog oficial. Acompanhe novidades e dicas.",
+    image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=400&fit=crop",
+    category: "Novidades",
+    date: "15 Jan 2025",
+    linkHref: "/blog/bem-vindo",
+    linkText: "Ler mais",
+  },
+  {
+    title: "5 Dicas para Estudantes de Sucesso",
+    excerpt: "Confira as melhores práticas para melhorar seus estudos e alcançar seus objetivos.",
+    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=400&fit=crop",
+    category: "Educação",
+    date: "20 Jan 2025",
+    linkHref: "/blog/dicas-estudantes",
+    linkText: "Ler mais",
+  },
+  {
+    title: "Novidades para o Próximo Semestre",
+    excerpt: "Novos cursos, eventos e melhorias que estão chegando. Saiba tudo sobre o que vem por aí.",
+    image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&h=400&fit=crop",
+    category: "Institucional",
+    date: "01 Fev 2025",
+    linkHref: "/blog/novidades-semestre",
+    linkText: "Ler mais",
+  },
+];
+
 export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
   type: "blogPostGrid",
   name: "Blog Post Grid",
@@ -12,7 +46,7 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
     title: "Blog",
     subtitle: "Últimas publicações",
     columns: 3,
-    cards: [],
+    cards: sampleCards,
     variant: "default",
     showViewAll: false,
     viewAllText: "Ver todos",

@@ -51,28 +51,47 @@ export function renderBlogPostGrid(block: any): React.ReactNode {
         )}
 
         {/* Grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${columns}, 1fr)`,
-            gap: "2rem",
-          }}
-        >
-          {cards.map((card: any, index: number) =>
-            renderBlogPostCard({
-              id: `${block.id}-card-${index}`,
-              props: {
-                ...card,
-                variant:
-                  variant === "featured" && index === 0
-                    ? "horizontal"
-                    : variant === "minimal"
-                      ? "minimal"
-                      : "default",
-              },
-            }),
-          )}
-        </div>
+        {cards.length > 0 ? (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${columns}, 1fr)`,
+              gap: "2rem",
+            }}
+          >
+            {cards.map((card: any, index: number) =>
+              renderBlogPostCard({
+                id: `${block.id}-card-${index}`,
+                props: {
+                  ...card,
+                  variant:
+                    variant === "featured" && index === 0
+                      ? "horizontal"
+                      : variant === "minimal"
+                        ? "minimal"
+                        : "default",
+                },
+              }),
+            )}
+          </div>
+        ) : (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "3rem 1rem",
+              color: "var(--sg-muted-text)",
+              border: "2px dashed var(--sg-border, #e5e7eb)",
+              borderRadius: "var(--sg-card-radius, 0.5rem)",
+            }}
+          >
+            <p style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
+              Nenhum post encontrado
+            </p>
+            <p style={{ fontSize: "0.875rem" }}>
+              Os posts aparecerão aqui quando forem publicados.
+            </p>
+          </div>
+        )}
 
         {/* View All link */}
         {showViewAll && (

@@ -92,7 +92,22 @@ export const blogPlugin: PluginRegistration = {
         slug: "blog",
         pluginId: "blog",
         pageTemplateId: "blog-listing",
-        structure: [],
+        structure: [
+          {
+            id: "blog-grid-default",
+            type: "blogPostGrid",
+            props: {
+              title: "Blog",
+              subtitle: "Últimas publicações",
+              columns: 3,
+              cards: [],
+              variant: "default",
+              showViewAll: false,
+              viewAllText: "Ver todos",
+              viewAllHref: "/blog",
+            },
+          },
+        ],
         dataSource: {
           provider: "blog-posts",
           mode: "list",
@@ -110,7 +125,27 @@ export const blogPlugin: PluginRegistration = {
         pluginId: "blog",
         pageTemplateId: "blog-post",
         isDynamic: true,
-        structure: [],
+        structure: [
+          {
+            id: "blog-detail-default",
+            type: "blogPostDetail",
+            props: {
+              title: "Título do Post",
+              content: "<p>O conteúdo do post será carregado automaticamente.</p>",
+              featuredImage: "",
+              date: "",
+              category: "",
+              authorName: "",
+              tags: [],
+              showFeaturedImage: true,
+              showAuthor: true,
+              showDate: true,
+              showTags: true,
+              showReadingTime: true,
+              contentMaxWidth: "720px",
+            },
+          },
+        ],
         dataSource: {
           provider: "blog-posts",
           mode: "single",

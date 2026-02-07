@@ -337,8 +337,16 @@ export type {
   SitePluginsConfig,
 } from './engine/plugins/types'
 
+// Content Provider API
+export { hydratePageWithContent } from './engine/plugins/contentHydration'
+export type { ContentProviderMap } from './engine/plugins/contentHydration'
+
+export { matchDynamicPage } from './engine/plugins/dynamicPageResolver'
+export type { DynamicPageMatch } from './engine/plugins/dynamicPageResolver'
+
 // Built-in plugins
 export { blogPlugin } from './engine/plugins/builtin/blog'
+export { mockBlogContentProvider } from './engine/plugins/builtin/blog'
 
 // ============================================================================
 // Deprecated re-exports (backward compatibility)

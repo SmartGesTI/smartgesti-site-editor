@@ -159,20 +159,22 @@ export function exportBlogPostGrid(
     throw new Error("exportBlogPostGrid requires renderChild function");
   }
 
-  const cardsHtml = cards
-    .map((c: any, i: number) =>
-      renderChild(
-        {
-          id: `${block.id}-card-${i}`,
-          type: "blogPostCard",
-          props: c,
-        } as Block,
-        depth + 1,
-        basePath,
-        theme,
-      ),
-    )
-    .join("");
+  const cardsHtml = cards.length > 0
+    ? cards
+        .map((c: any, i: number) =>
+          renderChild(
+            {
+              id: `${block.id}-card-${i}`,
+              type: "blogPostCard",
+              props: c,
+            } as Block,
+            depth + 1,
+            basePath,
+            theme,
+          ),
+        )
+        .join("")
+    : `<div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--sg-muted-text); border: 2px dashed var(--sg-border, #e5e7eb); border-radius: var(--sg-card-radius, 0.5rem);"><p style="font-size: 1rem; margin-bottom: 0.5rem;">Nenhum post encontrado</p><p style="font-size: 0.875rem;">Os posts aparecerão aqui quando forem publicados.</p></div>`;
 
   const viewAllHtml =
     showViewAll && viewAllText

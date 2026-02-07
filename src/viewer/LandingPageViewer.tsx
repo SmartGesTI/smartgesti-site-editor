@@ -2,15 +2,28 @@
  * Landing Page Viewer
  * Visualização pública da landing page.
  * Usa o mesmo mecanismo do Preview (editor): exportPageToHtml + iframe srcdoc.
+ *
+ * Supports dynamic pages via ContentProvider (Sprint 3):
+ * - Optional `contentProviders` prop allows consumer to supply data providers
+ * - Dynamic page resolution (e.g., "blog/:slug")
+ * - Automatic content hydration before rendering
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   SiteDocument,
+  SitePage,
   exportPageToHtml,
   createEmptySiteDocument,
   defaultThemeTokens,
 } from "../engine";
+import type { ContentProvider } from "../engine/plugins/types";
+import { matchDynamicPage } from "../engine/plugins/dynamicPageResolver";
+import {
+  hydratePageWithContent,
+  type ContentProviderMap,
+} from "../engine/plugins/contentHydration";
+import { logger } from "../utils/logger";
 
 /** Verifica se o HTML tem conteúdo real no body (evita usar publishedHtml vazio) */
 function hasBodyContent(html: string): boolean {
@@ -37,6 +50,24 @@ interface LandingPageViewerProps {
   schoolSlug?: string;
   /** Dados da escola para header/navbar dinâmico (quando em contexto escola) */
   schoolData?: SchoolData;
+  /**
+   * Content providers for dynamic pages (e.g., blog posts, products).
+   * Supplied by the consumer project to connect plugin data to the viewer.
+   */
+  contentProviders?: ContentProvider[];
+}
+
+/**
+ * Builds a ContentProviderMap from an array of providers.
+ */
+function buildProviderMap(providers?: ContentProvider[]): ContentProviderMap {
+  const map: ContentProviderMap = new Map();
+  if (providers) {
+    for (const p of providers) {
+      map.set(p.type, p);
+    }
+  }
+  return map;
 }
 
 export function LandingPageViewer({
@@ -46,11 +77,16 @@ export function LandingPageViewer({
   pageSlug,
   schoolSlug,
   schoolData: _schoolData, // reservado para header/navbar dinâmico (logo, nome da escola)
+  contentProviders,
 }: LandingPageViewerProps) {
   const [document, setDocument] = useState<SiteDocument | null>(null);
   const [publishedHtml, setPublishedHtml] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hydratedHtml, setHydratedHtml] = useState<string | null>(null);
+
+  // Track if hydration is in progress
+  const isHydratingRef = useRef(false);
 
   useEffect(() => {
     loadLandingPage();
@@ -59,6 +95,7 @@ export function LandingPageViewer({
   const loadLandingPage = async () => {
     setIsLoading(true);
     setError(null);
+    setHydratedHtml(null);
 
     try {
       const response = await fetch(
@@ -113,6 +150,56 @@ export function LandingPageViewer({
       setIsLoading(false);
     }
   };
+
+  // Hydrate dynamic pages when document + contentProviders are available
+  useEffect(() => {
+    if (!document || !pageSlug || isHydratingRef.current) return;
+
+    const pages = Array.isArray(document.pages) ? document.pages : [];
+    const providerMap = buildProviderMap(contentProviders);
+
+    // Only hydrate if we have providers
+    if (providerMap.size === 0) return;
+
+    // Try to resolve the page (exact or dynamic)
+    const exactPage = pages.find(
+      (p) => p.slug === pageSlug || p.id === pageSlug,
+    );
+
+    let resolvedPage: SitePage | undefined;
+    let urlParams: Record<string, string> = {};
+
+    if (exactPage) {
+      resolvedPage = exactPage;
+    } else {
+      // Try dynamic page resolution
+      const match = matchDynamicPage(pages, pageSlug);
+      if (match) {
+        resolvedPage = match.page;
+        urlParams = match.params;
+      }
+    }
+
+    // Only hydrate pages with a dataSource
+    if (!resolvedPage?.dataSource) return;
+
+    isHydratingRef.current = true;
+
+    hydratePageWithContent(resolvedPage, providerMap, urlParams)
+      .then((hydratedPage) => {
+        // Generate HTML from hydrated page
+        const html = renderPageToHtml(hydratedPage, document, schoolSlug, pages);
+        if (html) {
+          setHydratedHtml(html);
+        }
+      })
+      .catch((err) => {
+        logger.error("Error hydrating page:", err);
+      })
+      .finally(() => {
+        isHydratingRef.current = false;
+      });
+  }, [document, pageSlug, contentProviders, schoolSlug]);
 
   if (isLoading) {
     return (
@@ -189,13 +276,40 @@ export function LandingPageViewer({
     );
   }
 
+  // If we have hydrated HTML from ContentProvider, use it
+  if (hydratedHtml) {
+    return (
+      <iframe
+        srcDoc={hydratedHtml}
+        title="Site"
+        style={{
+          width: "100%",
+          minHeight: "100vh",
+          border: "none",
+          backgroundColor: "#ffffff",
+        }}
+      />
+    );
+  }
+
   // Resolver página por slug ou id; fallback para home
-  const page =
+  // Also try dynamic page resolution
+  let page =
     (pageSlug
       ? pages.find((p) => p.slug === pageSlug || p.id === pageSlug)
       : null) ??
-    pages.find((p) => p.id === "home") ??
-    pages[0];
+    null;
+
+  if (!page && pageSlug) {
+    const match = matchDynamicPage(pages, pageSlug);
+    if (match) {
+      page = match.page;
+    }
+  }
+
+  if (!page) {
+    page = pages.find((p) => p.id === "home") ?? pages[0];
+  }
 
   if (!page) {
     return (
@@ -212,6 +326,49 @@ export function LandingPageViewer({
     );
   }
 
+  const html = renderPageToHtml(page, document, schoolSlug, pages);
+  if (!html) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "2rem",
+          textAlign: "center",
+        }}
+      >
+        <div>Conteúdo da página vazio. Adicione blocos no editor.</div>
+      </div>
+    );
+  }
+
+  // Mesmo mecanismo do Preview (editor): iframe com srcdoc = HTML completo
+  return (
+    <iframe
+      srcDoc={html}
+      title="Site"
+      style={{
+        width: "100%",
+        minHeight: "100vh",
+        border: "none",
+        backgroundColor: "#ffffff",
+      }}
+    />
+  );
+}
+
+/**
+ * Generates HTML from a page using the standard export pipeline.
+ * Extracted to reuse for both static and hydrated pages.
+ */
+function renderPageToHtml(
+  page: SitePage,
+  document: SiteDocument,
+  schoolSlug?: string,
+  allPages?: SitePage[],
+): string | null {
   // Garantir structure para o export (evita erro se página vier sem structure)
   const pageWithStructure = {
     ...page,
@@ -248,6 +405,7 @@ export function LandingPageViewer({
   // basePath para links (ex.: /site ou /site/escola/:slug)
   const basePath = schoolSlug ? `/site/escola/${schoolSlug}` : "/site";
 
+  const pages = allPages ?? document.pages;
   const homePage = pages.find((p) => p.id === "home") ?? pages[0];
   const layoutFromPage =
     homePage && homePage.id !== pageWithStructure.id
@@ -259,68 +417,22 @@ export function LandingPageViewer({
         }
       : undefined;
 
-  let html: string;
   try {
-    html = exportPageToHtml(
+    const html = exportPageToHtml(
       pageWithStructure,
       documentWithTheme,
       true,
       basePath,
       layoutFromPage ? { layoutFromPage } : undefined,
     );
+
+    if (!html || !html.trim()) {
+      return null;
+    }
+
+    return html;
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Erro ao gerar HTML do site";
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "2rem",
-          textAlign: "center",
-          fontFamily: "system-ui, sans-serif",
-        }}
-      >
-        <div>
-          <p style={{ marginBottom: "0.5rem", fontWeight: 600 }}>
-            Erro ao renderizar o site
-          </p>
-          <p style={{ color: "#666", fontSize: "0.875rem" }}>{message}</p>
-        </div>
-      </div>
-    );
+    logger.error("Error generating HTML:", err);
+    return null;
   }
-
-  if (!html || !html.trim()) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "2rem",
-          textAlign: "center",
-        }}
-      >
-        <div>Conteúdo da página vazio. Adicione blocos no editor.</div>
-      </div>
-    );
-  }
-
-  // Mesmo mecanismo do Preview (editor): iframe com srcdoc = HTML completo
-  return (
-    <iframe
-      srcDoc={html}
-      title="Site"
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        border: "none",
-        backgroundColor: "#ffffff",
-      }}
-    />
-  );
 }
