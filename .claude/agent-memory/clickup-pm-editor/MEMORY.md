@@ -41,11 +41,11 @@ to do → in progress → complete
 
 ## Lições Aprendidas
 
-### Script Automation
-- Criar scripts Node.js (.mjs) para automação via API
-- Sempre incluir rate limiting (máx 2 calls paralelas)
-- Validar CLICKUP_API_KEY antes de executar
-- Documentar operações em .claude/docs/ para referência
+### Acesso ao ClickUp — EXCLUSIVAMENTE via MCP
+- **NUNCA** usar CLI, scripts Node.js (.mjs), ou chamadas diretas à API REST
+- **SEMPRE** usar as tools MCP `mcp__clickup__*` disponíveis no ambiente
+- Tools principais: `clickup_create_task`, `clickup_update_task`, `clickup_get_task`, `clickup_search`, `clickup_get_list`, `clickup_create_task_comment`
+- Workspace ID é detectado automaticamente — não precisa passar manualmente
 
 ### Descrições de Tasks
 - Usar Markdown com seções claras: ## Feito / ## Implementar / ## Critérios
@@ -66,39 +66,36 @@ to do → in progress → complete
 
 ## Referências Rápidas
 
-### Criar Feature via API
-```javascript
-POST /api/v2/list/{list_id}/task
-{
-  "name": "Feature Name",
-  "description": "Markdown description",
-  "tags": ["frontend", "feature", "sprint-5"],
-  "status": "in progress",
-  "priority": 3,
-  "custom_fields": [{ "id": "{campo_modulo_id}", "value": "{modulo_id}" }]
-}
+### Criar Feature via MCP
+```
+mcp__clickup__clickup_create_task({
+  list_id: "901710728590",
+  name: "Feature Name",
+  markdown_description: "Markdown description",
+  tags: ["frontend", "feature", "sprint-5"],
+  status: "in progress",
+  priority: "normal",
+  custom_fields: [{ id: "{campo_modulo_id}", value: "{modulo_id}" }]
+})
 ```
 
-### Criar Subtask via API
-```javascript
-POST /api/v2/list/{list_id}/task
-{
-  "name": "Subtask Name",
-  "description": "Markdown description",
-  "parent": "{parent_task_id}",
-  "tags": ["frontend"],
-  "status": "to do",
-  "custom_fields": [{ "id": "{campo_modulo_id}", "value": "{modulo_id}" }]
-}
+### Criar Subtask via MCP
+```
+mcp__clickup__clickup_create_task({
+  list_id: "901710728590",
+  name: "Subtask Name",
+  markdown_description: "Markdown description",
+  parent: "{parent_task_id}",
+  tags: ["frontend"],
+  status: "to do",
+  custom_fields: [{ id: "{campo_modulo_id}", value: "{modulo_id}" }]
+})
 ```
 
-## Arquivos Importantes
-
-| Arquivo | Propósito |
-|---------|-----------|
-| /home/bruno/.claude/projects/.../pm-editor.md | Estado atual das features e histórico |
-| .claude/scripts/update-clickup.mjs | Script Node.js para criar tasks via API |
-| .claude/docs/CLICKUP-UPDATE-*.md | Documentação de cada atualização |
+### Buscar Tasks
+```
+mcp__clickup__clickup_search({ keywords: "blog", filters: { asset_types: ["task"] } })
+```
 
 ## Features Recentes
 
