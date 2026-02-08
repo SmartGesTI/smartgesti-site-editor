@@ -436,25 +436,35 @@ export function exportPageToHtml(
     .join("");
 
   // Layout compartilhado: em páginas não-home, incluir navbar e footer da página de referência (ex.: home)
+  // Pula injeção se a página já possui seu próprio navbar/footer (ex.: páginas de plugin)
   if (
     layoutFromPage &&
     layoutFromPage.id !== page.id &&
     layoutFromPage.structure?.length
   ) {
     const layoutStructure = layoutFromPage.structure;
-    const navbarBlock = layoutStructure.find((b) => b.type === "navbar");
+
+    const pageHasNavbar = page.structure.some((b) => b.type === "navbar");
+    const pageHasFooter = page.structure.some((b) => b.type === "footer");
+
+    const navbarBlock = !pageHasNavbar
+      ? layoutStructure.find((b) => b.type === "navbar")
+      : null;
     const navbarHtml = navbarBlock
       ? blockToHtmlDirect(navbarBlock, 0, basePath, document.theme)
       : "";
-    const footerBlock =
-      layoutStructure.length > 1
-        ? layoutStructure[layoutStructure.length - 1]
-        : null;
+
+    const footerBlock = !pageHasFooter
+      ? layoutStructure.find((b) => b.type === "footer")
+      : null;
     const footerHtml =
       footerBlock && footerBlock.type !== "navbar"
         ? blockToHtmlDirect(footerBlock, 0, basePath, document.theme)
         : "";
-    bodyHtml = navbarHtml + bodyHtml + footerHtml;
+
+    if (navbarHtml || footerHtml) {
+      bodyHtml = navbarHtml + bodyHtml + footerHtml;
+    }
   }
 
   const html = `<!DOCTYPE html>

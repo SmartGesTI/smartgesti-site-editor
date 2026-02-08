@@ -30,7 +30,7 @@ const SAMPLE_BLOG_CARDS = [
       "https://images.unsplash.com/photo-1567168544230-3b9e5ec47659?w=800&h=400&fit=crop",
     category: "Eventos",
     date: "05 Fev 2026",
-    linkHref: "#",
+    linkHref: "/site/p/blog/feira-de-ciencias-2026",
     linkText: "Ler mais",
   },
   {
@@ -41,7 +41,7 @@ const SAMPLE_BLOG_CARDS = [
       "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=400&fit=crop",
     category: "Institucional",
     date: "01 Fev 2026",
-    linkHref: "#",
+    linkHref: "/site/p/blog/matriculas-segundo-semestre",
     linkText: "Ler mais",
   },
   {
@@ -52,7 +52,7 @@ const SAMPLE_BLOG_CARDS = [
       "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=400&fit=crop",
     category: "Educação",
     date: "28 Jan 2026",
-    linkHref: "#",
+    linkHref: "/site/p/blog/dicas-preparar-ano-letivo",
     linkText: "Ler mais",
   },
 ];

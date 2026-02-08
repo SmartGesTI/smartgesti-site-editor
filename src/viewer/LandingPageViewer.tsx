@@ -9,7 +9,7 @@
  * - Automatic content hydration before rendering
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   SiteDocument,
   SitePage,
@@ -55,6 +55,11 @@ interface LandingPageViewerProps {
    * Supplied by the consumer project to connect plugin data to the viewer.
    */
   contentProviders?: ContentProvider[];
+  /**
+   * Callback for internal navigation (link clicks inside iframe).
+   * Receives the href from clicked links. Consumer should use router navigation.
+   */
+  onNavigate?: (href: string) => void;
 }
 
 /**
@@ -78,6 +83,7 @@ export function LandingPageViewer({
   schoolSlug,
   schoolData: _schoolData, // reservado para header/navbar dinâmico (logo, nome da escola)
   contentProviders,
+  onNavigate,
 }: LandingPageViewerProps) {
   const [document, setDocument] = useState<SiteDocument | null>(null);
   const [publishedHtml, setPublishedHtml] = useState<string | null>(null);
@@ -87,6 +93,49 @@ export function LandingPageViewer({
 
   // Track if hydration is in progress
   const isHydratingRef = useRef(false);
+  const onNavigateRef = useRef(onNavigate);
+  onNavigateRef.current = onNavigate;
+
+  // Inject click interceptor into iframe HTML so link clicks propagate to parent
+  const injectClickInterceptor = useCallback((html: string): string => {
+    const script = `<script>
+(function() {
+  document.addEventListener('click', function(e) {
+    var target = e.target;
+    var anchor = target;
+    while (anchor && anchor.tagName !== 'A') {
+      anchor = anchor.parentElement;
+    }
+    if (anchor && anchor.tagName === 'A') {
+      var href = anchor.getAttribute('href') || '';
+      if (href && href !== '#' && !href.startsWith('javascript:')) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.parent.postMessage({ type: 'viewer-navigate', href: href }, '*');
+        return;
+      }
+    }
+  }, true);
+})();
+</script>`;
+    if (html.includes("</body>")) {
+      return html.replace("</body>", `${script}</body>`);
+    }
+    return html + script;
+  }, []);
+
+  // Listen for navigation messages from iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "viewer-navigate" && event.data?.href) {
+        if (onNavigateRef.current) {
+          onNavigateRef.current(event.data.href);
+        }
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
 
   useEffect(() => {
     loadLandingPage();
@@ -239,7 +288,7 @@ export function LandingPageViewer({
   if (publishedHtml && isHomeRoute && !document) {
     return (
       <iframe
-        srcDoc={publishedHtml}
+        srcDoc={injectClickInterceptor(publishedHtml)}
         title="Site publicado"
         style={{
           width: "100%",
@@ -280,7 +329,7 @@ export function LandingPageViewer({
   if (hydratedHtml) {
     return (
       <iframe
-        srcDoc={hydratedHtml}
+        srcDoc={injectClickInterceptor(hydratedHtml)}
         title="Site"
         style={{
           width: "100%",
@@ -347,7 +396,7 @@ export function LandingPageViewer({
   // Mesmo mecanismo do Preview (editor): iframe com srcdoc = HTML completo
   return (
     <iframe
-      srcDoc={html}
+      srcDoc={injectClickInterceptor(html)}
       title="Site"
       style={{
         width: "100%",
