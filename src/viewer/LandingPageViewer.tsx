@@ -91,8 +91,6 @@ export function LandingPageViewer({
   const [error, setError] = useState<string | null>(null);
   const [hydratedHtml, setHydratedHtml] = useState<string | null>(null);
 
-  // Track if hydration is in progress
-  const isHydratingRef = useRef(false);
   const onNavigateRef = useRef(onNavigate);
   onNavigateRef.current = onNavigate;
 
@@ -137,117 +135,172 @@ export function LandingPageViewer({
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
+  // Load site document from API. Uses stale flag to prevent
+  // React Strict Mode double-mount from causing duplicate state updates.
   useEffect(() => {
-    loadLandingPage();
-  }, [siteId]);
+    let stale = false;
 
-  const loadLandingPage = async () => {
     setIsLoading(true);
     setError(null);
-    setHydratedHtml(null);
 
-    try {
-      const response = await fetch(
-        `${apiBaseUrl}/sites/${siteId}?projectId=${projectId}`,
-      );
-      if (!response.ok) {
-        throw new Error("Landing page não encontrada");
-      }
+    (async () => {
+      try {
+        const response = await fetch(
+          `${apiBaseUrl}/sites/${siteId}?projectId=${projectId}`,
+        );
+        if (!response.ok) {
+          throw new Error("Landing page não encontrada");
+        }
 
-      const data = await response.json();
+        const data = await response.json();
+        if (stale) return;
 
-      // Sempre guardar template quando existir (para fallback se publishedHtml estiver vazio)
-      if (data.template) {
-        const schemaVersion = data.template.schemaVersion;
-        const hasPages =
-          data.template.pages && Array.isArray(data.template.pages);
-        const isV2 = schemaVersion === 2 || schemaVersion === "2" || hasPages;
+        if (data.template) {
+          const schemaVersion = data.template.schemaVersion;
+          const hasPages =
+            data.template.pages && Array.isArray(data.template.pages);
+          const isV2 =
+            schemaVersion === 2 || schemaVersion === "2" || hasPages;
 
-        if (isV2) {
-          const template = data.template as SiteDocument;
-          if (!Array.isArray(template.pages)) {
-            template.pages = [];
+          if (isV2) {
+            const template = data.template as SiteDocument;
+            if (!Array.isArray(template.pages)) {
+              template.pages = [];
+            }
+            if (
+              template.schemaVersion !== 2 &&
+              template.schemaVersion !== "2"
+            ) {
+              template.schemaVersion = 2;
+            }
+            setDocument(template);
+          } else {
+            throw new Error(
+              "Formato de template legado não suportado. Por favor, recrie o site.",
+            );
           }
-          if (template.schemaVersion !== 2 && template.schemaVersion !== "2") {
-            template.schemaVersion = 2;
-          }
-          setDocument(template);
         } else {
-          throw new Error(
-            "Formato de template legado não suportado. Por favor, recrie o site.",
+          setDocument(null);
+        }
+
+        if (data.publishedHtml && hasBodyContent(data.publishedHtml)) {
+          setPublishedHtml(data.publishedHtml);
+        } else {
+          setPublishedHtml(null);
+        }
+
+        if (!data.template && !data.publishedHtml) {
+          throw new Error("Template não encontrado");
+        }
+      } catch (err) {
+        if (!stale) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Erro ao carregar landing page",
           );
         }
-      } else {
-        setDocument(null);
+      } finally {
+        if (!stale) {
+          setIsLoading(false);
+        }
       }
+    })();
 
-      // publishedHtml só é usado se tiver conteúdo no body (evita tela em branco quando salvo vazio)
-      if (data.publishedHtml && hasBodyContent(data.publishedHtml)) {
-        setPublishedHtml(data.publishedHtml);
-      } else {
-        setPublishedHtml(null);
-      }
+    return () => {
+      stale = true;
+    };
+  }, [siteId, apiBaseUrl, projectId]);
 
-      if (!data.template && !data.publishedHtml) {
-        throw new Error("Template não encontrado");
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Erro ao carregar landing page",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Hydrate dynamic pages when document + contentProviders are available
+  // Hydrate pages when document + contentProviders are available.
+  // Supports both: pages with explicit dataSource AND pages with blogPostGrid blocks.
+  // Does NOT reset hydratedHtml at the start to avoid flash of mock data.
+  // Only clears it when navigating to a page that doesn't need hydration.
   useEffect(() => {
-    if (!document || !pageSlug || isHydratingRef.current) return;
+    if (!document) {
+      setHydratedHtml(null);
+      return;
+    }
+
+    let stale = false;
 
     const pages = Array.isArray(document.pages) ? document.pages : [];
     const providerMap = buildProviderMap(contentProviders);
 
-    // Only hydrate if we have providers
-    if (providerMap.size === 0) return;
+    if (providerMap.size === 0) {
+      setHydratedHtml(null);
+      return;
+    }
 
-    // Try to resolve the page (exact or dynamic)
-    const exactPage = pages.find(
-      (p) => p.slug === pageSlug || p.id === pageSlug,
-    );
-
+    // Resolve the current page
     let resolvedPage: SitePage | undefined;
     let urlParams: Record<string, string> = {};
 
-    if (exactPage) {
-      resolvedPage = exactPage;
-    } else {
-      // Try dynamic page resolution
-      const match = matchDynamicPage(pages, pageSlug);
-      if (match) {
-        resolvedPage = match.page;
-        urlParams = match.params;
+    if (pageSlug) {
+      const exactPage = pages.find(
+        (p) => p.slug === pageSlug || p.id === pageSlug,
+      );
+      if (exactPage) {
+        resolvedPage = exactPage;
+      } else {
+        const match = matchDynamicPage(pages, pageSlug);
+        if (match) {
+          resolvedPage = match.page;
+          urlParams = match.params;
+        }
       }
+    } else {
+      resolvedPage = pages.find((p) => p.id === "home") ?? pages[0];
     }
 
-    // Only hydrate pages with a dataSource
-    if (!resolvedPage?.dataSource) return;
+    if (!resolvedPage) {
+      setHydratedHtml(null);
+      return;
+    }
 
-    isHydratingRef.current = true;
+    // Check if page needs hydration:
+    // 1. Has explicit dataSource (blog page, blog-post page)
+    // 2. Has blogPostGrid blocks but no dataSource (home page with blog widget)
+    const hasDataSource = !!resolvedPage.dataSource;
+    const hasBlogBlocks = resolvedPage.structure?.some(
+      (b) => b.type === "blogPostGrid",
+    );
 
-    hydratePageWithContent(resolvedPage, providerMap, urlParams)
+    if (!hasDataSource && !hasBlogBlocks) {
+      setHydratedHtml(null);
+      return;
+    }
+
+    // For pages without dataSource but with blog blocks, create synthetic dataSource
+    let pageToHydrate = resolvedPage;
+    if (!hasDataSource && hasBlogBlocks) {
+      pageToHydrate = {
+        ...resolvedPage,
+        dataSource: { mode: "list" as const, provider: "blog-posts" },
+      };
+    }
+
+    hydratePageWithContent(pageToHydrate, providerMap, urlParams)
       .then((hydratedPage) => {
-        // Generate HTML from hydrated page
-        const html = renderPageToHtml(hydratedPage, document, schoolSlug, pages);
-        if (html) {
-          setHydratedHtml(html);
-        }
+        if (stale) return;
+        const html = renderPageToHtml(
+          hydratedPage,
+          document,
+          schoolSlug,
+          pages,
+        );
+        setHydratedHtml(html ?? null);
       })
       .catch((err) => {
-        logger.error("Error hydrating page:", err);
-      })
-      .finally(() => {
-        isHydratingRef.current = false;
+        if (!stale) {
+          logger.error("Error hydrating page:", err);
+          setHydratedHtml(null);
+        }
       });
+
+    return () => {
+      stale = true;
+    };
   }, [document, pageSlug, contentProviders, schoolSlug]);
 
   if (isLoading) {

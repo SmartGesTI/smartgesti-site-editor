@@ -114,7 +114,7 @@ function toBlockProps(item: ContentItem): Record<string, unknown> {
     authorName: d.authorName || "",
     authorAvatar: d.authorAvatar || "",
     readingTime: d.readingTime ? `${d.readingTime} min de leitura` : "",
-    linkHref: `/blog/${item.slug || item.id}`,
+    linkHref: `/site/p/blog/${item.slug || item.id}`,
     linkText: "Ler mais",
     // Detail-specific props
     content: d.content || "",
