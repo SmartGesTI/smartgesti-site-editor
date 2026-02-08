@@ -1,5 +1,5 @@
-import { memo, useState, useMemo } from "react";
-import { ChevronDown } from "lucide-react";
+import { memo, useState, useMemo, useEffect, useRef } from "react";
+import { ChevronDown, Pencil } from "lucide-react";
 import { InspectorMeta } from "../../engine";
 import { renderPropertyInput, type RenderInputContext } from "./renderPropertyInput";
 import { cn } from "../../utils/cn";
@@ -19,6 +19,8 @@ interface CollapsiblePropertyGroupProps {
   allProps?: Record<string, any>;
   uploadConfig?: UploadConfig;
   defaultOpen?: boolean;
+  /** When true, opens the group and scrolls it into view */
+  isFocused?: boolean;
 }
 
 /**
@@ -33,8 +35,10 @@ export const CollapsiblePropertyGroup = memo(function CollapsiblePropertyGroup({
   allProps,
   uploadConfig,
   defaultOpen = true,
+  isFocused,
 }: CollapsiblePropertyGroupProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const groupRef = useRef<HTMLDivElement>(null);
 
   // Create context for special inputs
   const renderContext = useMemo<RenderInputContext | undefined>(() => {
@@ -44,12 +48,28 @@ export const CollapsiblePropertyGroup = memo(function CollapsiblePropertyGroup({
     return undefined;
   }, [allProps, onMultiUpdate]);
 
+  // When focused, open and scroll into view
+  useEffect(() => {
+    if (isFocused && groupRef.current) {
+      setIsOpen(true);
+      // Small delay to ensure the group content is rendered before scrolling
+      requestAnimationFrame(() => {
+        groupRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, [isFocused]);
+
   if (props.length === 0) {
     return null;
   }
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg">
+    <div ref={groupRef} id={`prop-group-${groupName}`} className={cn(
+      "border rounded-lg transition-colors",
+      isFocused
+        ? "border-purple-400 dark:border-purple-600 ring-1 ring-purple-200 dark:ring-purple-800"
+        : "border-gray-200 dark:border-gray-700"
+    )}>
       {/* Header clicável */}
       <button
         type="button"
@@ -64,8 +84,16 @@ export const CollapsiblePropertyGroup = memo(function CollapsiblePropertyGroup({
           !isOpen && "rounded-b-lg"
         )}
       >
-        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-          {groupName}
+        <span className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
+            {groupName}
+          </span>
+          {isFocused && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 animate-pulse">
+              <Pencil className="w-2.5 h-2.5" />
+              Editando
+            </span>
+          )}
         </span>
         <ChevronDown
           className={cn(

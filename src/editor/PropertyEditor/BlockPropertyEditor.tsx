@@ -17,6 +17,8 @@ interface BlockPropertyEditorProps {
   currentPageId?: string;
   onUpdate: (updates: Record<string, any>) => void;
   uploadConfig?: UploadConfig;
+  /** When set, the matching property group opens and scrolls into view */
+  focusedGroup?: string | null;
 }
 
 /**
@@ -29,6 +31,7 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
   currentPageId,
   onUpdate,
   uploadConfig,
+  focusedGroup,
 }: BlockPropertyEditorProps) {
   // Obter definição do bloco do registry
   const blockDefinition = useMemo(() => {
@@ -153,6 +156,7 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
             onMultiUpdate={onUpdate}
             allProps={block?.props as Record<string, any>}
             uploadConfig={uploadConfig}
+            isFocused={groupName === focusedGroup}
           />
         ))
       )}

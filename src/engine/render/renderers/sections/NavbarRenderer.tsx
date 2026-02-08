@@ -191,10 +191,10 @@ export function renderNavbar(block: any): React.ReactNode {
       {hoverCss}
       <div className="sg-navbar__container" style={containerStyle}>
         {/* Layout padrão: logo | links + cta */}
-        <div className="sg-navbar__brand" style={{ flexShrink: 0 }}>
+        <div className="sg-navbar__brand" data-block-group="Logo e Marca" style={{ flexShrink: 0 }}>
           {brandEl}
         </div>
-        <div className="sg-navbar__menu" style={menuStyle}>
+        <div className="sg-navbar__menu" data-block-group="Links" style={menuStyle}>
           {links.map((link: any, index: number) => {
             if (link.dropdown && Array.isArray(link.dropdown)) {
               return (
@@ -230,6 +230,7 @@ export function renderNavbar(block: any): React.ReactNode {
             <a
               href={ctaButton.href || "#"}
               className={`sg-navbar__btn ${buttonVariantClass}`}
+              data-block-group="Botao CTA"
               style={buttonStyle}
             >
               {ctaButton.text}

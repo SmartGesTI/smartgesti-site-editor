@@ -57,6 +57,7 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
       {/* Featured image — full width banner */}
       {showFeaturedImage && featuredImage && (
         <div
+          data-block-group="Mídia"
           style={{
             maxWidth: "1200px",
             margin: "0 auto 2.5rem auto",
@@ -88,6 +89,7 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
       >
         {/* Post header: category, date, reading time */}
         <div
+          data-block-group="Conteúdo"
           style={{
             display: "flex",
             alignItems: "center",
@@ -161,6 +163,7 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
         {/* Tags */}
         {showTags && tags.length > 0 && (
           <div
+            data-block-group="Visibilidade"
             style={{
               display: "flex",
               flexWrap: "wrap",
@@ -192,6 +195,7 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
         {/* Author — dynamic placeholder (data comes from DB at runtime) */}
         {showAuthor && (
           <div
+            data-block-group="Autor"
             style={{
               marginTop: "2.5rem",
               paddingTop: "1.5rem",

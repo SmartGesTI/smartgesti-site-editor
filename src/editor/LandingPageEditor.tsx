@@ -81,6 +81,8 @@ export function LandingPageEditor({
   const [currentTemplateId, setCurrentTemplateId] = useState<TemplateId | null>(
     null,
   );
+  const [focusedGroup, setFocusedGroup] = useState<string | null>(null);
+  const [showSelectionOverlay, setShowSelectionOverlay] = useState(false);
 
   // Carregar template escolhido (converter shared → engine e carregar no editor)
   const handleSelectTemplate = useCallback(
@@ -191,6 +193,15 @@ export function LandingPageEditor({
     applyChange(patch, "Update color palette");
   }, [document, applyChange]);
 
+  // Handler para clique no preview (com grupo opcional para scroll-to-group)
+  const handleBlockClick = useCallback((blockId: string, group?: string) => {
+    setSelectedBlockId(blockId);
+    setFocusedGroup(group || null);
+  }, [setSelectedBlockId]);
+
+  // Limpar focusedGroup quando o bloco selecionado muda (via seleção no painel esquerdo, etc.)
+  // Nota: handleBlockClick já define o focusedGroup corretamente quando vem do preview
+
   // No editor: cliques em links no preview não navegam; trocam a página em edição
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -263,6 +274,8 @@ export function LandingPageEditor({
               }
             : resetToTemplate
         }
+        showSelectionOverlay={showSelectionOverlay}
+        onToggleSelectionOverlay={() => setShowSelectionOverlay(prev => !prev)}
       />
 
       {/* Main Content - 3 Columns */}
@@ -272,7 +285,7 @@ export function LandingPageEditor({
           currentPage={currentPage}
           selectedBlockId={selectedBlockId}
           isPaletteSelected={isPaletteSelected}
-          onSelectBlock={setSelectedBlockId}
+          onSelectBlock={(id) => { setSelectedBlockId(id); setFocusedGroup(null); }}
           onDeleteBlock={handleDeleteBlock}
         />
 
@@ -282,7 +295,7 @@ export function LandingPageEditor({
           currentPageId={currentPageId}
           currentPage={currentPage}
           selectedBlockId={selectedBlockId}
-          onBlockClick={setSelectedBlockId}
+          onBlockClick={handleBlockClick}
           onSelectPage={setCurrentPageId}
           onAddPage={() => {
             const name = prompt("Nome da página:");
@@ -297,6 +310,8 @@ export function LandingPageEditor({
           activePlugins={activePlugins}
           onActivatePlugin={activatePlugin}
           onDeactivatePlugin={deactivatePlugin}
+          showSelectionOverlay={showSelectionOverlay}
+          focusedGroup={focusedGroup}
         />
 
         {/* Right: Editor Panel */}
@@ -308,6 +323,7 @@ export function LandingPageEditor({
           uploadConfig={uploadConfig}
           document={document}
           currentPageId={currentPageId}
+          focusedGroup={focusedGroup}
         />
       </div>
     </div>

@@ -5,6 +5,7 @@
 
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { SiteDocument, Block } from "../schema/siteDocument";
+import { componentRegistry } from "../registry/registry";
 import { exportPageToHtml, exportBlockToHtml } from "../export/exportHtml";
 import { detectChangedBlocks } from "../../utils/changeDetector";
 import { hashDocument } from "../../utils/documentHash";
@@ -15,8 +16,12 @@ export interface PreviewProps {
   pageId?: string;
   className?: string;
   style?: React.CSSProperties;
-  onBlockClick?: (blockId: string) => void;
+  onBlockClick?: (blockId: string, group?: string) => void;
   selectedBlockId?: string | null;
+  /** Exibe hover e label de seleção nos blocos do preview */
+  showSelectionOverlay?: boolean;
+  /** Grupo focado para indicador visual no preview */
+  focusedGroup?: string | null;
 }
 
 /**
@@ -52,6 +57,28 @@ function findBlockInPage(page: any, blockId: string): Block | null {
 }
 
 /**
+ * Monta mapa blockId → nome legível (da registry)
+ */
+function buildBlockNameMap(page: any): Record<string, string> {
+  const map: Record<string, string> = {};
+  const walk = (blocks: Block[]) => {
+    for (const block of blocks) {
+      const def = componentRegistry.get(block.type);
+      map[block.id] = def?.name || block.type;
+      const props = block.props as Record<string, any>;
+      if (props?.children && Array.isArray(props.children)) walk(props.children);
+      if (block.type === "card") {
+        if (Array.isArray(props?.header)) walk(props.header);
+        if (Array.isArray(props?.content)) walk(props.content);
+        if (Array.isArray(props?.footer)) walk(props.footer);
+      }
+    }
+  };
+  if (page?.structure) walk(page.structure);
+  return map;
+}
+
+/**
  * Componente de preview usando iframe isolado
  */
 export function Preview({
@@ -61,6 +88,8 @@ export function Preview({
   style,
   onBlockClick,
   selectedBlockId,
+  showSelectionOverlay = false,
+  focusedGroup = null,
 }: PreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const previousDocRef = useRef<SiteDocument | null>(null);
@@ -71,11 +100,21 @@ export function Preview({
 
   // Usar ref para selectedBlockId (necessário para highlight assíncrono)
   const selectedBlockIdRef = useRef(selectedBlockId);
+  const showSelectionOverlayRef = useRef(showSelectionOverlay);
+  const focusedGroupRef = useRef(focusedGroup);
 
-  // Atualizar ref quando prop muda
+  // Atualizar refs quando props mudam
   useEffect(() => {
     selectedBlockIdRef.current = selectedBlockId;
   }, [selectedBlockId]);
+
+  useEffect(() => {
+    showSelectionOverlayRef.current = showSelectionOverlay;
+  }, [showSelectionOverlay]);
+
+  useEffect(() => {
+    focusedGroupRef.current = focusedGroup;
+  }, [focusedGroup]);
 
   const page = useMemo(() => {
     return pageId
@@ -83,7 +122,13 @@ export function Preview({
       : document.pages[0];
   }, [document, pageId]);
 
-  // Atualizar highlight diretamente no iframe (sem reload)
+  // Mapa blockId → nome legível para labels
+  const blockNameMapRef = useRef<Record<string, string>>({});
+  useEffect(() => {
+    blockNameMapRef.current = buildBlockNameMap(page);
+  }, [page]);
+
+  // Atualizar highlight + selection overlay diretamente no iframe (sem reload)
   const updateHighlight = (blockId: string | null) => {
     if (!iframeRef.current) return;
 
@@ -91,6 +136,9 @@ export function Preview({
       iframeRef.current.contentDocument ||
       iframeRef.current.contentWindow?.document;
     if (!iframeDoc) return;
+
+    const overlayEnabled = showSelectionOverlayRef.current;
+    const group = focusedGroupRef.current;
 
     requestAnimationFrame(() => {
       // Remover highlight anterior
@@ -103,6 +151,14 @@ export function Preview({
         htmlEl.style.outline = "";
         htmlEl.style.outlineOffset = "";
       });
+
+      // Remover labels anteriores
+      const oldLabel = iframeDoc.getElementById("sg-block-label");
+      if (oldLabel) oldLabel.remove();
+      const oldGroupStyle = iframeDoc.getElementById("sg-group-highlight");
+      if (oldGroupStyle) oldGroupStyle.remove();
+      const oldGroupLabel = iframeDoc.getElementById("sg-group-label");
+      if (oldGroupLabel) oldGroupLabel.remove();
 
       // Adicionar novo highlight
       if (blockId) {
@@ -127,8 +183,106 @@ export function Preview({
           }
         `;
         iframeDoc.head.appendChild(highlightStyle);
+
+        // Selection label (only when overlay is enabled)
+        if (overlayEnabled) {
+          const selectedEl = iframeDoc.querySelector(`[data-block-id="${blockId}"]`) as HTMLElement;
+          if (selectedEl) {
+            const blockName = blockNameMapRef.current[blockId] || blockId;
+            const label = iframeDoc.createElement("div");
+            label.id = "sg-block-label";
+            label.textContent = blockName;
+            label.style.cssText = "position:absolute;top:-22px;left:0;background:#3b82f6;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px 4px 0 0;z-index:10000;pointer-events:none;font-family:system-ui,sans-serif;white-space:nowrap;line-height:16px;";
+            const pos = getComputedStyle(selectedEl).position;
+            if (pos === "static") selectedEl.style.position = "relative";
+            selectedEl.appendChild(label);
+          }
+        }
+
+        // Indicador de grupo — mostra qual sub-seção foi clicada (purple)
+        if (group) {
+          const blockEl = iframeDoc.querySelector(`[data-block-id="${blockId}"]`);
+          const groupEl = blockEl?.querySelector(`[data-block-group="${group}"]`) as HTMLElement;
+          if (groupEl) {
+            const ghStyle = iframeDoc.createElement("style");
+            ghStyle.id = "sg-group-highlight";
+            ghStyle.textContent = `
+              [data-block-id="${blockId}"] [data-block-group="${group}"] {
+                outline: 2px solid #8b5cf6 !important;
+                outline-offset: 2px !important;
+                position: relative;
+              }
+            `;
+            iframeDoc.head.appendChild(ghStyle);
+
+            const gLabel = iframeDoc.createElement("div");
+            gLabel.id = "sg-group-label";
+            gLabel.textContent = group;
+            gLabel.style.cssText = "position:absolute;top:-20px;right:0;background:#8b5cf6;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px 4px 0 0;z-index:10001;pointer-events:none;font-family:system-ui,sans-serif;white-space:nowrap;line-height:14px;";
+            const gPos = getComputedStyle(groupEl).position;
+            if (gPos === "static") groupEl.style.position = "relative";
+            groupEl.appendChild(gLabel);
+          }
+        }
       }
     });
+  };
+
+  // Enviar mapa de nomes para o iframe
+  const sendBlockNamesToIframe = () => {
+    if (!iframeRef.current?.contentWindow) return;
+    iframeRef.current.contentWindow.postMessage({
+      type: "sg-set-block-names",
+      names: blockNameMapRef.current,
+    }, "*");
+  };
+
+  // Atualizar hover overlay (injetar/remover CSS de hover nos blocos)
+  const updateSelectionOverlay = (enabled: boolean) => {
+    if (!iframeRef.current) return;
+
+    const iframeDoc =
+      iframeRef.current.contentDocument ||
+      iframeRef.current.contentWindow?.document;
+    if (!iframeDoc) return;
+
+    const existingStyle = iframeDoc.getElementById("sg-hover-overlay");
+    if (existingStyle) existingStyle.remove();
+
+    // Remove tooltip when disabling
+    if (!enabled) {
+      const tooltip = iframeDoc.getElementById("sg-hover-tooltip");
+      if (tooltip) tooltip.style.opacity = "0";
+    }
+
+    if (enabled) {
+      const hoverStyle = iframeDoc.createElement("style");
+      hoverStyle.id = "sg-hover-overlay";
+      hoverStyle.textContent = `
+        [data-block-id] {
+          cursor: pointer;
+          transition: outline 0.15s ease, outline-offset 0.15s ease;
+        }
+        [data-block-id]:hover {
+          outline: 2px dashed #94a3b8 !important;
+          outline-offset: 2px !important;
+        }
+        [data-block-group] {
+          cursor: pointer;
+          transition: outline 0.15s ease, background 0.15s ease;
+        }
+        [data-block-group]:hover {
+          outline: 1.5px dashed #a78bfa !important;
+          outline-offset: 1px !important;
+          background: rgba(139, 92, 246, 0.04);
+        }
+      `;
+      iframeDoc.head.appendChild(hoverStyle);
+      sendBlockNamesToIframe();
+    }
+
+    // Re-apply highlight (recalcula label)
+    updateHighlight(selectedBlockIdRef.current || null);
   };
 
   // Atualizar preview completo (com srcdoc - causa reload)
@@ -142,7 +296,7 @@ export function Preview({
 
       let html = exportPageToHtml(page, doc, true);
 
-      // Adicionar click handler: links não navegam, enviam editor-navigate; outros cliques enviam block-click
+      // Adicionar click handler + hover handler: links não navegam, enviam editor-navigate; outros cliques enviam block-click
       const clickHandler = `
           <script>
             (function() {
@@ -163,14 +317,85 @@ export function Preview({
                   return;
                 }
                 var element = target;
+                var group = null;
                 while (element && !element.dataset.blockId) {
+                  if (element.dataset && element.dataset.blockGroup && !group) {
+                    group = element.dataset.blockGroup;
+                  }
                   element = element.parentElement;
                 }
                 if (element && element.dataset.blockId) {
                   window.parent.postMessage({
                     type: 'block-click',
-                    blockId: element.dataset.blockId
+                    blockId: element.dataset.blockId,
+                    group: group
                   }, '*');
+                }
+              }, true);
+
+              // Hover tooltip — block name map injected from parent via postMessage
+              var _blockNames = {};
+              var _hoverTooltip = null;
+
+              window.addEventListener('message', function(e) {
+                if (e.data && e.data.type === 'sg-set-block-names') {
+                  _blockNames = e.data.names || {};
+                }
+              });
+
+              function getTooltip() {
+                if (_hoverTooltip) return _hoverTooltip;
+                _hoverTooltip = document.createElement('div');
+                _hoverTooltip.id = 'sg-hover-tooltip';
+                _hoverTooltip.style.cssText = 'position:fixed;top:0;left:0;background:#334155;color:#fff;font-size:11px;font-weight:500;padding:3px 8px;border-radius:4px;z-index:99999;pointer-events:none;font-family:system-ui,sans-serif;white-space:nowrap;line-height:16px;opacity:0;transition:opacity 0.12s ease;box-shadow:0 2px 6px rgba(0,0,0,0.2);';
+                document.body.appendChild(_hoverTooltip);
+                return _hoverTooltip;
+              }
+
+              var _currentHoveredBlock = null;
+              var _currentHoveredGroup = null;
+
+              document.addEventListener('mouseover', function(e) {
+                // Check if hover overlay is active
+                if (!document.getElementById('sg-hover-overlay')) return;
+                var el = e.target;
+                var groupName = null;
+                while (el && !el.dataset.blockId) {
+                  if (el.dataset && el.dataset.blockGroup && !groupName) {
+                    groupName = el.dataset.blockGroup;
+                  }
+                  el = el.parentElement;
+                }
+                if (el && el.dataset.blockId) {
+                  if (el !== _currentHoveredBlock || groupName !== _currentHoveredGroup) {
+                    _currentHoveredBlock = el;
+                    _currentHoveredGroup = groupName;
+                    var tt = getTooltip();
+                    var blockName = _blockNames[el.dataset.blockId] || el.dataset.blockId;
+                    tt.textContent = groupName ? (blockName + ' \\u203A ' + groupName) : blockName;
+                    tt.style.opacity = '1';
+                  }
+                }
+              }, true);
+
+              document.addEventListener('mousemove', function(e) {
+                if (_hoverTooltip && _hoverTooltip.style.opacity === '1') {
+                  _hoverTooltip.style.left = (e.clientX + 12) + 'px';
+                  _hoverTooltip.style.top = (e.clientY - 28) + 'px';
+                }
+              }, true);
+
+              document.addEventListener('mouseout', function(e) {
+                var el = e.target;
+                while (el && !el.dataset.blockId) el = el.parentElement;
+                if (el === _currentHoveredBlock) {
+                  var related = e.relatedTarget;
+                  while (related && related !== el) related = related.parentElement;
+                  if (!related) {
+                    _currentHoveredBlock = null;
+                    _currentHoveredGroup = null;
+                    if (_hoverTooltip) _hoverTooltip.style.opacity = '0';
+                  }
                 }
               }, true);
             })();
@@ -183,26 +408,31 @@ export function Preview({
 
       const iframe = iframeRef.current;
 
+      const applyOverlayAfterLoad = () => {
+        updateHighlight(selectedBlockIdRef.current || null);
+        if (showSelectionOverlayRef.current) {
+          updateSelectionOverlay(true);
+        }
+      };
+
       if (showLoading) {
         iframe.onload = () => {
           setIsLoading(false);
           previousDocRef.current = JSON.parse(JSON.stringify(doc));
           previousDocHashRef.current = hashDocument(doc);
-          // Aplicar highlight após carregar
-          updateHighlight(selectedBlockIdRef.current || null);
+          applyOverlayAfterLoad();
         };
         setTimeout(() => {
           setIsLoading(false);
           previousDocRef.current = JSON.parse(JSON.stringify(doc));
           previousDocHashRef.current = hashDocument(doc);
-          updateHighlight(selectedBlockIdRef.current || null);
+          applyOverlayAfterLoad();
         }, 1000);
       } else {
         previousDocRef.current = JSON.parse(JSON.stringify(doc));
         previousDocHashRef.current = hashDocument(doc);
-        // Aguardar iframe recarregar para aplicar highlight
         iframe.onload = () => {
-          updateHighlight(selectedBlockIdRef.current || null);
+          applyOverlayAfterLoad();
         };
       }
 
@@ -374,7 +604,13 @@ export function Preview({
   useEffect(() => {
     if (!isInitializedRef.current) return;
     updateHighlight(selectedBlockId || null);
-  }, [selectedBlockId]);
+  }, [selectedBlockId, focusedGroup]); // eslint-disable-line react-hooks/exhaustive-deps -- updateHighlight reads focusedGroupRef
+
+  // Efeito para toggle do selection overlay
+  useEffect(() => {
+    if (!isInitializedRef.current) return;
+    updateSelectionOverlay(showSelectionOverlay);
+  }, [showSelectionOverlay]); // eslint-disable-line react-hooks/exhaustive-deps -- same pattern as updateFullPreview
 
   // Listener para cliques
   useEffect(() => {
@@ -382,7 +618,7 @@ export function Preview({
 
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === "block-click" && event.data?.blockId) {
-        onBlockClick(event.data.blockId);
+        onBlockClick(event.data.blockId, event.data.group || undefined);
       }
     };
 

@@ -13,7 +13,7 @@ interface CenterPanelProps {
   currentPageId: string;
   currentPage: any;
   selectedBlockId: string | null;
-  onBlockClick: (id: string) => void;
+  onBlockClick: (id: string, group?: string) => void;
   onSelectPage: (id: string) => void;
   onAddPage: () => void;
   onRemovePage: (id: string) => void;
@@ -24,6 +24,10 @@ interface CenterPanelProps {
   activePlugins: string[];
   onActivatePlugin: (pluginId: string) => void;
   onDeactivatePlugin: (pluginId: string) => void;
+  /** Exibe hover e label de seleção nos blocos do preview */
+  showSelectionOverlay?: boolean;
+  /** Grupo focado para indicador visual no preview */
+  focusedGroup?: string | null;
 }
 
 export const CenterPanel = React.memo(function CenterPanel({
@@ -39,6 +43,8 @@ export const CenterPanel = React.memo(function CenterPanel({
   activePlugins,
   onActivatePlugin,
   onDeactivatePlugin,
+  showSelectionOverlay,
+  focusedGroup,
 }: CenterPanelProps) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-gray-50/30 dark:bg-gray-900/30">
@@ -65,6 +71,8 @@ export const CenterPanel = React.memo(function CenterPanel({
               style={{ height: "100%", width: "100%" }}
               onBlockClick={onBlockClick}
               selectedBlockId={selectedBlockId}
+              showSelectionOverlay={showSelectionOverlay}
+              focusedGroup={focusedGroup}
             />
           </Suspense>
         ) : (

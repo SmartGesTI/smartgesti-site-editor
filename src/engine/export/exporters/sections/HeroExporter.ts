@@ -225,7 +225,7 @@ export function exportHero(
 
   // Badge HTML
   const badgeHtml = badge
-    ? `<span class="sg-hero__badge" style="display: inline-block; padding: 0.5rem 1.25rem; background: ${finalBadgeColor}; color: ${finalBadgeTextColor}; border-radius: 999px; font-size: 0.875rem; font-weight: 600; margin-bottom: ${spacing.badge};">${escapeHtml(badge)}</span>`
+    ? `<span class="sg-hero__badge" data-block-group="Badge" style="display: inline-block; padding: 0.5rem 1.25rem; background: ${finalBadgeColor}; color: ${finalBadgeTextColor}; border-radius: 999px; font-size: 0.875rem; font-weight: 600; margin-bottom: ${spacing.badge};">${escapeHtml(badge)}</span>`
     : "";
 
   // Title HTML - usa tipografia customizada com clamp para responsividade
@@ -268,18 +268,19 @@ export function exportHero(
   const primaryHref = primaryButton ? resolveHref(primaryButton.href || "#", basePath) : "#";
   const secondaryHref = secondaryButton ? resolveHref(secondaryButton.href || "#", basePath) : "#";
   const primaryBtnHtml = primaryButton
-    ? `<a href="${escapeHtml(primaryHref)}"${linkTargetAttr(primaryHref, basePath)} class="sg-hero__btn sg-hero__btn--primary" style="${buttonStyles.primary}">${escapeHtml(primaryButton.text)}</a>`
+    ? `<a href="${escapeHtml(primaryHref)}"${linkTargetAttr(primaryHref, basePath)} class="sg-hero__btn sg-hero__btn--primary" data-block-group="Botão Primário" style="${buttonStyles.primary}">${escapeHtml(primaryButton.text)}</a>`
     : "";
   const secondaryBtnHtml = secondaryButton
-    ? `<a href="${escapeHtml(secondaryHref)}"${linkTargetAttr(secondaryHref, basePath)} class="sg-hero__btn sg-hero__btn--secondary" style="${buttonStyles.secondary}">${escapeHtml(secondaryButton.text)}</a>`
+    ? `<a href="${escapeHtml(secondaryHref)}"${linkTargetAttr(secondaryHref, basePath)} class="sg-hero__btn sg-hero__btn--secondary" data-block-group="Botão Secundário" style="${buttonStyles.secondary}">${escapeHtml(secondaryButton.text)}</a>`
     : "";
   const buttonsHtml =
     primaryButton || secondaryButton
       ? `<div class="sg-hero__actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: ${align === "center" ? "center" : "flex-start"}; margin-top: ${spacing.actions};">${primaryBtnHtml}${secondaryBtnHtml}</div>`
       : "";
 
-  // Content block
-  const contentBlock = `${badgeHtml}${titleHtml}${subtitleHtml}${descHtml}${buttonsHtml}`;
+  // Content block — wrap text content in a group for click-to-scroll
+  const textContentHtml = (titleHtml || subtitleHtml || descHtml) ? `<div data-block-group="Conteúdo">${titleHtml}${subtitleHtml}${descHtml}</div>` : "";
+  const contentBlock = `${badgeHtml}${textContentHtml}${buttonsHtml}`;
 
   // Style block (hover effects)
   const styleBlock = buttonStyles.css ? `<style>${buttonStyles.css}</style>` : "";
@@ -406,7 +407,7 @@ export function exportHero(
 
     const splitBgStyle = background ? `background: ${background};` : "background-color: var(--sg-bg, #fff);";
     const imgStyle = `width: 100%; max-width: 500px; height: auto; border-radius: ${imageRadius}px; box-shadow: ${imgShadow}; object-fit: cover;`;
-    const imageDiv = `<div class="sg-hero__split-image" style="display: flex; justify-content: center; flex: 0 1 auto; max-width: ${blocksMaxWidth};"><img src="${escapeHtml(heroImage)}" alt="${escapeHtml(title || "")}" class="sg-hero__img" style="${imgStyle}" onerror="${imgFallback}" /></div>`;
+    const imageDiv = `<div class="sg-hero__split-image" data-block-group="Mídia" style="display: flex; justify-content: center; flex: 0 1 auto; max-width: ${blocksMaxWidth};"><img src="${escapeHtml(heroImage)}" alt="${escapeHtml(title || "")}" class="sg-hero__img" style="${imgStyle}" onerror="${imgFallback}" /></div>`;
     const contentDiv = `<div class="sg-hero__split-content" style="text-align: ${align}; position: relative; z-index: 1; max-width: ${blocksMaxWidth}; flex: 0 1 auto;">${contentBlock}</div>`;
 
     const innerHtml = isImageLeft
@@ -439,7 +440,7 @@ export function exportHero(
       );
 
       const cardHtml = `<div class="sg-hero__card" style="max-width: 500px; background: ${cardBg}; padding: 2rem; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); position: relative; z-index: 2; text-align: ${align}; flex: 0 1 auto;">${contentBlock}</div>`;
-      const gridWrapperHtml = `<div class="sg-hero__grid-wrapper" style="position: relative; z-index: 3; display: flex; justify-content: center; align-items: center; flex: 0 1 auto; max-width: ${blocksMaxWidth};">${gridResult.html}</div>`;
+      const gridWrapperHtml = `<div class="sg-hero__grid-wrapper" data-block-group="Mídia" style="position: relative; z-index: 3; display: flex; justify-content: center; align-items: center; flex: 0 1 auto; max-width: ${blocksMaxWidth};">${gridResult.html}</div>`;
 
       // Card always left, Grid always right
       const innerHtml = `${cardHtml}${gridWrapperHtml}`;
@@ -490,7 +491,7 @@ export function exportHero(
       gridId
     );
 
-    const gridWrapperHtml = `<div class="sg-hero__grid-wrapper" style="position: relative; z-index: 3; display: flex; justify-content: center; align-items: center; flex: 1 1 0%; max-width: ${blocksMaxWidth};">${gridResult.html}</div>`;
+    const gridWrapperHtml = `<div class="sg-hero__grid-wrapper" data-block-group="Mídia" style="position: relative; z-index: 3; display: flex; justify-content: center; align-items: center; flex: 1 1 0%; max-width: ${blocksMaxWidth};">${gridResult.html}</div>`;
     const contentSideHtml = `<div class="sg-hero__content-side" style="max-width: ${blocksMaxWidth}; flex: 1 1 0%; text-align: ${align}; position: relative; z-index: 2;">${contentBlock}</div>`;
 
     // Responsive CSS for the grid layout

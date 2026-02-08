@@ -183,7 +183,7 @@ export function exportNavbar(
     ? linkTargetAttr(ctaResolved, basePath)
     : "";
   const ctaBtnHtml = ctaButton
-    ? `<a href="${escapeHtml(ctaResolved)}"${ctaTargetAttr} class="sg-navbar__btn" style="${resolvedStyles.button}">${escapeHtml(ctaButton.text)}</a>`
+    ? `<a href="${escapeHtml(ctaResolved)}"${ctaTargetAttr} class="sg-navbar__btn" data-block-group="Botao CTA" style="${resolvedStyles.button}">${escapeHtml(ctaButton.text)}</a>`
     : "";
 
   // Container style baseado no layout
@@ -197,7 +197,7 @@ export function exportNavbar(
     ? "flex-shrink: 0; justify-self: start;"
     : "flex-shrink: 0;";
 
-  const menuHtml = `<div class="sg-navbar__menu" style="${menuStyle}">${linksHtml}${!isCentered ? ctaBtnHtml : ""}</div>`;
+  const menuHtml = `<div class="sg-navbar__menu" data-block-group="Links" style="${menuStyle}">${linksHtml}${!isCentered ? ctaBtnHtml : ""}</div>`;
   const actionsHtml =
     isCentered && ctaButton
       ? `<div class="sg-navbar__actions" style="flex-shrink: 0; justify-self: end;">${ctaBtnHtml}</div>`
@@ -533,7 +533,7 @@ export function exportNavbar(
   // Update containerHtml to include hamburger
   const containerHtmlWithMobile = `
     <div class="sg-navbar__container" style="${containerStyle}">
-      <div class="sg-navbar__brand" style="${brandWrapStyle}">
+      <div class="sg-navbar__brand" data-block-group="Logo e Marca" style="${brandWrapStyle}">
         ${logoHtml}
       </div>
       ${menuHtml}

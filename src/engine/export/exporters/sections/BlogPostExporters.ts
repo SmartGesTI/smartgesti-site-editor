@@ -214,7 +214,7 @@ export function exportBlogPostDetail(
   // Featured image banner
   const featuredImageHtml =
     showFeaturedImage && featuredImage
-      ? `<div style="width: 100%; height: 400px; background-image: url(${escapeHtml(featuredImage)}); background-size: cover; background-position: center; border-radius: var(--sg-card-radius); margin-bottom: 2rem;"></div>`
+      ? `<div data-block-group="Mídia" style="width: 100%; height: 400px; background-image: url(${escapeHtml(featuredImage)}); background-size: cover; background-position: center; border-radius: var(--sg-card-radius); margin-bottom: 2rem;"></div>`
       : "";
 
   // Category badge
@@ -231,7 +231,7 @@ export function exportBlogPostDetail(
     : "";
 
   // Title
-  const titleHtml = `<h1 style="font-size: var(--sg-heading-h1, 2.25rem); font-weight: 700; margin-bottom: 0.75rem; line-height: 1.2;">${escapeHtml(title)}</h1>`;
+  const titleHtml = `<h1 data-block-group="Conteúdo" style="font-size: var(--sg-heading-h1, 2.25rem); font-weight: 700; margin-bottom: 0.75rem; line-height: 1.2;">${escapeHtml(title)}</h1>`;
 
   // Content — trusted HTML from backend, not escaped
   const contentHtml = content
@@ -245,19 +245,19 @@ export function exportBlogPostDetail(
   let authorHtml = "";
   if (showAuthor) {
     if (authorVariant === "card") {
-      authorHtml = `<div style="display:flex;align-items:flex-start;gap:1rem;margin-top:3rem;padding:1.25rem;border-radius:var(--sg-card-radius, 0.75rem);background-color:var(--sg-surface, #f9fafb);">${avatarPlaceholder}<div><div style="font-size:0.75rem;color:var(--sg-muted-text);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.125rem;">Escrito por</div><div style="font-weight:600;font-size:1rem;">Nome do Autor</div><p style="color:var(--sg-muted-text);font-size:0.875rem;margin:0.25rem 0 0;">Bio do autor carregada do banco de dados.</p></div></div>`;
+      authorHtml = `<div data-block-group="Autor" style="display:flex;align-items:flex-start;gap:1rem;margin-top:3rem;padding:1.25rem;border-radius:var(--sg-card-radius, 0.75rem);background-color:var(--sg-surface, #f9fafb);">${avatarPlaceholder}<div><div style="font-size:0.75rem;color:var(--sg-muted-text);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.125rem;">Escrito por</div><div style="font-weight:600;font-size:1rem;">Nome do Autor</div><p style="color:var(--sg-muted-text);font-size:0.875rem;margin:0.25rem 0 0;">Bio do autor carregada do banco de dados.</p></div></div>`;
     } else if (authorVariant === "minimal") {
-      authorHtml = `<p style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--sg-border, #e5e7eb);color:var(--sg-muted-text);font-size:0.9375rem;">Escrito por <span style="font-weight:600;color:var(--sg-text);">Nome do Autor</span></p>`;
+      authorHtml = `<p data-block-group="Autor" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--sg-border, #e5e7eb);color:var(--sg-muted-text);font-size:0.9375rem;">Escrito por <span style="font-weight:600;color:var(--sg-text);">Nome do Autor</span></p>`;
     } else {
       // inline (default)
-      authorHtml = `<div style="display:flex;align-items:center;gap:0.75rem;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--sg-border, #e5e7eb);">${avatarSmall}<div><div style="font-size:0.75rem;color:var(--sg-muted-text);">Escrito por</div><div style="font-weight:600;font-size:0.9375rem;">Nome do Autor</div></div></div>`;
+      authorHtml = `<div data-block-group="Autor" style="display:flex;align-items:center;gap:0.75rem;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--sg-border, #e5e7eb);">${avatarSmall}<div><div style="font-size:0.75rem;color:var(--sg-muted-text);">Escrito por</div><div style="font-weight:600;font-size:0.9375rem;">Nome do Autor</div></div></div>`;
     }
   }
 
   // Tags
   const tagsHtml =
     showTags && tags.length > 0
-      ? `<div style="margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">${tags
+      ? `<div data-block-group="Visibilidade" style="margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">${tags
           .map(
             (tag: string) =>
               `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-surface, #f3f4f6); color: var(--sg-text); border-radius: 999px; font-size: 0.75rem;">${escapeHtml(tag)}</span>`,

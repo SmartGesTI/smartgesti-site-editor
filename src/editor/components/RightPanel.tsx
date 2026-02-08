@@ -19,6 +19,8 @@ interface RightPanelProps {
   uploadConfig?: UploadConfig;
   document?: SiteDocument;
   currentPageId?: string;
+  /** When set, the matching property group opens and scrolls into view */
+  focusedGroup?: string | null;
 }
 
 export const RightPanel = React.memo(function RightPanel({
@@ -29,6 +31,7 @@ export const RightPanel = React.memo(function RightPanel({
   uploadConfig,
   document,
   currentPageId,
+  focusedGroup,
 }: RightPanelProps) {
   return (
     <div className="w-80 flex-shrink-0 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden flex flex-col">
@@ -51,6 +54,7 @@ export const RightPanel = React.memo(function RightPanel({
               currentPageId={currentPageId}
               onUpdate={onUpdateBlock}
               uploadConfig={uploadConfig}
+              focusedGroup={focusedGroup}
             />
           </div>
         ) : (

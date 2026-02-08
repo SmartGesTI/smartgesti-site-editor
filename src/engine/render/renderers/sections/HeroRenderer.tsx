@@ -342,22 +342,24 @@ export function renderHero(block: any): React.ReactNode {
   // Content block (reused across layouts)
   const content = (
     <>
-      {badge && <span style={badgeStyle}>{badge}</span>}
-      {title && (
-        <h1 className="sg-hero__title" style={titleStyle}>
-          {title}
-        </h1>
-      )}
-      {subtitle && (
-        <h2 className="sg-hero__subtitle" style={subtitleStyle}>
-          {subtitle}
-        </h2>
-      )}
-      {description && (
-        <p className="sg-hero__description" style={descriptionStyle}>
-          {description}
-        </p>
-      )}
+      {badge && <span data-block-group="Badge" style={badgeStyle}>{badge}</span>}
+      <div data-block-group="Conteúdo">
+        {title && (
+          <h1 className="sg-hero__title" style={titleStyle}>
+            {title}
+          </h1>
+        )}
+        {subtitle && (
+          <h2 className="sg-hero__subtitle" style={subtitleStyle}>
+            {subtitle}
+          </h2>
+        )}
+        {description && (
+          <p className="sg-hero__description" style={descriptionStyle}>
+            {description}
+          </p>
+        )}
+      </div>
       <div
         className="sg-hero__actions"
         style={{
@@ -372,6 +374,7 @@ export function renderHero(block: any): React.ReactNode {
           <a
             href={primaryButton.href || "#"}
             className="sg-hero__btn sg-hero__btn--primary"
+            data-block-group="Botão Primário"
             style={getPrimaryButtonStyle()}
           >
             {primaryButton.text}
@@ -381,6 +384,7 @@ export function renderHero(block: any): React.ReactNode {
           <a
             href={secondaryButton.href || "#"}
             className="sg-hero__btn sg-hero__btn--secondary"
+            data-block-group="Botão Secundário"
             style={getSecondaryButtonStyle()}
           >
             {secondaryButton.text}
@@ -466,6 +470,7 @@ export function renderHero(block: any): React.ReactNode {
   const ImageGridElement = shouldShowImageGrid ? (
     <div
       className="sg-hero__grid-wrapper"
+      data-block-group="Mídia"
       style={{
         position: "relative",
         zIndex: 3,
@@ -571,7 +576,7 @@ export function renderHero(block: any): React.ReactNode {
     const isImageLeft = imagePosition === "left";
 
     const imageArea = (
-      <div className="sg-hero__split-image" style={{ display: "flex", justifyContent: "center", flex: "0 1 auto", maxWidth: blocksMaxWidth }}>
+      <div className="sg-hero__split-image" data-block-group="Mídia" style={{ display: "flex", justifyContent: "center", flex: "0 1 auto", maxWidth: blocksMaxWidth }}>
         <img
           src={heroImage}
           alt={title || ""}

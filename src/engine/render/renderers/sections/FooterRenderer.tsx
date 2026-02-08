@@ -47,7 +47,7 @@ export function renderFooter(block: any): React.ReactNode {
             }}
           >
             {/* Brand column */}
-            <div>
+            <div data-block-group="Logo">
               {logoUrl && (
                 <img
                   src={logoUrl}
@@ -106,7 +106,7 @@ export function renderFooter(block: any): React.ReactNode {
 
             {/* Link columns */}
             {columns.map((column: any, index: number) => (
-              <div key={index}>
+              <div key={index} data-block-group="🔗 Links">
                 <h4
                   style={{
                     fontWeight: 600,
@@ -146,6 +146,7 @@ export function renderFooter(block: any): React.ReactNode {
           </div>
         ) : (
           <div
+            data-block-group="Logo"
             style={{
               textAlign: "center",
               marginBottom: "1.5rem",

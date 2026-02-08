@@ -1,5 +1,5 @@
 import React from "react";
-import { Save, Eye, Undo, Redo, RotateCcw } from "lucide-react";
+import { Save, Eye, Undo, Redo, RotateCcw, MousePointer2 } from "lucide-react";
 import { cn } from "../../utils/cn";
 
 interface ToolbarProps {
@@ -10,6 +10,9 @@ interface ToolbarProps {
   onSave: () => void;
   onPublish?: () => void;
   onReset: () => void;
+  /** Mostrar hover/seleção visual no preview */
+  showSelectionOverlay?: boolean;
+  onToggleSelectionOverlay?: () => void;
 }
 
 interface ToolbarButtonProps {
@@ -51,6 +54,8 @@ export const Toolbar = React.memo(function Toolbar({
   onSave,
   onPublish,
   onReset,
+  showSelectionOverlay,
+  onToggleSelectionOverlay,
 }: ToolbarProps) {
   return (
     <div className="h-12 flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md flex items-center justify-between px-4">
@@ -79,6 +84,27 @@ export const Toolbar = React.memo(function Toolbar({
           title="Resetar Template"
           icon={<RotateCcw className="w-4 h-4" />}
         />
+
+        {/* Separator */}
+        <div className="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-0.5" />
+
+        {/* Selection Overlay Toggle */}
+        {onToggleSelectionOverlay && (
+          <button
+            onClick={onToggleSelectionOverlay}
+            className={cn(
+              "h-8 px-2 rounded-md text-xs font-medium transition-all cursor-pointer",
+              "flex items-center gap-1.5",
+              showSelectionOverlay
+                ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700"
+                : "border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
+            )}
+            title="Mostrar Seleção"
+          >
+            <MousePointer2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Seleção</span>
+          </button>
+        )}
 
         {/* Save */}
         <button
