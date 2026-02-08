@@ -264,6 +264,13 @@ src/
 └── styles/                    # Global CSS files
 ```
 
+## ClickUp (Gestão de Tarefas)
+
+- **Space**: SmartGesTI (ID: 90174029631)
+- **Folder**: SmartGesTI - Editor (ID: 90176447853)
+- **Backlog List**: 901710728590
+- **PM Agent**: `clickup-pm-editor` (em `.claude/agents/`) — roda automaticamente em background para gerenciar tarefas no ClickUp
+
 ## Key Files
 
 | Purpose | Path |
