@@ -27,7 +27,8 @@
     "*.css",
     "./src/engine/registry/blocks/**",
     "./src/engine/render/renderers/**",
-    "./src/engine/export/exporters/**"
+    "./src/engine/export/exporters/**",
+    "./src/engine/plugins/builtin/**"
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

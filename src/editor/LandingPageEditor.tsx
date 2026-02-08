@@ -274,9 +274,6 @@ export function LandingPageEditor({
           isPaletteSelected={isPaletteSelected}
           onSelectBlock={setSelectedBlockId}
           onDeleteBlock={handleDeleteBlock}
-          activePlugins={activePlugins}
-          onActivatePlugin={activatePlugin}
-          onDeactivatePlugin={deactivatePlugin}
         />
 
         {/* Center: Preview (apenas a página em edição) */}
@@ -297,6 +294,9 @@ export function LandingPageEditor({
           onRemovePage={removePage}
           canRemovePage={canRemovePage}
           onUpdateBlock={handleUpdateBlockById}
+          activePlugins={activePlugins}
+          onActivatePlugin={activatePlugin}
+          onDeactivatePlugin={deactivatePlugin}
         />
 
         {/* Right: Editor Panel */}

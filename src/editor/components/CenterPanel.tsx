@@ -20,6 +20,10 @@ interface CenterPanelProps {
   canRemovePage: (id: string) => boolean;
   /** Callback ao atualizar um bloco específico */
   onUpdateBlock?: (blockId: string, updates: Record<string, any>) => void;
+  /** Plugin integration */
+  activePlugins: string[];
+  onActivatePlugin: (pluginId: string) => void;
+  onDeactivatePlugin: (pluginId: string) => void;
 }
 
 export const CenterPanel = React.memo(function CenterPanel({
@@ -32,6 +36,9 @@ export const CenterPanel = React.memo(function CenterPanel({
   onAddPage,
   onRemovePage,
   canRemovePage,
+  activePlugins,
+  onActivatePlugin,
+  onDeactivatePlugin,
 }: CenterPanelProps) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-gray-50/30 dark:bg-gray-900/30">
@@ -43,6 +50,9 @@ export const CenterPanel = React.memo(function CenterPanel({
         onAddPage={onAddPage}
         onRemovePage={onRemovePage}
         canRemovePage={canRemovePage}
+        activePlugins={activePlugins}
+        onActivatePlugin={onActivatePlugin}
+        onDeactivatePlugin={onDeactivatePlugin}
       />
 
       {/* Preview */}

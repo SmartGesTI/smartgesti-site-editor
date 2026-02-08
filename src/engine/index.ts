@@ -56,6 +56,8 @@ export * from "./generators/generateLandingPage";
 
 // Plugins
 export * from "./plugins";
+// Garantir que builtin plugins sejam importados para executar auto-registro
+import "./plugins/builtin/blog";
 
 // Shared modules
 export * from "./shared/imageGrid";

@@ -65,6 +65,7 @@ export function Preview({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const previousDocRef = useRef<SiteDocument | null>(null);
   const previousDocHashRef = useRef<string | null>(null);
+  const previousPageIdRef = useRef<string | null>(null);
   const isInitializedRef = useRef<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -297,12 +298,21 @@ export function Preview({
     if (!isInitializedRef.current) {
       if (iframeRef.current) {
         isInitializedRef.current = true;
+        previousPageIdRef.current = page?.id ?? null;
         updateFullPreview(document, true);
       }
       return;
     }
 
     if (!iframeRef.current) return;
+
+    // Detectar troca de página (pageId mudou)
+    const currentPageId = page?.id ?? null;
+    if (previousPageIdRef.current !== currentPageId) {
+      previousPageIdRef.current = currentPageId;
+      updateFullPreview(document, false);
+      return;
+    }
 
     // Se hash não mudou, não há mudanças no documento
     if (previousDocHashRef.current === currentDocHash) {

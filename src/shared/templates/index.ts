@@ -7,11 +7,13 @@
 import { escolaPremiumTemplate } from "./escola-premium";
 import { escolaEdviTemplate } from "./escola-edvi";
 import { escolaZilomTemplate } from "./escola-zilom";
+import { escolaBlogTemplate } from "./escola-blog";
 
 // Re-export templates
 export { escolaPremiumTemplate } from "./escola-premium";
 export { escolaEdviTemplate } from "./escola-edvi";
 export { escolaZilomTemplate } from "./escola-zilom";
+export { escolaBlogTemplate } from "./escola-blog";
 
 /**
  * Informações sobre templates disponíveis
@@ -83,6 +85,22 @@ export const templateList: TemplateInfo[] = [
     ],
     preview: "https://placehold.co/400x300/6366f1/white?text=Zilom",
   },
+  {
+    id: "escola-blog",
+    name: "Escola Blog",
+    description:
+      "Template simples com blog integrado — ideal para testar o sistema de plugins. Ative o plugin Blog no editor para páginas dinâmicas.",
+    category: "education",
+    tags: [
+      "escola",
+      "blog",
+      "plugin",
+      "simples",
+      "notícias",
+      "landing page",
+    ],
+    preview: "https://placehold.co/400x300/4f46e5/white?text=Escola+Blog",
+  },
 ];
 
 /**
@@ -92,6 +110,7 @@ export const templates = {
   "escola-premium": escolaPremiumTemplate,
   "escola-edvi": escolaEdviTemplate,
   "escola-zilom": escolaZilomTemplate,
+  "escola-blog": escolaBlogTemplate,
 } as const;
 
 export type TemplateId = keyof typeof templates;
