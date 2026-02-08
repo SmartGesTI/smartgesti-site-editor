@@ -319,10 +319,11 @@ export function Preview({
       return;
     }
 
-    // Detectar mudanças
+    // Detectar mudanças na página atual
     const changedBlocks = detectChangedBlocks(
       previousDocRef.current || document,
       document,
+      page?.id,
     );
 
     // Se não há mudanças detectadas mas o hash mudou, forçar reload

@@ -58,17 +58,24 @@ function blocksAreDifferent(block1: Block, block2: Block): { different: boolean;
 
 /**
  * Detecta quais blocos foram modificados entre dois documentos
+ * @param pageId - ID da página atual sendo editada (se omitido, usa "home" ou primeira página)
  * @returns Array de objetos com blockId e changedProps
  */
 export function detectChangedBlocks(
   oldDoc: SiteDocument,
-  newDoc: SiteDocument
+  newDoc: SiteDocument,
+  pageId?: string,
 ): Array<{ blockId: string; changedProps?: string[] }> {
   const changedBlocks: Array<{ blockId: string; changedProps?: string[] }> = []
 
-  // Comparar páginas
-  const oldPage = oldDoc.pages.find((p) => p.id === 'home') || oldDoc.pages[0]
-  const newPage = newDoc.pages.find((p) => p.id === 'home') || newDoc.pages[0]
+  // Comparar a página que está sendo editada
+  const findPage = (doc: SiteDocument) =>
+    (pageId ? doc.pages.find((p) => p.id === pageId) : null)
+    || doc.pages.find((p) => p.id === 'home')
+    || doc.pages[0]
+
+  const oldPage = findPage(oldDoc)
+  const newPage = findPage(newDoc)
 
   if (!oldPage || !newPage) {
     return [] // Se não há páginas, não há mudanças
