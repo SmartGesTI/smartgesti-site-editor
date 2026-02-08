@@ -200,13 +200,11 @@ export function exportBlogPostDetail(
     featuredImage,
     date,
     category,
-    authorName,
-    authorAvatar,
-    authorBio,
     readingTime,
     tags = [],
     showFeaturedImage = true,
     showAuthor = true,
+    authorVariant = "inline",
     showDate = true,
     showTags = true,
     showReadingTime = true,
@@ -240,15 +238,21 @@ export function exportBlogPostDetail(
     ? `<div class="sg-blog-post-content" style="font-size: 1.0625rem; line-height: 1.75; color: var(--sg-text);">${content}</div>`
     : "";
 
-  // Author card
-  const authorHtml =
-    showAuthor && authorName
-      ? `<div style="display: flex; align-items: center; gap: 1rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--sg-border, #e5e7eb);">${
-          authorAvatar
-            ? `<img src="${escapeHtml(authorAvatar)}" alt="${escapeHtml(authorName)}" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover;" />`
-            : ""
-        }<div><p style="font-weight: 600; font-size: 1rem;">${escapeHtml(authorName)}</p>${authorBio ? `<p style="color: var(--sg-muted-text); font-size: 0.875rem; margin-top: 0.25rem;">${escapeHtml(authorBio)}</p>` : ""}</div></div>`
-      : "";
+  // Author — placeholder structure (real data injected by ContentProvider at runtime)
+  const avatarPlaceholder = `<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg, var(--sg-primary, #6366f1) 0%, #818cf8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:1.5rem;font-weight:700;">A</div>`;
+  const avatarSmall = `<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg, var(--sg-primary, #6366f1) 0%, #818cf8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:1.1rem;font-weight:700;">A</div>`;
+
+  let authorHtml = "";
+  if (showAuthor) {
+    if (authorVariant === "card") {
+      authorHtml = `<div style="display:flex;align-items:flex-start;gap:1rem;margin-top:3rem;padding:1.25rem;border-radius:var(--sg-card-radius, 0.75rem);background-color:var(--sg-surface, #f9fafb);">${avatarPlaceholder}<div><div style="font-size:0.75rem;color:var(--sg-muted-text);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.125rem;">Escrito por</div><div style="font-weight:600;font-size:1rem;">Nome do Autor</div><p style="color:var(--sg-muted-text);font-size:0.875rem;margin:0.25rem 0 0;">Bio do autor carregada do banco de dados.</p></div></div>`;
+    } else if (authorVariant === "minimal") {
+      authorHtml = `<p style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--sg-border, #e5e7eb);color:var(--sg-muted-text);font-size:0.9375rem;">Escrito por <span style="font-weight:600;color:var(--sg-text);">Nome do Autor</span></p>`;
+    } else {
+      // inline (default)
+      authorHtml = `<div style="display:flex;align-items:center;gap:0.75rem;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--sg-border, #e5e7eb);">${avatarSmall}<div><div style="font-size:0.75rem;color:var(--sg-muted-text);">Escrito por</div><div style="font-weight:600;font-size:0.9375rem;">Nome do Autor</div></div></div>`;
+    }
+  }
 
   // Tags
   const tagsHtml =

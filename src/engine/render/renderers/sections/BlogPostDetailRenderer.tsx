@@ -1,9 +1,32 @@
 /**
  * BlogPostDetail Renderer
  * Renderiza conteudo completo de um post de blog (pagina blog/:slug)
+ * Dados do autor sao dinamicos (vem do banco) — aqui usamos placeholders.
  */
 
 import React from "react";
+
+function AuthorPlaceholderAvatar({ size }: { size: string }) {
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: "linear-gradient(135deg, var(--sg-primary, #6366f1) 0%, #818cf8 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+        color: "#fff",
+        fontSize: `calc(${size} * 0.45)`,
+        fontWeight: 700,
+      }}
+    >
+      A
+    </div>
+  );
+}
 
 export function renderBlogPostDetail(block: any): React.ReactNode {
   const {
@@ -12,13 +35,11 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
     featuredImage,
     date,
     category,
-    authorName,
-    authorAvatar,
-    authorBio,
     readingTime,
     tags = [],
     showFeaturedImage = true,
     showAuthor = true,
+    authorVariant = "inline",
     showDate = true,
     showTags = true,
     showReadingTime = true,
@@ -168,50 +189,97 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
           </div>
         )}
 
-        {/* Author card */}
-        {showAuthor && authorName && (
+        {/* Author — dynamic placeholder (data comes from DB at runtime) */}
+        {showAuthor && (
           <div
             style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "1rem",
               marginTop: "2.5rem",
               paddingTop: "1.5rem",
-              borderTop: showTags && tags.length > 0
-                ? undefined
-                : "1px solid var(--sg-border, #e5e7eb)",
+              borderTop:
+                showTags && tags.length > 0
+                  ? undefined
+                  : "1px solid var(--sg-border, #e5e7eb)",
             }}
           >
-            {authorAvatar && (
-              <img
-                src={authorAvatar}
-                alt={authorName}
+            {authorVariant === "card" && (
+              <div
                 style={{
-                  width: "3.5rem",
-                  height: "3.5rem",
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "1rem",
+                  padding: "1.25rem",
+                  borderRadius: "var(--sg-card-radius, 0.75rem)",
+                  backgroundColor: "var(--sg-surface, #f9fafb)",
                 }}
-              />
-            )}
-            <div>
-              <div style={{ fontWeight: 600, fontSize: "1rem", marginBottom: "0.25rem" }}>
-                {authorName}
+              >
+                <AuthorPlaceholderAvatar size="3.5rem" />
+                <div>
+                  <div
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "var(--sg-muted-text)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      marginBottom: "0.125rem",
+                    }}
+                  >
+                    Escrito por
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: "1rem" }}>
+                    Nome do Autor
+                  </div>
+                  <p
+                    style={{
+                      color: "var(--sg-muted-text)",
+                      fontSize: "0.9375rem",
+                      lineHeight: 1.5,
+                      margin: "0.25rem 0 0",
+                    }}
+                  >
+                    Bio do autor carregada do banco de dados.
+                  </p>
+                </div>
               </div>
-              {authorBio && (
-                <p
-                  style={{
-                    color: "var(--sg-muted-text)",
-                    fontSize: "0.9375rem",
-                    lineHeight: 1.5,
-                    margin: 0,
-                  }}
-                >
-                  {authorBio}
-                </p>
-              )}
-            </div>
+            )}
+
+            {authorVariant === "inline" && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                }}
+              >
+                <AuthorPlaceholderAvatar size="2.5rem" />
+                <div>
+                  <div
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "var(--sg-muted-text)",
+                    }}
+                  >
+                    Escrito por
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: "0.9375rem" }}>
+                    Nome do Autor
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {authorVariant === "minimal" && (
+              <p
+                style={{
+                  color: "var(--sg-muted-text)",
+                  fontSize: "0.9375rem",
+                }}
+              >
+                Escrito por{" "}
+                <span style={{ fontWeight: 600, color: "var(--sg-text)" }}>
+                  Nome do Autor
+                </span>
+              </p>
+            )}
           </div>
         )}
       </div>

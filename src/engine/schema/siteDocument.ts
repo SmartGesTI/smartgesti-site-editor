@@ -1058,9 +1058,8 @@ export interface BlogPostDetailBlock extends BlockBase {
     featuredImage?: string;
     date?: string;
     category?: string;
-    authorName?: string;
-    authorAvatar?: string;
-    authorBio?: string;
+    /** Variante visual do bloco autor: "inline" | "card" | "minimal" */
+    authorVariant?: "inline" | "card" | "minimal";
     readingTime?: string;
     tags?: string[];
     showFeaturedImage?: boolean;

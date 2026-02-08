@@ -150,8 +150,7 @@ export const blogPlugin: PluginRegistration = {
             { name: "featuredImage", type: "image", label: "Featured Image" },
             { name: "category", type: "string", label: "Category" },
             { name: "tags", type: "array", label: "Tags" },
-            { name: "authorName", type: "string", label: "Author Name" },
-            { name: "authorAvatar", type: "image", label: "Author Avatar" },
+            { name: "authorVariant", type: "string", label: "Author Variant" },
             { name: "readingTime", type: "number", label: "Reading Time" },
           ],
         },
@@ -162,7 +161,7 @@ export const blogPlugin: PluginRegistration = {
 
     restrictions: {
       lockedFields: {
-        blogPostDetail: ["content", "date", "authorName"],
+        blogPostDetail: ["content", "date"],
       },
       requiredPages: ["blog-listing", "blog-post"],
     },
@@ -304,11 +303,7 @@ export const blogPlugin: PluginRegistration = {
             "https://images.unsplash.com/photo-1567168544230-3b9e5ec47659?w=1200&h=600&fit=crop",
           date: "05 Fev 2026",
           category: "Eventos",
-          authorName: "Prof. Ana Costa",
-          authorAvatar:
-            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-          authorBio:
-            "Professora de Ciências e coordenadora de projetos de pesquisa da escola.",
+          authorVariant: "inline",
           readingTime: "5 min de leitura",
           tags: ["Feira de Ciências", "Eventos", "Sustentabilidade", "Projetos"],
           showFeaturedImage: true,
@@ -386,7 +381,7 @@ export const blogPlugin: PluginRegistration = {
   getEditorRestrictions(blockType: BlockType) {
     if (blockType === "blogPostDetail") {
       return {
-        lockedFields: ["content", "date", "authorName"],
+        lockedFields: ["content", "date"],
       };
     }
     return undefined;
