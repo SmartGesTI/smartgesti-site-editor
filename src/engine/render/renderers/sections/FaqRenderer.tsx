@@ -19,7 +19,7 @@ export function renderFaq(block: any): React.ReactNode {
     >
       <div style={{ maxWidth: "800px", margin: "0 auto", padding: "0 1rem" }}>
         {(title || subtitle) && (
-          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <div data-block-group="Conteúdo" style={{ textAlign: "center", marginBottom: "3rem" }}>
             {title && (
               <h2
                 style={{

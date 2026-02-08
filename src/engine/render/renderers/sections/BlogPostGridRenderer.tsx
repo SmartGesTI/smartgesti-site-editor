@@ -29,7 +29,7 @@ export function renderBlogPostGrid(block: any): React.ReactNode {
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1rem" }}>
         {/* Header */}
         {(title || subtitle) && (
-          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <div data-block-group="Cabeçalho" style={{ textAlign: "center", marginBottom: "3rem" }}>
             {title && (
               <h2
                 style={{
@@ -53,6 +53,7 @@ export function renderBlogPostGrid(block: any): React.ReactNode {
         {/* Grid */}
         {cards.length > 0 ? (
           <div
+            data-block-group="Layout"
             style={{
               display: "grid",
               gridTemplateColumns: `repeat(${columns}, 1fr)`,
@@ -95,7 +96,7 @@ export function renderBlogPostGrid(block: any): React.ReactNode {
 
         {/* View All link */}
         {showViewAll && (
-          <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+          <div data-block-group="Rodapé" style={{ textAlign: "center", marginTop: "2.5rem" }}>
             <a
               href={viewAllHref}
               style={{

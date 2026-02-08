@@ -32,6 +32,7 @@ export function renderCta(block: any): React.ReactNode {
       }}
     >
       <div style={{ maxWidth: "800px", margin: "0 auto", padding: "0 1rem" }}>
+        <div data-block-group="Conteúdo">
         <h2
           style={{
             fontSize: "var(--sg-heading-h2)",
@@ -54,7 +55,8 @@ export function renderCta(block: any): React.ReactNode {
             {description}
           </p>
         )}
-        <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+        </div>
+        <div data-block-group="Botoes" style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
           {primaryButton && (
             <a
               href={primaryButton.href || "#"}

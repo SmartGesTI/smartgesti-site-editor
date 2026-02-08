@@ -20,6 +20,7 @@ export function renderPricingCard(block: any): React.ReactNode {
   return (
     <div
       key={block.id}
+      data-block-group="Conteúdo"
       style={{
         backgroundColor: "var(--sg-bg)",
         borderRadius: "var(--sg-card-radius, 0.75rem)",

@@ -12,6 +12,7 @@ export function renderFeature(block: any): React.ReactNode {
   return (
     <div
       key={block.id}
+      data-block-group="Conteúdo"
       style={{
         padding: "1.5rem",
         textAlign: "center",

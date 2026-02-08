@@ -27,7 +27,7 @@ export function exportFeature(
   const iconHtml = icon
     ? `<div style="width: 3rem; height: 3rem; background-color: var(--sg-primary); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #fff;">[★]</div>`
     : "";
-  return `<div ${dataBlockIdAttr(block.id)} style="padding: 1.5rem; text-align: center;">${iconHtml}<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${escapeHtml(title)}</h3><p style="color: var(--sg-muted-text); font-size: 0.875rem;">${escapeHtml(description)}</p></div>`;
+  return `<div ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="padding: 1.5rem; text-align: center;">${iconHtml}<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${escapeHtml(title)}</h3><p style="color: var(--sg-muted-text); font-size: 0.875rem;">${escapeHtml(description)}</p></div>`;
 }
 
 export function exportFeatureGrid(
@@ -53,7 +53,7 @@ export function exportFeatureGrid(
   const isImageCards = variant === "image-cards";
   const headerHtml =
     title || subtitle
-      ? `<div style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text); font-size: 1.125rem;">${escapeHtml(subtitle)}</p>` : ""}</div>`
+      ? `<div data-block-group="Conteúdo" style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text); font-size: 1.125rem;">${escapeHtml(subtitle)}</p>` : ""}</div>`
       : "";
 
   const featuresHtml = features
@@ -74,7 +74,7 @@ export function exportFeatureGrid(
     })
     .join("");
 
-  return `<style>${mediaQueries}</style><section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div id="${gridId}" style="${inlineStyles}">${featuresHtml}</div></div></section>`;
+  return `<style>${mediaQueries}</style><section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-surface);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div data-block-group="Layout" id="${gridId}" style="${inlineStyles}">${featuresHtml}</div></div></section>`;
 }
 
 export function exportCta(
@@ -224,7 +224,7 @@ export function exportCta(
   const secondaryBtnHtml = secondaryButton
     ? `<a href="${escapeHtml(ctaSecondaryHref)}"${linkTargetAttr(ctaSecondaryHref, basePath)} class="sg-cta__btn sg-cta__btn--secondary" style="${secondaryBtnStyle}">${escapeHtml(secondaryButton.text)}</a>`
     : "";
-  return `<style>${buttonsCss}</style><section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; ${bgStyle} text-align: center;"><div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;"><h2 style="font-size: var(--sg-heading-h2); margin-bottom: 1rem; color: ${textColor};">${escapeHtml(title)}</h2>${ctaDesc ? `<p style="font-size: 1.125rem; margin-bottom: 2rem; color: ${mutedColor};">${escapeHtml(ctaDesc)}</p>` : ""}<div id="${ctaId}" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">${primaryBtnHtml}${secondaryBtnHtml}</div></div></section>`;
+  return `<style>${buttonsCss}</style><section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; ${bgStyle} text-align: center;"><div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;"><div data-block-group="Conteúdo"><h2 style="font-size: var(--sg-heading-h2); margin-bottom: 1rem; color: ${textColor};">${escapeHtml(title)}</h2>${ctaDesc ? `<p style="font-size: 1.125rem; margin-bottom: 2rem; color: ${mutedColor};">${escapeHtml(ctaDesc)}</p>` : ""}</div><div data-block-group="Botoes" id="${ctaId}" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">${primaryBtnHtml}${secondaryBtnHtml}</div></div></section>`;
 }
 
 export function exportPricingCard(
@@ -256,7 +256,7 @@ export function exportPricingCard(
   const buttonStyle = highlighted
     ? "background-color: var(--sg-primary); color: var(--sg-primary-text); border: none;"
     : "background-color: transparent; color: var(--sg-primary); border: 1px solid var(--sg-primary);";
-  return `<div ${dataBlockIdAttr(block.id)} style="background-color: var(--sg-bg); border-radius: 0.75rem; padding: 2rem; box-shadow: ${highlighted ? "var(--sg-shadow-strong)" : "var(--sg-card-shadow)"}; border: ${highlighted ? "2px solid var(--sg-primary)" : "1px solid var(--sg-border)"}; position: relative;">${badgeHtml}<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${escapeHtml(name)}</h3>${desc ? `<p style="color: var(--sg-muted-text); margin-bottom: 1rem;">${escapeHtml(desc)}</p>` : ""}<div style="margin-bottom: 1.5rem;"><span style="font-size: 2.5rem; font-weight: 700;">${escapeHtml(price)}</span>${period ? `<span style="color: var(--sg-muted-text);">${escapeHtml(period)}</span>` : ""}</div><ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">${featuresHtml}</ul>${buttonText ? `<button style="width: 100%; padding: 0.625rem 1.25rem; ${buttonStyle} border-radius: var(--sg-button-radius); font-weight: 500; cursor: pointer;">${escapeHtml(buttonText)}</button>` : ""}</div>`;
+  return `<div ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="background-color: var(--sg-bg); border-radius: 0.75rem; padding: 2rem; box-shadow: ${highlighted ? "var(--sg-shadow-strong)" : "var(--sg-card-shadow)"}; border: ${highlighted ? "2px solid var(--sg-primary)" : "1px solid var(--sg-border)"}; position: relative;">${badgeHtml}<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${escapeHtml(name)}</h3>${desc ? `<p style="color: var(--sg-muted-text); margin-bottom: 1rem;">${escapeHtml(desc)}</p>` : ""}<div style="margin-bottom: 1.5rem;"><span style="font-size: 2.5rem; font-weight: 700;">${escapeHtml(price)}</span>${period ? `<span style="color: var(--sg-muted-text);">${escapeHtml(period)}</span>` : ""}</div><ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">${featuresHtml}</ul>${buttonText ? `<button style="width: 100%; padding: 0.625rem 1.25rem; ${buttonStyle} border-radius: var(--sg-button-radius); font-weight: 500; cursor: pointer;">${escapeHtml(buttonText)}</button>` : ""}</div>`;
 }
 
 export function exportPricing(
@@ -276,7 +276,7 @@ export function exportPricing(
 
   const headerHtml =
     title || subtitle
-      ? `<div style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text); font-size: 1.125rem;">${escapeHtml(subtitle)}</p>` : ""}</div>`
+      ? `<div data-block-group="Conteúdo" style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text); font-size: 1.125rem;">${escapeHtml(subtitle)}</p>` : ""}</div>`
       : "";
 
   if (!renderChild) {
@@ -313,7 +313,7 @@ export function exportTestimonial(
   } = (block as any).props;
 
   const ratingHtml = rating
-    ? `<div style="margin-bottom: 1rem; color: #fbbf24;">${"\u2605".repeat(rating)}</div>`
+    ? `<div data-block-group="Estilo" style="margin-bottom: 1rem; color: #fbbf24;">${"\u2605".repeat(rating)}</div>`
     : "";
   const avatarHtml = authorAvatar
     ? `<img src="${escapeHtml(authorAvatar)}" alt="${escapeHtml(authorName)}" style="width: 3rem; height: 3rem; border-radius: 50%; object-fit: cover;" />`
@@ -327,7 +327,7 @@ export function exportTestimonial(
               .slice(0, 2)
           : "?"
       }</div>`;
-  return `<div ${dataBlockIdAttr(block.id)} style="background-color: var(--sg-surface); border-radius: var(--sg-card-radius); padding: 2rem;">${ratingHtml}<blockquote style="font-size: 1rem; margin-bottom: 1.5rem; font-style: italic;">"${escapeHtml(quote)}"</blockquote><div style="display: flex; align-items: center; gap: 1rem;">${avatarHtml}<div><div style="font-weight: 600;">${escapeHtml(authorName)}</div>${authorRole || authorCompany ? `<div style="color: var(--sg-muted-text); font-size: 0.875rem;">${escapeHtml(authorRole || "")}${authorRole && authorCompany ? ", " : ""}${escapeHtml(authorCompany || "")}</div>` : ""}</div></div></div>`;
+  return `<div ${dataBlockIdAttr(block.id)} style="background-color: var(--sg-surface); border-radius: var(--sg-card-radius); padding: 2rem;">${ratingHtml}<blockquote data-block-group="Conteúdo" style="font-size: 1rem; margin-bottom: 1.5rem; font-style: italic;">"${escapeHtml(quote)}"</blockquote><div data-block-group="Autor" style="display: flex; align-items: center; gap: 1rem;">${avatarHtml}<div><div style="font-weight: 600;">${escapeHtml(authorName)}</div>${authorRole || authorCompany ? `<div style="color: var(--sg-muted-text); font-size: 0.875rem;">${escapeHtml(authorRole || "")}${authorRole && authorCompany ? ", " : ""}${escapeHtml(authorCompany || "")}</div>` : ""}</div></div></div>`;
 }
 
 export function exportTestimonialGrid(
@@ -351,7 +351,7 @@ export function exportTestimonialGrid(
 
   const headerHtml =
     title || subtitle
-      ? `<div style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text); font-size: 1.125rem;">${escapeHtml(subtitle)}</p>` : ""}</div>`
+      ? `<div data-block-group="Conteúdo" style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text); font-size: 1.125rem;">${escapeHtml(subtitle)}</p>` : ""}</div>`
       : "";
 
   if (!renderChild) {
@@ -369,7 +369,7 @@ export function exportTestimonialGrid(
     )
     .join("");
 
-  return `<style>${mediaQueries}</style><section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div id="${gridId}" style="${inlineStyles}">${testimonialsHtml}</div></div></section>`;
+  return `<style>${mediaQueries}</style><section ${blockIdAttr(block.id)} ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div data-block-group="Layout" id="${gridId}" style="${inlineStyles}">${testimonialsHtml}</div></div></section>`;
 }
 
 export function exportFaqItem(
@@ -379,7 +379,7 @@ export function exportFaqItem(
   theme?: ThemeTokens,
 ): string {
   const { question, answer } = (block as any).props;
-  return `<details ${dataBlockIdAttr(block.id)} style="border-bottom: 1px solid var(--sg-border); padding: 1rem 0;"><summary style="font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">${escapeHtml(question)}<span>+</span></summary><p style="margin-top: 1rem; color: var(--sg-muted-text);">${escapeHtml(answer)}</p></details>`;
+  return `<details ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="border-bottom: 1px solid var(--sg-border); padding: 1rem 0;"><summary style="font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">${escapeHtml(question)}<span>+</span></summary><p style="margin-top: 1rem; color: var(--sg-muted-text);">${escapeHtml(answer)}</p></details>`;
 }
 
 export function exportFaq(
@@ -393,7 +393,7 @@ export function exportFaq(
 
   const headerHtml =
     title || subtitle
-      ? `<div style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text); font-size: 1.125rem;">${escapeHtml(subtitle)}</p>` : ""}</div>`
+      ? `<div data-block-group="Conteúdo" style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text); font-size: 1.125rem;">${escapeHtml(subtitle)}</p>` : ""}</div>`
       : "";
 
   if (!renderChild) {

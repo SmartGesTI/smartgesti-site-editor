@@ -11,6 +11,7 @@ export function renderFaqItem(block: any): React.ReactNode {
   return (
     <details
       key={block.id}
+      data-block-group="Conteúdo"
       style={{
         borderBottom: "1px solid var(--sg-border)",
         padding: "1rem 0",

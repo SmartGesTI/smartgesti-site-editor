@@ -20,11 +20,12 @@ export function renderTestimonial(block: any): React.ReactNode {
       }}
     >
       {rating && (
-        <div style={{ marginBottom: "1rem", color: "#fbbf24" }}>
+        <div data-block-group="Estilo" style={{ marginBottom: "1rem", color: "#fbbf24" }}>
           {"\u2605".repeat(rating)}
         </div>
       )}
       <blockquote
+        data-block-group="Conteúdo"
         style={{
           fontSize: "1rem",
           marginBottom: "1.5rem",
@@ -33,7 +34,7 @@ export function renderTestimonial(block: any): React.ReactNode {
       >
         "{quote}"
       </blockquote>
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+      <div data-block-group="Autor" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         {authorAvatar ? (
           <img
             src={authorAvatar}

@@ -26,7 +26,7 @@ export function renderFeatureGrid(block: any): React.ReactNode {
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1rem" }}>
         {(title || subtitle) && (
-          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <div data-block-group="Conteúdo" style={{ textAlign: "center", marginBottom: "3rem" }}>
             {title && (
               <h2
                 style={{
@@ -47,6 +47,7 @@ export function renderFeatureGrid(block: any): React.ReactNode {
           </div>
         )}
         <div
+          data-block-group="Layout"
           style={{
             display: "grid",
             gridTemplateColumns: `repeat(${columns}, 1fr)`,
