@@ -20,6 +20,10 @@ export interface ColorPalette {
   linkColor?: string; // Cor específica para links em geral (dropdowns, etc)
   menuLinkColor?: string; // Cor específica para links do menu navbar (derivada do primary)
   gradient: string[];
+
+  // Hero gradient overrides (derivados automaticamente se ausentes)
+  heroGradientStart?: string;
+  heroGradientEnd?: string;
 }
 
 // ============================================================================
@@ -39,6 +43,8 @@ export const colorPalettes: ColorPalette[] = [
     linkColor: "#1e40af", // Links gerais - azul escuro
     menuLinkColor: "#2563eb", // Links do menu - tom do primary mais escuro
     gradient: ["#3b82f6", "#60a5fa", "#93c5fd"],
+    heroGradientStart: "#1e3a5f",
+    heroGradientEnd: "#2d5a8e",
   },
   {
     name: "Ocean Deep",
@@ -51,6 +57,8 @@ export const colorPalettes: ColorPalette[] = [
     linkColor: "#7dd3fc", // Links gerais - azul claro
     menuLinkColor: "#38bdf8", // Links do menu - tom do primary mais claro
     gradient: ["#0284c7", "#0369a1", "#38bdf8"],
+    heroGradientStart: "#0a1628",
+    heroGradientEnd: "#0c2d4d",
   },
   // Verdes
   {
@@ -64,6 +72,8 @@ export const colorPalettes: ColorPalette[] = [
     linkColor: "#047857", // Links gerais - verde escuro
     menuLinkColor: "#059669", // Links do menu - tom do primary mais escuro
     gradient: ["#10b981", "#059669", "#34d399"],
+    heroGradientStart: "#0d3320",
+    heroGradientEnd: "#1a5c3a",
   },
   {
     name: "Forest",
@@ -76,6 +86,8 @@ export const colorPalettes: ColorPalette[] = [
     linkColor: "#86efac", // Links gerais - verde claro
     menuLinkColor: "#4ade80", // Links do menu - tom do primary mais claro
     gradient: ["#22c55e", "#16a34a", "#4ade80"],
+    heroGradientStart: "#0a1f12",
+    heroGradientEnd: "#153d25",
   },
   // Roxos
   {
@@ -89,6 +101,8 @@ export const colorPalettes: ColorPalette[] = [
     linkColor: "#6d28d9", // Links gerais - roxo escuro
     menuLinkColor: "#7c3aed", // Links do menu - tom do primary mais escuro
     gradient: ["#8b5cf6", "#7c3aed", "#a78bfa"],
+    heroGradientStart: "#2d1b69",
+    heroGradientEnd: "#4c2889",
   },
   {
     name: "Midnight",
@@ -101,6 +115,8 @@ export const colorPalettes: ColorPalette[] = [
     linkColor: "#d8b4fe", // Links gerais - roxo claro
     menuLinkColor: "#c084fc", // Links do menu - tom do primary mais claro
     gradient: ["#a855f7", "#9333ea", "#c084fc"],
+    heroGradientStart: "#1e1b4b",
+    heroGradientEnd: "#312e81",
   },
   // Laranjas/Amarelos
   {
@@ -114,6 +130,8 @@ export const colorPalettes: ColorPalette[] = [
     linkColor: "#c2410c", // Links gerais - laranja escuro
     menuLinkColor: "#ea580c", // Links do menu - tom do primary mais escuro
     gradient: ["#f97316", "#ea580c", "#fb923c"],
+    heroGradientStart: "#4a1d0a",
+    heroGradientEnd: "#7a3012",
   },
   {
     name: "Golden",
@@ -126,6 +144,8 @@ export const colorPalettes: ColorPalette[] = [
     linkColor: "#fde047", // Links gerais - amarelo claro
     menuLinkColor: "#fde047", // Links do menu - amarelo bem claro para contraste
     gradient: ["#eab308", "#ca8a04", "#facc15"],
+    heroGradientStart: "#1a1500",
+    heroGradientEnd: "#3d3005",
   },
   // Vermelhos/Rosas
   {
@@ -139,6 +159,8 @@ export const colorPalettes: ColorPalette[] = [
     linkColor: "#be123c", // Links gerais - rosa escuro
     menuLinkColor: "#e11d48", // Links do menu - tom do primary mais escuro
     gradient: ["#f43f5e", "#e11d48", "#fb7185"],
+    heroGradientStart: "#4a0a1a",
+    heroGradientEnd: "#7a1230",
   },
   {
     name: "Berry",
@@ -151,6 +173,8 @@ export const colorPalettes: ColorPalette[] = [
     linkColor: "#fbbf24", // Links gerais - amarelo para contraste
     menuLinkColor: "#fda4d0", // Links do menu - rosa bem claro para contraste
     gradient: ["#ec4899", "#db2777", "#f472b6"],
+    heroGradientStart: "#3d0724",
+    heroGradientEnd: "#6b1040",
   },
   // Neutros
   {
@@ -164,6 +188,8 @@ export const colorPalettes: ColorPalette[] = [
     linkColor: "#1e293b", // Links gerais - cinza escuro
     menuLinkColor: "#334155", // Links do menu - tom do primary mais escuro
     gradient: ["#475569", "#334155", "#64748b"],
+    heroGradientStart: "#1a1a2e",
+    heroGradientEnd: "#2d2d4a",
   },
   {
     name: "Dark Mode",
@@ -176,8 +202,75 @@ export const colorPalettes: ColorPalette[] = [
     linkColor: "#a5b4fc", // Links gerais - índigo claro
     menuLinkColor: "#818cf8", // Links do menu - tom do primary mais claro
     gradient: ["#6366f1", "#4f46e5", "#818cf8"],
+    heroGradientStart: "#0f0a2e",
+    heroGradientEnd: "#1a1552",
+  },
+  // Template-specific palettes
+  {
+    name: "Indigo & Cyan",
+    primary: "#6366f1",
+    secondary: "#0ea5e9",
+    accent: "#f97316",
+    background: "#ffffff",
+    surface: "#f8fafc",
+    text: "#0f172a",
+    linkColor: "#4338ca",
+    menuLinkColor: "#6366f1",
+    gradient: ["#6366f1", "#0ea5e9", "#f97316"],
+    heroGradientStart: "#3730a3",
+    heroGradientEnd: "#0369a1",
+  },
+  {
+    name: "Blue Academy",
+    primary: "#2563eb",
+    secondary: "#1d4ed8",
+    accent: "#3b82f6",
+    background: "#ffffff",
+    surface: "#f8fafc",
+    text: "#0f172a",
+    linkColor: "#1e40af",
+    menuLinkColor: "#2563eb",
+    gradient: ["#2563eb", "#1d4ed8", "#3b82f6"],
+    heroGradientStart: "#1e3a8a",
+    heroGradientEnd: "#1e40af",
+  },
+  {
+    name: "Indigo Amber",
+    primary: "#4f46e5",
+    secondary: "#6366f1",
+    accent: "#f59e0b",
+    background: "#ffffff",
+    surface: "#f9fafb",
+    text: "#111827",
+    linkColor: "#4338ca",
+    menuLinkColor: "#4f46e5",
+    gradient: ["#4f46e5", "#6366f1", "#f59e0b"],
+    heroGradientStart: "#312e81",
+    heroGradientEnd: "#3730a3",
+  },
+  {
+    name: "Indigo Pro",
+    primary: "#6366f1",
+    secondary: "#4f46e5",
+    accent: "#8b5cf6",
+    background: "#ffffff",
+    surface: "#f8fafc",
+    text: "#0f172a",
+    linkColor: "#4338ca",
+    menuLinkColor: "#6366f1",
+    gradient: ["#6366f1", "#4f46e5", "#8b5cf6"],
+    heroGradientStart: "#1e1b4b",
+    heroGradientEnd: "#312e81",
   },
 ];
+
+// ============================================================================
+// Utilities
+// ============================================================================
+
+export function findPaletteByName(name: string): ColorPalette | undefined {
+  return colorPalettes.find(p => p.name === name);
+}
 
 // ============================================================================
 // Component
@@ -218,6 +311,12 @@ export function PaletteSelector({
             {palette.gradient.map((color, i) => (
               <span key={i} className="flex-1" style={{ background: color }} />
             ))}
+            {palette.heroGradientStart && (
+              <span className="flex-1" style={{ background: palette.heroGradientStart }} />
+            )}
+            {palette.heroGradientEnd && (
+              <span className="flex-1" style={{ background: palette.heroGradientEnd }} />
+            )}
           </div>
           <span className="text-xs font-medium text-gray-700 dark:text-gray-300 text-center leading-tight px-1">
             {palette.name}

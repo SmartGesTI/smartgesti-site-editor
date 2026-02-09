@@ -41,7 +41,7 @@ export function renderPricingCard(block: any): React.ReactNode {
             top: "-0.75rem",
             right: "1rem",
             backgroundColor: "var(--sg-primary)",
-            color: "#fff",
+            color: "var(--sg-primary-text, #fff)",
             padding: "0.25rem 0.75rem",
             borderRadius: "9999px",
             fontSize: "0.75rem",

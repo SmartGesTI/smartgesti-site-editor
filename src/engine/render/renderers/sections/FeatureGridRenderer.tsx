@@ -96,7 +96,7 @@ export function renderFeatureGrid(block: any): React.ReactNode {
                   >
                     {renderIcon({
                       id: `${block.id}-feat-${index}-icon`,
-                      props: { name: feature.icon, color: "#fff" },
+                      props: { name: feature.icon, color: "var(--sg-primary-text, #fff)" },
                     })}
                   </div>
                 )}

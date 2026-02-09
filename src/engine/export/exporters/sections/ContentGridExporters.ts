@@ -94,7 +94,7 @@ export function exportTeamCard(
 
   const avatarHtml = avatar
     ? `<img src="${escapeHtml(avatar)}" alt="${escapeHtml(name)}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin: 0 auto 1rem; display: block;" />`
-    : `<div style="width: 120px; height: 120px; border-radius: 50%; background-color: var(--sg-primary); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; font-weight: 600;">${name ? name.charAt(0) : "?"}</div>`;
+    : `<div style="width: 120px; height: 120px; border-radius: 50%; background-color: var(--sg-primary); color: var(--sg-primary-text, #fff); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; font-weight: 600;">${name ? name.charAt(0) : "?"}</div>`;
 
   return `<div ${dataBlockIdAttr(block.id)} class="sg-team-card" style="text-align: center;">${avatarHtml}<h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem;">${escapeHtml(name)}</h3>${role ? `<p style="color: var(--sg-muted-text); font-size: 0.875rem;">${escapeHtml(role)}</p>` : ""}</div>`;
 }
@@ -221,7 +221,7 @@ export function exportCountdown(
   } = (block as any).props;
 
   const isBanner = variant === "banner";
-  const sectionStyle = `padding: 4rem 2rem; background-color: ${bg || "var(--sg-primary)"}; color: #fff;`;
+  const sectionStyle = `padding: 4rem 2rem; background-color: ${bg || "var(--sg-primary)"}; color: var(--sg-primary-text, #fff);`;
 
   // Responsive countdown grid
   const countdownId = generateScopedId(block.id || "", "countdown-numbers");
@@ -304,7 +304,7 @@ export function exportCarousel(
     ? `<a href="${escapeHtml(slide.secondaryButton.href || "#")}" style="padding: 0.75rem 1.5rem; border: 2px solid #fff; color: #fff; border-radius: var(--sg-button-radius); font-weight: 500; text-decoration: none;">${escapeHtml(slide.secondaryButton.text)}</a>`
     : "";
 
-  const slideContent = `<div style="padding: 2rem; color: #fff;">${slide.title ? `<h2 style="margin-bottom: 1rem;">${escapeHtml(slide.title)}</h2>` : ""}${slide.description ? `<p style="margin-bottom: 1.5rem; opacity: 0.9;">${escapeHtml(slide.description)}</p>` : ""}<div style="display: flex; gap: 1rem; flex-wrap: wrap;">${primaryBtn}${secondaryBtn}</div></div>`;
+  const slideContent = `<div style="padding: 2rem; color: var(--sg-primary-text, #fff);">${slide.title ? `<h2 style="margin-bottom: 1rem;">${escapeHtml(slide.title)}</h2>` : ""}${slide.description ? `<p style="margin-bottom: 1.5rem; opacity: 0.9;">${escapeHtml(slide.description)}</p>` : ""}<div style="display: flex; gap: 1rem; flex-wrap: wrap;">${primaryBtn}${secondaryBtn}</div></div>`;
 
   const slideHtml = `<style>${carouselCss}</style><div id="${carouselId}" style="background-color: var(--sg-primary); border-radius: var(--sg-card-radius); overflow: hidden;">${slideImg}${slideContent}</div>`;
 

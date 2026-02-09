@@ -34,7 +34,7 @@ export function renderFeature(block: any): React.ReactNode {
         >
           {renderIcon({
             id: `${block.id}-icon`,
-            props: { name: icon, size: "md", color: "#fff" },
+            props: { name: icon, size: "md", color: "var(--sg-primary-text, #fff)" },
           })}
         </div>
       )}

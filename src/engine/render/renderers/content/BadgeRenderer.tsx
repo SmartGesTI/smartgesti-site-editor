@@ -17,11 +17,11 @@ export function renderBadge(block: any): React.ReactNode {
       bg: "var(--sg-primary, #3b82f6)",
       text: "var(--sg-primary-text, #fff)",
     },
-    secondary: { bg: "var(--sg-secondary, #6b7280)", text: "#fff" },
-    success: { bg: "var(--sg-success, #10b981)", text: "#fff" },
-    warning: { bg: "var(--sg-warning, #f59e0b)", text: "#fff" },
-    danger: { bg: "var(--sg-danger, #ef4444)", text: "#fff" },
-    info: { bg: "var(--sg-info, #3b82f6)", text: "#fff" },
+    secondary: { bg: "var(--sg-secondary, #6b7280)", text: "var(--sg-primary-text, #fff)" },
+    success: { bg: "var(--sg-success, #10b981)", text: "var(--sg-primary-text, #fff)" },
+    warning: { bg: "var(--sg-warning, #f59e0b)", text: "var(--sg-primary-text, #fff)" },
+    danger: { bg: "var(--sg-danger, #ef4444)", text: "var(--sg-primary-text, #fff)" },
+    info: { bg: "var(--sg-info, #3b82f6)", text: "var(--sg-primary-text, #fff)" },
   };
 
   const sizeStyles: Record<string, React.CSSProperties> = {

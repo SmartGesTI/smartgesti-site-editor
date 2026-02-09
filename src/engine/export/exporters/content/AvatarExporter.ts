@@ -36,5 +36,5 @@ export function exportAvatar(
     return `<img ${dataBlockIdAttr(block.id)} src="${escapeHtml(src)}" alt="${escapeHtml(name || "Avatar")}" style="width: ${avatarSize}; height: ${avatarSize}; border-radius: 50%; object-fit: cover;" />`;
   }
 
-  return `<div ${dataBlockIdAttr(block.id)} style="width: ${avatarSize}; height: ${avatarSize}; border-radius: 50%; background-color: var(--sg-primary, #3b82f6); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: calc(${avatarSize} / 2.5);">${initials}</div>`;
+  return `<div ${dataBlockIdAttr(block.id)} style="width: ${avatarSize}; height: ${avatarSize}; border-radius: 50%; background-color: var(--sg-primary, #3b82f6); color: var(--sg-primary-text, #fff); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: calc(${avatarSize} / 2.5);">${initials}</div>`;
 }

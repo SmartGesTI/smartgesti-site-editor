@@ -136,6 +136,17 @@ export const templates = {
 export type TemplateId = keyof typeof templates;
 
 /**
+ * Mapa de template → nome da paleta default correspondente
+ */
+export const templateDefaultPalette: Record<TemplateId, string> = {
+  "escola-premium": "Indigo & Cyan",
+  "escola-edvi": "Blue Academy",
+  "escola-zilom": "Blue Academy",
+  "escola-blog": "Indigo Amber",
+  "smartgesti-admin": "Indigo Pro",
+};
+
+/**
  * Retorna um template pelo ID
  */
 export function getTemplate(id: TemplateId) {

@@ -64,6 +64,10 @@ interface UseEditorStateReturn {
   isTemplateSelected: boolean;
   canRemovePage: (pageId: string) => boolean;
 
+  // Paleta
+  selectedPalette: string | null;
+  setSelectedPalette: (name: string | null) => void;
+
   // Plugins
   activePlugins: string[];
   activatePlugin: (pluginId: string) => void;
@@ -93,6 +97,7 @@ export function useEditorState(
   const [currentPageId, setCurrentPageIdState] = useState<string>("home");
   const [history] = useState<HistoryManager>(() => createHistoryManager(50));
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [selectedPalette, setSelectedPaletteState] = useState<string | null>(null);
 
   // Aplicar mudanças via patches (precisa ser declarado antes de useNavbarAutoSync)
   const applyChange = useCallback(
@@ -277,12 +282,17 @@ export function useEditorState(
     [document, selectedBlockId, currentPage, applyChange],
   );
 
+  const setSelectedPalette = useCallback((name: string | null) => {
+    setSelectedPaletteState(name);
+  }, []);
+
   // Voltar ao seletor de templates (document = null)
   const resetToTemplate = useCallback(() => {
     setDocument(null);
     setCurrentPageIdState("home");
     history.clear();
     setSelectedBlockId(null);
+    setSelectedPaletteState(null);
   }, [history]);
 
   // Carregar um documento completo (ex: gerado por IA)
@@ -420,6 +430,10 @@ export function useEditorState(
     isPaletteSelected,
     isTemplateSelected,
     canRemovePage,
+
+    // Paleta
+    selectedPalette,
+    setSelectedPalette,
 
     // Plugins
     activePlugins,

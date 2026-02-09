@@ -128,7 +128,7 @@ export function exportProductShowcase(
 
   // Header
   const subtitleHtml = subtitle
-    ? `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary); color: #fff; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">${escapeHtml(subtitle)}</span>`
+    ? `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary); color: var(--sg-primary-text, #fff); border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">${escapeHtml(subtitle)}</span>`
     : "";
   const titleHtml = title
     ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>`
@@ -156,7 +156,7 @@ export function exportProductShowcase(
           ? `<div style="width: 100%; height: 200px; background-image: url(${escapeHtml(p.image)}); background-size: cover; background-position: center;"></div>`
           : "";
         const badgeHtml = p.badge
-          ? `<span style="display: inline-block; padding: 0.125rem 0.5rem; background-color: var(--sg-primary); color: #fff; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; margin-bottom: 0.5rem;">${escapeHtml(p.badge)}</span>`
+          ? `<span style="display: inline-block; padding: 0.125rem 0.5rem; background-color: var(--sg-primary); color: var(--sg-primary-text, #fff); border-radius: 9999px; font-size: 0.7rem; font-weight: 600; margin-bottom: 0.5rem;">${escapeHtml(p.badge)}</span>`
           : "";
         const iconHtml = p.icon ? `<span style="margin-right: 0.5rem;">${escapeHtml(p.icon)}</span>` : "";
         const btnHtml = p.primaryButton
@@ -180,7 +180,7 @@ export function exportProductShowcase(
         : `<div style="width: 100%; height: 300px; background-color: var(--sg-surface); border-radius: var(--sg-card-radius, 0.75rem); display: flex; align-items: center; justify-content: center; font-size: 4rem;">${escapeHtml(p.icon || "📦")}</div>`;
 
       const badgeHtml = p.badge
-        ? `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary); color: #fff; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem;">${escapeHtml(p.badge)}</span>`
+        ? `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary); color: var(--sg-primary-text, #fff); border-radius: 9999px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem;">${escapeHtml(p.badge)}</span>`
         : "";
       const iconHtml = p.icon ? `<span style="margin-right: 0.5rem;">${escapeHtml(p.icon)}</span>` : "";
 
@@ -253,7 +253,7 @@ export function exportAboutSection(
   }, theme);
 
   const subtitleHtml = subtitle
-    ? `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary); color: #fff; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">${escapeHtml(subtitle)}</span>`
+    ? `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary); color: var(--sg-primary-text, #fff); border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">${escapeHtml(subtitle)}</span>`
     : "";
   const titleHtml = title
     ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 1rem;">${escapeHtml(title)}</h2>`
@@ -289,7 +289,7 @@ export function exportAboutSection(
 
   const statsHtml =
     stats.length > 0
-      ? `<div style="display: flex; gap: 0.5rem; margin-top: 1rem;">${stats.map((s: any) => `<div style="background-color: var(--sg-primary); color: #fff; padding: 0.75rem 1rem; border-radius: var(--sg-card-radius, 0.75rem); text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 80px;"><div style="font-size: 1.5rem; font-weight: 700;">${escapeHtml(s.value)}</div><div style="font-size: 0.7rem; opacity: 0.9;">${escapeHtml(s.label)}</div></div>`).join("")}</div>`
+      ? `<div style="display: flex; gap: 0.5rem; margin-top: 1rem;">${stats.map((s: any) => `<div style="background-color: var(--sg-primary); color: var(--sg-primary-text, #fff); padding: 0.75rem 1rem; border-radius: var(--sg-card-radius, 0.75rem); text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 80px;"><div style="font-size: 1.5rem; font-weight: 700;">${escapeHtml(s.value)}</div><div style="font-size: 0.7rem; opacity: 0.9;">${escapeHtml(s.label)}</div></div>`).join("")}</div>`
       : "";
 
   return `${stylePreamble}<style>
@@ -350,7 +350,7 @@ export function exportContactSection(
   }, theme);
 
   const subtitleHtml = subtitle
-    ? `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary); color: #fff; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">${escapeHtml(subtitle)}</span>`
+    ? `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary); color: var(--sg-primary-text, #fff); border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">${escapeHtml(subtitle)}</span>`
     : "";
   const titleHtml = title
     ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>`
@@ -392,7 +392,7 @@ export function exportContactSection(
   const contactCardsHtml = contactInfo
     .map((info: any) => {
       const iconSvg = getContactIconSvg(info.icon || "mail");
-      return `<div style="display: flex; align-items: flex-start; gap: 1rem; padding: 1.25rem; background-color: var(--sg-surface); border-radius: var(--sg-card-radius, 0.75rem); box-shadow: var(--sg-card-shadow);"><div style="width: 2.5rem; height: 2.5rem; background-color: var(--sg-primary); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0;">${iconSvg}</div><div><div style="font-weight: 600; font-size: 0.875rem; margin-bottom: 0.25rem;">${escapeHtml(info.label)}</div><div style="color: var(--sg-muted-text); font-size: 0.875rem;">${escapeHtml(info.value)}</div></div></div>`;
+      return `<div style="display: flex; align-items: flex-start; gap: 1rem; padding: 1.25rem; background-color: var(--sg-surface); border-radius: var(--sg-card-radius, 0.75rem); box-shadow: var(--sg-card-shadow);"><div style="width: 2.5rem; height: 2.5rem; background-color: var(--sg-primary); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: var(--sg-primary-text, #fff); flex-shrink: 0;">${iconSvg}</div><div><div style="font-weight: 600; font-size: 0.875rem; margin-bottom: 0.25rem;">${escapeHtml(info.label)}</div><div style="color: var(--sg-muted-text); font-size: 0.875rem;">${escapeHtml(info.value)}</div></div></div>`;
     })
     .join("");
 

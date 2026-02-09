@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { LoadingSpinner } from "./LoadingSpinner";
 import type { UploadConfig } from "../LandingPageEditor";
 import type { SiteDocument } from "../../engine";
+import type { ColorPalette } from "../PaletteSelector";
 
 // Lazy load componentes pesados do editor
 const BlockPropertyEditor = lazy(() =>
@@ -14,6 +15,7 @@ const PaletteSelector = lazy(() =>
 interface RightPanelProps {
   isPaletteSelected: boolean;
   selectedBlock: any;
+  selectedPalette?: ColorPalette;
   onPaletteChange: (palette: any) => void;
   onUpdateBlock: (updates: Record<string, any>) => void;
   uploadConfig?: UploadConfig;
@@ -26,6 +28,7 @@ interface RightPanelProps {
 export const RightPanel = React.memo(function RightPanel({
   isPaletteSelected,
   selectedBlock,
+  selectedPalette,
   onPaletteChange,
   onUpdateBlock,
   uploadConfig,
@@ -42,7 +45,7 @@ export const RightPanel = React.memo(function RightPanel({
               Escolha uma Paleta de Cores
             </h2>
             <PaletteSelector
-              selectedPalette={undefined}
+              selectedPalette={selectedPalette}
               onPaletteChange={onPaletteChange}
             />
           </div>

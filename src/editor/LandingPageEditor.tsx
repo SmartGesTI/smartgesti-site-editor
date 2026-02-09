@@ -10,11 +10,12 @@ import { useEditorState } from "../hooks/useEditorState";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 import { SiteDocument, PatchBuilder, Block } from "../engine";
-import { getTemplate } from "../shared/templates";
+import { getTemplate, templateDefaultPalette } from "../shared/templates";
 import type { TemplateId } from "../shared/templates";
+import { findPaletteByName } from "./PaletteSelector";
 import { sharedTemplateToEngineDocument } from "../utils/sharedTemplateToEngine";
 import { findBlockInStructure } from "../utils/blockUtils";
-import { isLightColor } from "../utils/colorUtils";
+import { derivePaletteColors } from "../utils/colorUtils";
 import { logger } from "../utils/logger";
 import { processBlockDataURLs } from "../utils/dataURLUtils";
 
@@ -71,6 +72,8 @@ export function LandingPageEditor({
     resetToTemplate,
     isPaletteSelected,
     loadDocument,
+    selectedPalette,
+    setSelectedPalette,
     activePlugins,
     activatePlugin,
     deactivatePlugin,
@@ -92,8 +95,14 @@ export function LandingPageEditor({
       const engineDoc = sharedTemplateToEngineDocument(sharedDoc);
       loadDocument(engineDoc);
       setCurrentTemplateId(templateId);
+
+      // Auto-selecionar paleta correspondente ao template
+      const paletteName = templateDefaultPalette[templateId];
+      if (paletteName) {
+        setSelectedPalette(paletteName);
+      }
     },
-    [loadDocument],
+    [loadDocument, setSelectedPalette],
   );
 
   // Ao montar sem documento: carregar defaultTemplateId se informado
@@ -168,57 +177,62 @@ export function LandingPageEditor({
     [document, currentPage, applyChange]
   );
 
-  // Handler para atualizar paleta de cores (inclui mutedText, primaryText, linkColor e menuLinkColor)
-  // Também atualiza links e botões do navbar para refletir a paleta escolhida
+  // Handler para atualizar paleta de cores
+  // Usa derivePaletteColors() para derivar todas as cores e patcha Hero/Navbar/Footer alem do theme
   const handlePaletteChange = useCallback((palette: any) => {
     if (!document) return;
-    const bgLight = isLightColor(palette.background ?? "#ffffff");
-    const primaryLight = isLightColor(palette.primary ?? "#3b82f6");
-    const mutedText = bgLight ? "#6b7280" : "#9ca3af";
-    const primaryText = primaryLight ? "#1f2937" : "#ffffff";
-    const menuLinkColor = palette.menuLinkColor || palette.primary;
+    const derived = derivePaletteColors(palette);
 
-    // Construir todas as operações de patch em um único array
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const allPatches: Array<{ op: "replace"; path: string; value: any }> = [];
 
     // 1. Theme color updates
-    const themeColors = document.theme.colors;
-    const newColors: Record<string, string> = {
-      primary: palette.primary,
-      secondary: palette.secondary,
-      accent: palette.accent,
-      bg: palette.background,
-      surface: palette.surface || themeColors.surface || "#f8fafc",
-      text: palette.text || themeColors.text || "#1e293b",
-      mutedText,
-      primaryText,
-      linkColor: palette.linkColor || palette.primary,
-      menuLinkColor,
-    };
-    for (const [key, value] of Object.entries(newColors)) {
+    for (const [key, value] of Object.entries(derived.themeColors)) {
       allPatches.push({ op: "replace", path: `/theme/colors/${key}`, value });
     }
 
-    // 2. Navbar link/button color updates (todas as páginas)
+    // 2. Block-level patches (todas as paginas)
+    // Hero variations that use dark gradient backgrounds
+    const darkGradientVariations = new Set([
+      "hero-gradient", "hero-parallax", "hero-overlay", "hero-carousel",
+    ]);
+
     for (let pageIdx = 0; pageIdx < document.pages.length; pageIdx++) {
       const page = document.pages[pageIdx];
       if (!page?.structure) continue;
       for (let blockIdx = 0; blockIdx < page.structure.length; blockIdx++) {
-        if (page.structure[blockIdx].type === "navbar") {
-          const base = `/pages/${pageIdx}/structure/${blockIdx}/props`;
+        const block = page.structure[blockIdx];
+        const base = `/pages/${pageIdx}/structure/${blockIdx}/props`;
+
+        if (block.type === "hero") {
+          const variation = (block.props as any)?.variation || "";
+          if (darkGradientVariations.has(variation)) {
+            allPatches.push(
+              { op: "replace", path: `${base}/background`, value: `linear-gradient(135deg, ${derived.heroGradientStart} 0%, ${derived.heroGradientEnd} 100%)` },
+              { op: "replace", path: `${base}/titleColor`, value: derived.heroTitleColor },
+              { op: "replace", path: `${base}/subtitleColor`, value: derived.heroSubtitleColor },
+              { op: "replace", path: `${base}/descriptionColor`, value: derived.heroDescColor },
+            );
+          }
+        } else if (block.type === "navbar") {
           allPatches.push(
-            { op: "replace", path: `${base}/linkColor`, value: menuLinkColor },
-            { op: "replace", path: `${base}/linkHoverColor`, value: palette.primary },
-            { op: "replace", path: `${base}/buttonColor`, value: palette.primary },
-            { op: "replace", path: `${base}/buttonTextColor`, value: primaryText },
+            { op: "replace", path: `${base}/bg`, value: derived.navbarBg },
+            { op: "replace", path: `${base}/linkColor`, value: derived.themeColors.menuLinkColor },
+            { op: "replace", path: `${base}/linkHoverColor`, value: derived.themeColors.primary },
+            { op: "replace", path: `${base}/buttonColor`, value: derived.themeColors.primary },
+            { op: "replace", path: `${base}/buttonTextColor`, value: derived.themeColors.primaryText },
+          );
+        } else if (block.type === "footer") {
+          allPatches.push(
+            { op: "replace", path: `${base}/linkHoverColor`, value: derived.footerLinkHover },
           );
         }
       }
     }
 
     applyChange(allPatches, "Update color palette");
-  }, [document, applyChange]);
+    setSelectedPalette(palette.name ?? null);
+  }, [document, applyChange, setSelectedPalette]);
 
   // Handler para clique no preview (com grupo opcional para scroll-to-group)
   const handleBlockClick = useCallback((blockId: string, group?: string) => {
@@ -296,8 +310,13 @@ export function LandingPageEditor({
             ? () => {
                 // Recarregar o mesmo template
                 const sharedDoc = getTemplate(currentTemplateId);
-                if (sharedDoc)
+                if (sharedDoc) {
                   loadDocument(sharedTemplateToEngineDocument(sharedDoc));
+                  const paletteName = templateDefaultPalette[currentTemplateId];
+                  if (paletteName) {
+                    setSelectedPalette(paletteName);
+                  }
+                }
               }
             : resetToTemplate
         }
@@ -345,6 +364,7 @@ export function LandingPageEditor({
         <RightPanel
           isPaletteSelected={isPaletteSelected}
           selectedBlock={selectedBlock}
+          selectedPalette={selectedPalette ? findPaletteByName(selectedPalette) : undefined}
           onPaletteChange={handlePaletteChange}
           onUpdateBlock={handleUpdateBlock}
           uploadConfig={uploadConfig}

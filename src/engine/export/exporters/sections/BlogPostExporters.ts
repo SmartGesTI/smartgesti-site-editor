@@ -178,7 +178,7 @@ export function exportBlogPostGrid(
 
   const viewAllHtml =
     showViewAll && viewAllText
-      ? `<div data-block-group="Rodapé" style="text-align: center; margin-top: 2.5rem;"><a href="${escapeHtml(viewAllHref || "#")}" style="display: inline-block; padding: 0.75rem 1.5rem; background-color: var(--sg-primary); color: #fff; font-weight: 600; border-radius: var(--sg-button-radius); text-decoration: none;">${escapeHtml(viewAllText)}</a></div>`
+      ? `<div data-block-group="Rodapé" style="text-align: center; margin-top: 2.5rem;"><a href="${escapeHtml(viewAllHref || "#")}" style="display: inline-block; padding: 0.75rem 1.5rem; background-color: var(--sg-primary); color: var(--sg-primary-text, #fff); font-weight: 600; border-radius: var(--sg-button-radius); text-decoration: none;">${escapeHtml(viewAllText)}</a></div>`
       : "";
 
   return `<style>${mediaQueries}</style><section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div data-block-group="Layout" id="${gridId}" style="${inlineStyles}">${cardsHtml}</div>${viewAllHtml}</div></section>`;
@@ -219,7 +219,7 @@ export function exportBlogPostDetail(
 
   // Category badge
   const categoryHtml = category
-    ? `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary); color: #fff; border-radius: 999px; font-size: 0.75rem; font-weight: 600; margin-bottom: 1rem;">${escapeHtml(category)}</span>`
+    ? `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary); color: var(--sg-primary-text, #fff); border-radius: 999px; font-size: 0.75rem; font-weight: 600; margin-bottom: 1rem;">${escapeHtml(category)}</span>`
     : "";
 
   // Meta line (date + reading time)
@@ -239,8 +239,8 @@ export function exportBlogPostDetail(
     : "";
 
   // Author — placeholder structure (real data injected by ContentProvider at runtime)
-  const avatarPlaceholder = `<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg, var(--sg-primary, #6366f1) 0%, #818cf8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:1.5rem;font-weight:700;">A</div>`;
-  const avatarSmall = `<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg, var(--sg-primary, #6366f1) 0%, #818cf8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:1.1rem;font-weight:700;">A</div>`;
+  const avatarPlaceholder = `<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg, var(--sg-primary, #6366f1) 0%, #818cf8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--sg-primary-text, #fff);font-size:1.5rem;font-weight:700;">A</div>`;
+  const avatarSmall = `<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg, var(--sg-primary, #6366f1) 0%, #818cf8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--sg-primary-text, #fff);font-size:1.1rem;font-weight:700;">A</div>`;
 
   let authorHtml = "";
   if (showAuthor) {

@@ -104,9 +104,6 @@ export const smartgestiAdminTemplate: SiteDocument = {
         align: "left",
         minHeight: "85vh",
         background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)",
-        titleColor: "#ffffff",
-        subtitleColor: "#e0e7ff",
-        descriptionColor: "#c7d2fe",
         // Button hover effects
         buttonHoverEffect: "glow",
         buttonHoverIntensity: 60,
@@ -469,7 +466,7 @@ export const smartgestiAdminTemplate: SiteDocument = {
         // Link hover effects
         linkHoverEffect: "underline-center",
         linkHoverIntensity: 50,
-        linkHoverColor: "#818cf8",
+        linkHoverColor: "#a5b4fc",
       },
     },
   ],

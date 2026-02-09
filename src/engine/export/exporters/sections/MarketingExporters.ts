@@ -25,7 +25,7 @@ export function exportFeature(
 ): string {
   const { icon, title, description } = (block as any).props;
   const iconHtml = icon
-    ? `<div style="width: 3rem; height: 3rem; background-color: var(--sg-primary); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #fff;">[★]</div>`
+    ? `<div style="width: 3rem; height: 3rem; background-color: var(--sg-primary); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: var(--sg-primary-text, #fff);">[★]</div>`
     : "";
   return `<div ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="padding: 1.5rem; text-align: center;">${iconHtml}<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${escapeHtml(title)}</h3><p style="color: var(--sg-muted-text); font-size: 0.875rem;">${escapeHtml(description)}</p></div>`;
 }
@@ -64,7 +64,7 @@ export function exportFeatureGrid(
           : "";
       const iconBlock =
         !isImageCards && f.icon
-          ? `<div style="width: 3rem; height: 3rem; background-color: var(--sg-primary); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; color: #fff;">[★]</div>`
+          ? `<div style="width: 3rem; height: 3rem; background-color: var(--sg-primary); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; color: var(--sg-primary-text, #fff);">[★]</div>`
           : "";
       const linkBlock = f.link
         ? `<a href="${escapeHtml(f.link.href || "#")}" style="display: inline-block; margin-top: 0.75rem; color: var(--sg-primary); font-weight: 500; text-decoration: none; border: 1px solid var(--sg-primary); padding: 0.5rem 1rem; border-radius: var(--sg-button-radius);">${escapeHtml(f.link.text)}</a>`
@@ -245,7 +245,7 @@ export function exportPricingCard(
   } = (block as any).props;
 
   const badgeHtml = pBadge
-    ? `<span style="position: absolute; top: -0.75rem; right: 1rem; background-color: var(--sg-primary); color: #fff; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem;">${escapeHtml(pBadge)}</span>`
+    ? `<span style="position: absolute; top: -0.75rem; right: 1rem; background-color: var(--sg-primary); color: var(--sg-primary-text, #fff); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem;">${escapeHtml(pBadge)}</span>`
     : "";
   const featuresHtml = features
     .map(
@@ -317,7 +317,7 @@ export function exportTestimonial(
     : "";
   const avatarHtml = authorAvatar
     ? `<img src="${escapeHtml(authorAvatar)}" alt="${escapeHtml(authorName)}" style="width: 3rem; height: 3rem; border-radius: 50%; object-fit: cover;" />`
-    : `<div style="width: 3rem; height: 3rem; border-radius: 50%; background-color: var(--sg-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600;">${
+    : `<div style="width: 3rem; height: 3rem; border-radius: 50%; background-color: var(--sg-primary); color: var(--sg-primary-text, #fff); display: flex; align-items: center; justify-content: center; font-weight: 600;">${
         authorName
           ? authorName
               .split(" ")

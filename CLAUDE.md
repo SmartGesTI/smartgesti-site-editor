@@ -271,6 +271,24 @@ src/
 - **Backlog List**: 901710728590
 - **PM Agent**: `clickup-pm-editor` (em `.claude/agents/`) — roda automaticamente em background para gerenciar tarefas no ClickUp
 
+### Comunicacao com Atlas (Gerente Global)
+
+**Ao concluir uma feature ou etapa significativa**, notifique o Atlas:
+```bash
+/home/bruno/GithubPessoal/SmartGesTI/scripts/notify-atlas.sh \
+  --from editor --type feature_complete --summary "Descricao" \
+  --commits "hash1,hash2" --task "task-id"
+```
+
+**Para mudancas que afetam projetos consumidores** (Ensino, Portifolios):
+```bash
+/home/bruno/GithubPessoal/SmartGesTI/scripts/notify-atlas.sh \
+  --from editor --type cross_project_impact \
+  --summary "Descricao da mudanca" --affected "ensino,portfolios"
+```
+
+**Para consultas rapidas ao ClickUp** (verificar status, buscar task), o PM Agent local (`clickup-pm-editor`) pode ser usado normalmente.
+
 ## Key Files
 
 | Purpose | Path |

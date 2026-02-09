@@ -104,7 +104,7 @@ export function renderAboutSection(block: any): React.ReactNode {
                   display: "inline-block",
                   padding: "0.25rem 0.75rem",
                   backgroundColor: "var(--sg-primary)",
-                  color: "#fff",
+                  color: "var(--sg-primary-text, #fff)",
                   borderRadius: "9999px",
                   fontSize: "0.75rem",
                   fontWeight: 600,
@@ -227,7 +227,7 @@ export function renderAboutSection(block: any): React.ReactNode {
                     key={i}
                     style={{
                       backgroundColor: "var(--sg-primary)",
-                      color: "#fff",
+                      color: "var(--sg-primary-text, #fff)",
                       padding: "0.75rem 1rem",
                       borderRadius: "var(--sg-card-radius, 0.75rem)",
                       textAlign: "center",
@@ -251,7 +251,7 @@ export function renderAboutSection(block: any): React.ReactNode {
                   display: "inline-block",
                   padding: "0.25rem 0.75rem",
                   backgroundColor: "var(--sg-primary)",
-                  color: "#fff",
+                  color: "var(--sg-primary-text, #fff)",
                   borderRadius: "9999px",
                   fontSize: "0.75rem",
                   fontWeight: 600,
