@@ -48,6 +48,9 @@ const BLOCK_ICONS: Record<string, string> = {
   logoCloud: "🏂",
   navbar: "☰",
   footer: "📋",
+  productShowcase: "🛍️",
+  aboutSection: "ℹ️",
+  contactSection: "📬",
 
   // Formulários
   form: "📋",

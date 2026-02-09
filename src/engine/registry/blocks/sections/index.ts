@@ -24,3 +24,6 @@ export * from "./categoryCardGrid";
 export * from "./blogPostCard";
 export * from "./blogPostGrid";
 export * from "./blogPostDetail";
+export * from "./productShowcase";
+export * from "./aboutSection";
+export * from "./contactSection";

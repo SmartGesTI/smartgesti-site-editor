@@ -650,3 +650,278 @@ case "meu-input":
   }
   return null;
 ```
+
+---
+
+## Sistema de Hover Effects
+
+O editor possui um sistema completo de efeitos de hover para **botões** e **links**, implementado em `src/engine/shared/hoverEffects/`. Os efeitos funcionam tanto no React preview quanto no HTML export.
+
+### Blocos que Suportam Hover Effects
+
+| Bloco | Button Hover | Link Hover | Observação |
+|-------|:----------:|:----------:|------------|
+| **Button** | Props diretas | - | Efeito principal + overlay |
+| **Link** | - | Props diretas | Efeito + cor de hover |
+| **Hero** | `buttonHover*` | - | Controla primary + secondary |
+| **CTA** | `buttonHover*` | - | Controla primary + secondary |
+| **Navbar** | `buttonHover*` (CTA) | `linkHover*` (nav links) | Controles separados |
+| **Footer** | - | `linkHover*` | Links do footer |
+
+### Props de Button Hover
+
+Usadas em blocos de seção (Hero, CTA, Navbar):
+
+```typescript
+{
+  // Efeito principal ao passar o mouse
+  buttonHoverEffect: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse",
+
+  // Intensidade do efeito (10 a 100)
+  buttonHoverIntensity: number,
+
+  // Efeito extra (overlay animado)
+  buttonHoverOverlay: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow",
+
+  // Ícone (só quando overlay = "icon")
+  buttonHoverIconName: string,  // ex: "arrow-right", "rocket", "sparkles"
+
+  // Tamanho do botão
+  buttonSize: "sm" | "md" | "lg",
+}
+```
+
+No bloco **Button** standalone, as props são sem prefixo `button`:
+
+```typescript
+{
+  hoverEffect: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse",
+  hoverIntensity: number,
+  hoverOverlay: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow",
+  hoverIconName: string,
+}
+```
+
+### Props de Link Hover
+
+Usadas em Navbar, Footer e bloco Link:
+
+```typescript
+{
+  // Efeito ao passar o mouse nos links
+  linkHoverEffect: "none" | "background" | "underline" | "underline-center" | "slide-bg" | "scale" | "glow",
+
+  // Intensidade do efeito (10 a 100)
+  linkHoverIntensity: number,
+
+  // Cor aplicada no hover
+  linkHoverColor: string,  // ex: "#6366f1"
+}
+```
+
+No bloco **Link** standalone, as props são sem prefixo `link`:
+
+```typescript
+{
+  hoverEffect: "none" | "background" | "underline" | "underline-center" | "scale" | "glow",
+  hoverIntensity: number,
+  hoverColor: string,
+}
+```
+
+### Referência Visual dos Efeitos
+
+**Button Hover Effects:**
+
+| Valor | Descrição |
+|-------|-----------|
+| `none` | Sem efeito |
+| `darken` | Escurece o botão + leve elevação |
+| `lighten` | Clareia o botão + leve elevação |
+| `scale` | Aumenta levemente o tamanho |
+| `glow` | Brilho neon colorido ao redor |
+| `shadow` | Sombra elevada dramática |
+| `pulse` | Animação de pulso infinita |
+
+**Button Overlay Effects (extras):**
+
+| Valor | Descrição |
+|-------|-----------|
+| `none` | Sem overlay |
+| `shine` | Faixa de luz deslizando sobre o botão |
+| `fill` | Preenchimento de cor da esquerda para direita |
+| `bounce` | Pequeno salto animado |
+| `icon` | Ícone que aparece ao passar o mouse |
+| `border-glow` | Borda com brilho pulsante |
+
+**Link Hover Effects:**
+
+| Valor | Descrição |
+|-------|-----------|
+| `none` | Apenas mudança de cor |
+| `background` | Fundo colorido aparece |
+| `underline` | Sublinhado desliza da esquerda para direita |
+| `underline-center` | Sublinhado cresce do centro para as pontas |
+| `slide-bg` | Fundo desliza de baixo para cima |
+| `scale` | Texto aumenta levemente |
+| `glow` | Brilho neon ao redor do texto |
+
+### Ícones Disponíveis (para `buttonHoverIconName`)
+
+Quando `buttonHoverOverlay: "icon"`, escolha entre 28 ícones:
+
+- **Navegação**: `arrow-right` (default), `chevron-right`, `external-link`
+- **Ações**: `plus`, `check`, `download`, `send`, `play`
+- **Expressivos**: `star`, `heart`, `zap`, `sparkles`, `rocket`, `fire`, `gift`, `trophy`
+- **Comunicação**: `mail`, `phone`
+- **E-commerce**: `cart`, `tag`
+- **Interface**: `eye`, `lock`, `user`, `settings`
+
+### Arquivos-Chave do Sistema
+
+| Arquivo | Conteúdo |
+|---------|----------|
+| `src/engine/shared/hoverEffects/types.ts` | Tipos e interfaces |
+| `src/engine/shared/hoverEffects/buttonHover.ts` | Gerador de CSS para button hover |
+| `src/engine/shared/hoverEffects/linkHover.ts` | Gerador de CSS para link hover |
+| `src/engine/shared/hoverEffects/index.ts` | Barrel exports |
+
+---
+
+## Criando Templates
+
+Templates são `SiteDocument` estáticos com blocos pré-configurados, usados como ponto de partida no editor.
+
+### Estrutura de um Template
+
+```typescript
+// src/shared/templates/meu-template.ts
+import type { SiteDocument } from "../schema";
+import { NAVBAR_DEFAULT_PROPS } from "../../engine/registry/blocks/sections/navbar";
+
+export const meuTemplate: SiteDocument = {
+  meta: {
+    title: "Meu Template",
+    description: "Descrição curta do template",
+    language: "pt-BR",
+  },
+  theme: {
+    colors: { primary: "#3b82f6", secondary: "#64748b", /* ... */ },
+    typography: { fontFamily: "Inter, system-ui, sans-serif", /* ... */ },
+    spacing: { unit: "0.25rem", scale: [0, 1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64] },
+    effects: { borderRadius: "0.75rem", shadow: "...", shadowLg: "...", transition: "all 0.3s ease" },
+  },
+  structure: [
+    // Blocos aqui...
+  ],
+};
+```
+
+### Checklist para Novo Template
+
+1. Criar arquivo em `src/shared/templates/meu-template.ts`
+2. Registrar em `src/shared/templates/index.ts`:
+   - Import + re-export
+   - Adicionar à `templateList[]` (com `id`, `name`, `description`, `category`, `tags`, `preview`)
+   - Adicionar ao mapa `templates`
+3. Atualizar `src/shared/schema.ts` se criou novos tipos de bloco
+
+### Hover Effects em Templates
+
+Sempre adicionar hover effects aos blocos que suportam para que o template fique interativo e profissional. Use efeitos coerentes entre si (mesma "família" de efeitos).
+
+**Exemplo completo — Navbar com hover effects:**
+
+```typescript
+{
+  id: "meu-navbar",
+  type: "navbar",
+  props: {
+    ...NAVBAR_DEFAULT_PROPS,
+    links: [
+      { text: "Home", href: "/site/p/home" },
+      { text: "Sobre", href: "#sobre" },
+    ],
+    ctaButton: { text: "Contato", href: "#contato" },
+    bg: "#ffffff",
+    // Link hover: sublinhado deslizante na cor primária
+    linkHoverEffect: "underline",
+    linkHoverIntensity: 60,
+    linkHoverColor: "#6366f1",
+    // CTA button hover: scale + brilho
+    buttonHoverEffect: "scale",
+    buttonHoverIntensity: 50,
+    buttonHoverOverlay: "shine",
+  },
+},
+```
+
+**Exemplo — Hero com hover effects nos botões:**
+
+```typescript
+{
+  id: "meu-hero",
+  type: "hero",
+  props: {
+    variation: "hero-split",
+    variant: "split",
+    title: "Título Impactante",
+    description: "Descrição do produto ou serviço.",
+    primaryButton: { text: "Começar", href: "#cta" },
+    secondaryButton: { text: "Saiba Mais", href: "#sobre" },
+    background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)",
+    // Button hover: glow neon + shine overlay
+    buttonHoverEffect: "glow",
+    buttonHoverIntensity: 60,
+    buttonHoverOverlay: "shine",
+  },
+},
+```
+
+**Exemplo — CTA com hover effects:**
+
+```typescript
+{
+  id: "meu-cta",
+  type: "cta",
+  props: {
+    title: "Pronto para começar?",
+    primaryButton: { text: "Começar Agora", href: "#contato" },
+    secondaryButton: { text: "Ver Planos" },
+    variant: "gradient",
+    // Button hover: scale + shine
+    buttonHoverEffect: "scale",
+    buttonHoverIntensity: 50,
+    buttonHoverOverlay: "shine",
+  },
+},
+```
+
+**Exemplo — Footer com hover effects nos links:**
+
+```typescript
+{
+  id: "meu-footer",
+  type: "footer",
+  props: {
+    logoText: "Minha Marca",
+    variant: "multi-column",
+    columns: [ /* ... */ ],
+    // Link hover: sublinhado do centro, cor mais suave
+    linkHoverEffect: "underline-center",
+    linkHoverIntensity: 50,
+    linkHoverColor: "#818cf8",
+  },
+},
+```
+
+### Combinações Recomendadas por Estilo
+
+| Estilo | Button Effect | Button Overlay | Link Effect | Notas |
+|--------|:----------:|:----------:|:----------:|-------|
+| **Corporativo** | `scale` | `shine` | `underline` | Elegante e discreto |
+| **Tech/SaaS** | `glow` | `shine` | `underline-center` | Moderno, efeito neon |
+| **Criativo** | `shadow` | `fill` | `slide-bg` | Dramático e visual |
+| **Minimalista** | `lighten` | `none` | `underline` | Limpo, quase sem overlay |
+| **E-commerce** | `scale` | `icon` (cart) | `background` | Ícone incentiva ação |
+| **Educação** | `darken` | `bounce` | `underline-center` | Amigável e convidativo |

@@ -67,6 +67,10 @@ export type BlockType =
   | "blogPostCard"
   | "blogPostGrid"
   | "blogPostDetail"
+  // Seções avançadas
+  | "productShowcase"
+  | "aboutSection"
+  | "contactSection"
   // Formulários
   | "form"
   | "input"
@@ -1072,6 +1076,101 @@ export interface BlogPostDetailBlock extends BlockBase {
 }
 
 // ============================================================================
+// SEÇÕES AVANÇADAS
+// ============================================================================
+
+/**
+ * ProductShowcase - Seção de produtos com layout alternado
+ */
+export interface ProductShowcaseBlock extends BlockBase {
+  type: "productShowcase";
+  props: {
+    title?: string;
+    subtitle?: string;
+    products: Array<{
+      image?: string;
+      icon?: string;
+      badge?: string;
+      name: string;
+      description: string;
+      longDescription?: string;
+      features?: string[];
+      primaryButton?: { text: string; href?: string };
+      secondaryButton?: { text: string; href?: string };
+    }>;
+    variant?: "alternating" | "grid" | "stacked";
+    bg?: string;
+    // Button Hover Effects
+    buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse";
+    buttonHoverIntensity?: number;
+    buttonHoverOverlay?: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow";
+    buttonHoverIconName?: string;
+  };
+}
+
+/**
+ * AboutSection - Seção sobre com imagem decorativa + texto + achievements
+ */
+export interface AboutSectionBlock extends BlockBase {
+  type: "aboutSection";
+  props: {
+    title?: string;
+    subtitle?: string;
+    description?: string;
+    secondaryDescription?: string;
+    image?: string;
+    achievements?: Array<{
+      text: string;
+    }>;
+    primaryButton?: { text: string; href?: string };
+    variant?: "image-left" | "image-right" | "centered";
+    bg?: string;
+    stats?: Array<{
+      value: string;
+      label: string;
+    }>;
+    // Button Hover Effects
+    buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse";
+    buttonHoverIntensity?: number;
+    buttonHoverOverlay?: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow";
+    buttonHoverIconName?: string;
+  };
+}
+
+/**
+ * ContactSection - Seção de contato com info cards + formulário
+ */
+export interface ContactSectionBlock extends BlockBase {
+  type: "contactSection";
+  props: {
+    title?: string;
+    subtitle?: string;
+    description?: string;
+    contactInfo?: Array<{
+      icon?: string;
+      label: string;
+      value: string;
+    }>;
+    formTitle?: string;
+    formFields?: Array<{
+      name: string;
+      label: string;
+      type: "text" | "email" | "tel" | "textarea";
+      placeholder?: string;
+      required?: boolean;
+    }>;
+    submitText?: string;
+    variant?: "split" | "stacked" | "form-only";
+    bg?: string;
+    // Button Hover Effects
+    buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse";
+    buttonHoverIntensity?: number;
+    buttonHoverOverlay?: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow";
+    buttonHoverIconName?: string;
+  };
+}
+
+// ============================================================================
 // NOVOS BLOCOS - FORMULÁRIOS
 // ============================================================================
 
@@ -1189,6 +1288,10 @@ export type Block =
   | BlogPostCardBlock
   | BlogPostGridBlock
   | BlogPostDetailBlock
+  // Seções avançadas
+  | ProductShowcaseBlock
+  | AboutSectionBlock
+  | ContactSectionBlock
   // Formulários
   | FormBlock
   | InputBlock

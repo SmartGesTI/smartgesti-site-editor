@@ -57,6 +57,10 @@ export type BlockType =
   | "teamGrid"
   | "courseCardGrid"
   | "categoryCardGrid"
+  // Seções avançadas
+  | "productShowcase"
+  | "aboutSection"
+  | "contactSection"
   // Forms
   | "form"
   | "input"
@@ -106,6 +110,9 @@ export const AVAILABLE_BLOCK_TYPES: readonly BlockType[] = [
   "teamGrid",
   "courseCardGrid",
   "categoryCardGrid",
+  "productShowcase",
+  "aboutSection",
+  "contactSection",
   "form",
   "input",
   "textarea",

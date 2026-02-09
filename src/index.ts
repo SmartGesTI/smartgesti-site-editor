@@ -74,6 +74,11 @@ export type {
   BlogPostGridBlock,
   BlogPostDetailBlock,
 
+  // Advanced sections
+  ProductShowcaseBlock,
+  AboutSectionBlock,
+  ContactSectionBlock,
+
   // Form blocks
   FormBlock,
   InputBlock,

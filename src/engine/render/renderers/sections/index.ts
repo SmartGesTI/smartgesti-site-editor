@@ -22,6 +22,9 @@ import { renderFooter } from "./FooterRenderer";
 import { renderBlogPostCard } from "./BlogPostCardRenderer";
 import { renderBlogPostGrid } from "./BlogPostGridRenderer";
 import { renderBlogPostDetail } from "./BlogPostDetailRenderer";
+import { renderProductShowcase } from "./ProductShowcaseRenderer";
+import { renderAboutSection } from "./AboutSectionRenderer";
+import { renderContactSection } from "./ContactSectionRenderer";
 
 // Registrar renderizadores
 renderRegistry.register("hero", renderHero);
@@ -42,3 +45,6 @@ renderRegistry.register("footer", renderFooter);
 renderRegistry.register("blogPostCard", renderBlogPostCard);
 renderRegistry.register("blogPostGrid", renderBlogPostGrid);
 renderRegistry.register("blogPostDetail", renderBlogPostDetail);
+renderRegistry.register("productShowcase", renderProductShowcase);
+renderRegistry.register("aboutSection", renderAboutSection);
+renderRegistry.register("contactSection", renderContactSection);

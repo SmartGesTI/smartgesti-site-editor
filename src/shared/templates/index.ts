@@ -8,12 +8,14 @@ import { escolaPremiumTemplate } from "./escola-premium";
 import { escolaEdviTemplate } from "./escola-edvi";
 import { escolaZilomTemplate } from "./escola-zilom";
 import { escolaBlogTemplate } from "./escola-blog";
+import { smartgestiAdminTemplate } from "./smartgesti-admin";
 
 // Re-export templates
 export { escolaPremiumTemplate } from "./escola-premium";
 export { escolaEdviTemplate } from "./escola-edvi";
 export { escolaZilomTemplate } from "./escola-zilom";
 export { escolaBlogTemplate } from "./escola-blog";
+export { smartgestiAdminTemplate } from "./smartgesti-admin";
 
 /**
  * Informações sobre templates disponíveis
@@ -101,6 +103,23 @@ export const templateList: TemplateInfo[] = [
     ],
     preview: "https://placehold.co/400x300/4f46e5/white?text=Escola+Blog",
   },
+  {
+    id: "smartgesti-admin",
+    name: "SmartGesti Admin",
+    description:
+      "Landing page profissional para sistema de gestão administrativa – módulos, benefícios, contato e depoimentos",
+    category: "business",
+    tags: [
+      "gestão",
+      "administrativo",
+      "saas",
+      "software",
+      "profissional",
+      "corporativo",
+      "landing page",
+    ],
+    preview: "https://placehold.co/400x300/6366f1/white?text=SmartGesti+Admin",
+  },
 ];
 
 /**
@@ -111,6 +130,7 @@ export const templates = {
   "escola-edvi": escolaEdviTemplate,
   "escola-zilom": escolaZilomTemplate,
   "escola-blog": escolaBlogTemplate,
+  "smartgesti-admin": smartgestiAdminTemplate,
 } as const;
 
 export type TemplateId = keyof typeof templates;

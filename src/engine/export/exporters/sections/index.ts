@@ -35,6 +35,11 @@ import {
   exportBlogPostGrid,
   exportBlogPostDetail,
 } from "./BlogPostExporters";
+import {
+  exportProductShowcase,
+  exportAboutSection,
+  exportContactSection,
+} from "./AdminSectionExporters";
 
 // Referência para renderChild
 import { Block } from "../../../schema/siteDocument";
@@ -68,6 +73,9 @@ htmlExportRegistry.register("teamCard", exportTeamCard);
 htmlExportRegistry.register("courseCardGrid", exportCourseCardGrid);
 htmlExportRegistry.register("countdown", exportCountdown);
 htmlExportRegistry.register("carousel", exportCarousel);
+htmlExportRegistry.register("productShowcase", exportProductShowcase);
+htmlExportRegistry.register("aboutSection", exportAboutSection);
+htmlExportRegistry.register("contactSection", exportContactSection);
 
 // Exporters que precisam de renderChild
 htmlExportRegistry.register("featureGrid", (block, depth, basePath, theme) => {

@@ -11,6 +11,54 @@ import { BlockHeader } from "./BlockHeader";
 import { CollapsiblePropertyGroup } from "./CollapsiblePropertyGroup";
 import type { UploadConfig } from "../LandingPageEditor";
 
+// ============================================================================
+// Theme Color Fallback Map
+// Maps color property names → theme color token keys.
+// Used when block.props[colorProp] and defaultProps[colorProp] are both undefined,
+// so the editor shows the actual theme color instead of #000000.
+// ============================================================================
+
+const THEME_COLOR_FALLBACKS: Record<string, string> = {
+  // Buttons (primary)
+  primaryButtonColor: "primary",
+  buttonColor: "primary",
+  primaryButtonTextColor: "primaryText",
+  buttonTextColor: "primaryText",
+  // Buttons (secondary)
+  secondaryButtonColor: "secondary",
+  secondaryButtonTextColor: "primaryText",
+  // Badge
+  badgeColor: "accent",
+  badgeTextColor: "primaryText",
+  // Links
+  linkColor: "linkColor",
+  linkHoverColor: "primary",
+  // Border
+  borderColor: "border",
+  // Generic text
+  color: "text",
+  // Title/description
+  titleColor: "text",
+  subtitleColor: "mutedText",
+  descriptionColor: "mutedText",
+  // Background (generic)
+  bg: "bg",
+};
+
+/**
+ * Resolve theme color fallback for a color property.
+ * Returns the theme color value if a mapping exists, undefined otherwise.
+ */
+function resolveThemeColorFallback(
+  propName: string,
+  themeColors: Record<string, unknown>,
+): string | undefined {
+  const themeKey = THEME_COLOR_FALLBACKS[propName];
+  if (!themeKey) return undefined;
+  const color = themeColors[themeKey];
+  return typeof color === "string" ? color : undefined;
+}
+
 interface BlockPropertyEditorProps {
   block: Block | null;
   document?: SiteDocument;
@@ -79,12 +127,20 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
         groups[group] = [];
       }
 
-      // Usar valor atual ou fallback para defaultProps
+      // Usar valor atual ou fallback para defaultProps, e depois theme colors
       const currentValue = props[propName];
       // Para campos de cor, também fazer fallback se o valor for string vazia
       const isColorInput = meta.inputType === "color" || meta.inputType === "color-advanced";
       const shouldUseFallback = currentValue === undefined || (isColorInput && currentValue === "");
-      const value = shouldUseFallback ? defaultProps[propName] : currentValue;
+      let value = shouldUseFallback ? defaultProps[propName] : currentValue;
+
+      // Para color inputs sem valor definido, tentar fallback para cor do theme
+      if (value === undefined && isColorInput && document?.theme?.colors) {
+        value = resolveThemeColorFallback(
+          propName,
+          document.theme.colors as unknown as Record<string, unknown>,
+        );
+      }
 
       // Aplicar readOnly de plugin restrictions
       const effectiveMeta = lockedFields.has(propName)
@@ -99,7 +155,7 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
     }
 
     return groups;
-  }, [block, blockDefinition, showWhenContext, lockedFields]);
+  }, [block, blockDefinition, document, showWhenContext, lockedFields]);
 
   // IMPORTANTE: todos os hooks devem ser chamados ANTES de qualquer early return
   const handlePropChange = useCallback((propName: string, value: any) => {
