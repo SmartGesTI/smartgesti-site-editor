@@ -178,49 +178,46 @@ export function LandingPageEditor({
     const primaryText = primaryLight ? "#1f2937" : "#ffffff";
     const menuLinkColor = palette.menuLinkColor || palette.primary;
 
-    // 1. Patch do theme
-    const themePatch = PatchBuilder.updateTheme(document, {
-      colors: {
-        ...document.theme.colors,
-        primary: palette.primary,
-        secondary: palette.secondary,
-        accent: palette.accent,
-        bg: palette.background,
-        surface: palette.surface || document.theme.colors.surface,
-        text: palette.text || document.theme.colors.text,
-        mutedText,
-        primaryText,
-        linkColor: palette.linkColor || palette.primary, // Links gerais
-        menuLinkColor, // Links do menu navbar
-      },
-    });
+    // Construir todas as operações de patch em um único array
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allPatches: Array<{ op: "replace"; path: string; value: any }> = [];
 
-    // 2. Atualizar cores de links e botões em todos os navbars
-    const navbarPatches: typeof themePatch = [];
-    for (const page of (document.pages || [])) {
-      for (const block of (page.structure || [])) {
-        if (block.type === "navbar") {
-          try {
-            const blockPatch = PatchBuilder.updateBlockProps(
-              document,
-              page.id,
-              block.id,
-              {
-                linkColor: menuLinkColor,
-                linkHoverColor: palette.primary,
-                buttonColor: palette.primary,
-                buttonTextColor: primaryText,
-              }
-            );
-            navbarPatches.push(...blockPatch);
-          } catch (error) {
-            logger.error("Error updating navbar palette:", error);
-          }
+    // 1. Theme color updates
+    const themeColors = document.theme.colors;
+    const newColors: Record<string, string> = {
+      primary: palette.primary,
+      secondary: palette.secondary,
+      accent: palette.accent,
+      bg: palette.background,
+      surface: palette.surface || themeColors.surface || "#f8fafc",
+      text: palette.text || themeColors.text || "#1e293b",
+      mutedText,
+      primaryText,
+      linkColor: palette.linkColor || palette.primary,
+      menuLinkColor,
+    };
+    for (const [key, value] of Object.entries(newColors)) {
+      allPatches.push({ op: "replace", path: `/theme/colors/${key}`, value });
+    }
+
+    // 2. Navbar link/button color updates (todas as páginas)
+    for (let pageIdx = 0; pageIdx < document.pages.length; pageIdx++) {
+      const page = document.pages[pageIdx];
+      if (!page?.structure) continue;
+      for (let blockIdx = 0; blockIdx < page.structure.length; blockIdx++) {
+        if (page.structure[blockIdx].type === "navbar") {
+          const base = `/pages/${pageIdx}/structure/${blockIdx}/props`;
+          allPatches.push(
+            { op: "replace", path: `${base}/linkColor`, value: menuLinkColor },
+            { op: "replace", path: `${base}/linkHoverColor`, value: palette.primary },
+            { op: "replace", path: `${base}/buttonColor`, value: palette.primary },
+            { op: "replace", path: `${base}/buttonTextColor`, value: primaryText },
+          );
         }
       }
     }
 
-    applyChange([...themePatch, ...navbarPatches], "Update color palette");
+    applyChange(allPatches, "Update color palette");
   }, [document, applyChange]);
 
   // Handler para clique no preview (com grupo opcional para scroll-to-group)

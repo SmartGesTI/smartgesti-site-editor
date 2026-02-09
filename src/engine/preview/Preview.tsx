@@ -549,6 +549,14 @@ export function Preview({
       return;
     }
 
+    // Se o theme mudou, forçar reload completo (CSS variables precisam ser regeneradas)
+    const prevThemeJson = previousDocRef.current ? JSON.stringify(previousDocRef.current.theme) : null;
+    const currThemeJson = JSON.stringify(document.theme);
+    if (prevThemeJson !== currThemeJson) {
+      updateFullPreview(document, false);
+      return;
+    }
+
     // Detectar mudanças na página atual
     const changedBlocks = detectChangedBlocks(
       previousDocRef.current || document,
