@@ -283,17 +283,23 @@ export function LandingPageViewer({
     hydratePageWithContent(pageToHydrate, providerMap, urlParams)
       .then((hydratedPage) => {
         if (stale) return;
+
+        // useCache: false — hydrated page has different block props than the
+        // cached static render. Without this, exportPageToHtml returns the
+        // cached static HTML (same page.id + docHash = same cache key).
         const html = renderPageToHtml(
           hydratedPage,
           document,
           schoolSlug,
           pages,
+          false,
         );
+
         setHydratedHtml(html ?? null);
       })
       .catch((err) => {
         if (!stale) {
-          logger.error("Error hydrating page:", err);
+          logger.error("Error in content hydration:", err);
           setHydratedHtml(null);
         }
       });
@@ -464,12 +470,18 @@ export function LandingPageViewer({
 /**
  * Generates HTML from a page using the standard export pipeline.
  * Extracted to reuse for both static and hydrated pages.
+ *
+ * @param useCache - Pass false for hydrated pages to bypass the export cache.
+ *   The cache key uses page.id + docHash, which is identical for static and
+ *   hydrated renders of the same page. Hydrated pages have different block
+ *   props (real data), so they must skip the cache to avoid getting stale HTML.
  */
 function renderPageToHtml(
   page: SitePage,
   document: SiteDocument,
   schoolSlug?: string,
   allPages?: SitePage[],
+  useCache: boolean = true,
 ): string | null {
   // Garantir structure para o export (evita erro se página vier sem structure)
   const pageWithStructure = {
@@ -523,7 +535,7 @@ function renderPageToHtml(
     const html = exportPageToHtml(
       pageWithStructure,
       documentWithTheme,
-      true,
+      useCache,
       basePath,
       layoutFromPage ? { layoutFromPage } : undefined,
     );
