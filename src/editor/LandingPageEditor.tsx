@@ -169,13 +169,17 @@ export function LandingPageEditor({
   );
 
   // Handler para atualizar paleta de cores (inclui mutedText, primaryText, linkColor e menuLinkColor)
+  // Também atualiza links e botões do navbar para refletir a paleta escolhida
   const handlePaletteChange = useCallback((palette: any) => {
     if (!document) return;
     const bgLight = isLightColor(palette.background ?? "#ffffff");
     const primaryLight = isLightColor(palette.primary ?? "#3b82f6");
     const mutedText = bgLight ? "#6b7280" : "#9ca3af";
     const primaryText = primaryLight ? "#1f2937" : "#ffffff";
-    const patch = PatchBuilder.updateTheme(document, {
+    const menuLinkColor = palette.menuLinkColor || palette.primary;
+
+    // 1. Patch do theme
+    const themePatch = PatchBuilder.updateTheme(document, {
       colors: {
         ...document.theme.colors,
         primary: palette.primary,
@@ -187,10 +191,36 @@ export function LandingPageEditor({
         mutedText,
         primaryText,
         linkColor: palette.linkColor || palette.primary, // Links gerais
-        menuLinkColor: palette.menuLinkColor || palette.primary, // Links do menu navbar
+        menuLinkColor, // Links do menu navbar
       },
     });
-    applyChange(patch, "Update color palette");
+
+    // 2. Atualizar cores de links e botões em todos os navbars
+    const navbarPatches: typeof themePatch = [];
+    for (const page of (document.pages || [])) {
+      for (const block of (page.structure || [])) {
+        if (block.type === "navbar") {
+          try {
+            const blockPatch = PatchBuilder.updateBlockProps(
+              document,
+              page.id,
+              block.id,
+              {
+                linkColor: menuLinkColor,
+                linkHoverColor: palette.primary,
+                buttonColor: palette.primary,
+                buttonTextColor: primaryText,
+              }
+            );
+            navbarPatches.push(...blockPatch);
+          } catch (error) {
+            logger.error("Error updating navbar palette:", error);
+          }
+        }
+      }
+    }
+
+    applyChange([...themePatch, ...navbarPatches], "Update color palette");
   }, [document, applyChange]);
 
   // Handler para clique no preview (com grupo opcional para scroll-to-group)
