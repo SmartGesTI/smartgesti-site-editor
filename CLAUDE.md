@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Modelos para Subagentes
+
+- **Planejamento e exploracao de codigo**: Sempre usar `model: opus` (Opus 4.6)
+- **Tarefas estruturadas** (criar tasks, editar arquivos simples): Pode usar `model: sonnet`
+
 ## Project Overview
 
 SmartGesti Site Editor is a shared React component library for building landing pages. Published as `@brunoalz/smartgesti-site-editor` on NPM, it provides a block-based site editor with drag-and-drop, HTML export for static site generation, multi-tenant asset management with Supabase Storage, and pre-built templates for schools and portfolios.
