@@ -86,6 +86,8 @@ export type {
   // Blog plugin blocks (new)
   BlogCategoryFilterBlock,
   BlogSearchBarBlock,
+  BlogRecentPostsBlock,
+  BlogTagCloudBlock,
 
   // SEO
   PageSeoConfig,

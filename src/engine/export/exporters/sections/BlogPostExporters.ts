@@ -278,7 +278,13 @@ export function exportBlogPostDetail(
     showTags = true,
     showReadingTime = true,
     contentMaxWidth = "720px",
+    authorName,
+    authorAvatar,
+    authorBio,
   } = (block as any).props;
+
+  const displayName = escapeHtml(authorName || "Nome do Autor");
+  const displayBio = authorBio ? escapeHtml(authorBio) : "";
 
   // Featured image banner
   const featuredImageHtml =
@@ -307,19 +313,24 @@ export function exportBlogPostDetail(
     ? `<div class="sg-blog-post-content" style="font-size: 1.0625rem; line-height: 1.75; color: var(--sg-text);">${content}</div>`
     : "";
 
-  // Author — placeholder structure (real data injected by ContentProvider at runtime)
-  const avatarPlaceholder = `<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg, var(--sg-primary, #6366f1) 0%, #818cf8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--sg-primary-text, #fff);font-size:1.5rem;font-weight:700;">A</div>`;
-  const avatarSmall = `<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg, var(--sg-primary, #6366f1) 0%, #818cf8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--sg-primary-text, #fff);font-size:1.1rem;font-weight:700;">A</div>`;
+  // Author avatar — real image or placeholder
+  const avatarLargeHtml = authorAvatar
+    ? `<img src="${escapeHtml(authorAvatar)}" alt="${displayName}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;" />`
+    : `<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg, var(--sg-primary, #6366f1) 0%, #818cf8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--sg-primary-text, #fff);font-size:1.5rem;font-weight:700;">${displayName.charAt(0).toUpperCase()}</div>`;
+  const avatarSmallHtml = authorAvatar
+    ? `<img src="${escapeHtml(authorAvatar)}" alt="${displayName}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;" />`
+    : `<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg, var(--sg-primary, #6366f1) 0%, #818cf8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--sg-primary-text, #fff);font-size:1.1rem;font-weight:700;">${displayName.charAt(0).toUpperCase()}</div>`;
 
   let authorHtml = "";
   if (showAuthor) {
+    const bioHtml = displayBio ? `<p style="color:var(--sg-muted-text);font-size:0.875rem;margin:0.25rem 0 0;">${displayBio}</p>` : "";
     if (authorVariant === "card") {
-      authorHtml = `<div data-block-group="Autor" style="display:flex;align-items:flex-start;gap:1rem;margin-top:3rem;padding:1.25rem;border-radius:var(--sg-card-radius, 0.75rem);background-color:var(--sg-surface, #f9fafb);">${avatarPlaceholder}<div><div style="font-size:0.75rem;color:var(--sg-muted-text);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.125rem;">Escrito por</div><div style="font-weight:600;font-size:1rem;">Nome do Autor</div><p style="color:var(--sg-muted-text);font-size:0.875rem;margin:0.25rem 0 0;">Bio do autor carregada do banco de dados.</p></div></div>`;
+      authorHtml = `<div data-block-group="Autor" style="display:flex;align-items:flex-start;gap:1rem;margin-top:3rem;padding:1.25rem;border-radius:var(--sg-card-radius, 0.75rem);background-color:var(--sg-surface, #f9fafb);">${avatarLargeHtml}<div><div style="font-size:0.75rem;color:var(--sg-muted-text);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.125rem;">Escrito por</div><div style="font-weight:600;font-size:1rem;">${displayName}</div>${bioHtml}</div></div>`;
     } else if (authorVariant === "minimal") {
-      authorHtml = `<p data-block-group="Autor" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--sg-border, #e5e7eb);color:var(--sg-muted-text);font-size:0.9375rem;">Escrito por <span style="font-weight:600;color:var(--sg-text);">Nome do Autor</span></p>`;
+      authorHtml = `<p data-block-group="Autor" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--sg-border, #e5e7eb);color:var(--sg-muted-text);font-size:0.9375rem;">Escrito por <span style="font-weight:600;color:var(--sg-text);">${displayName}</span></p>`;
     } else {
       // inline (default)
-      authorHtml = `<div data-block-group="Autor" style="display:flex;align-items:center;gap:0.75rem;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--sg-border, #e5e7eb);">${avatarSmall}<div><div style="font-size:0.75rem;color:var(--sg-muted-text);">Escrito por</div><div style="font-weight:600;font-size:0.9375rem;">Nome do Autor</div></div></div>`;
+      authorHtml = `<div data-block-group="Autor" style="display:flex;align-items:center;gap:0.75rem;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--sg-border, #e5e7eb);">${avatarSmallHtml}<div><div style="font-size:0.75rem;color:var(--sg-muted-text);">Escrito por</div><div style="font-weight:600;font-size:0.9375rem;">${displayName}</div></div></div>`;
     }
   }
 
@@ -472,4 +483,97 @@ export function exportBlogSearchBar(
   const inputHtml = `<div style="position:relative;width:100%;max-width:400px;">${searchIconSvg}<input type="search" name="busca" placeholder="${escapeHtml(placeholder)}" style="width:100%;${inputPadding}padding-right:1rem;padding-top:0.625rem;padding-bottom:0.625rem;font-size:0.875rem;border:1px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);outline:none;" /></div>`;
 
   return `<form ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" action="${escapeHtml(searchUrl)}" method="get" style="padding:1.5rem 0;background-color:var(--sg-bg);"><div style="max-width:1200px;margin:0 auto;padding:0 1rem;">${inputHtml}</div></form>`;
+}
+
+// ---------------------------------------------------------------------------
+// BlogRecentPosts
+// ---------------------------------------------------------------------------
+
+export function exportBlogRecentPosts(
+  block: Block,
+  _depth: number,
+  _basePath?: string,
+  _theme?: ThemeTokens,
+): string {
+  const {
+    title = "Posts Recentes",
+    posts = [],
+    showThumbnail = true,
+    showDate = true,
+    showCategory = false,
+  } = (block as any).props;
+
+  const titleHtml = title
+    ? `<div style="padding:1rem 1.25rem;border-bottom:1px solid var(--sg-border, #e5e7eb);"><h3 style="font-size:1rem;font-weight:600;margin:0;color:var(--sg-text);">${escapeHtml(title)}</h3></div>`
+    : "";
+
+  let contentHtml = "";
+  if (posts.length === 0) {
+    contentHtml = `<p style="padding:1.5rem 1.25rem;color:var(--sg-muted-text);font-size:0.875rem;text-align:center;margin:0;">Nenhum post recente</p>`;
+  } else {
+    const itemsHtml = posts
+      .map((post: any) => {
+        const imgHtml =
+          showThumbnail && post.image
+            ? `<img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" style="width:64px;height:64px;object-fit:cover;border-radius:var(--sg-card-radius, 0.5rem);flex-shrink:0;" />`
+            : "";
+
+        const metaParts: string[] = [];
+        if (showDate && post.date) metaParts.push(escapeHtml(post.date));
+        if (showCategory && post.category) metaParts.push(`<span style="font-size:0.6875rem;color:var(--sg-primary);font-weight:600;text-transform:uppercase;letter-spacing:0.03em;">${escapeHtml(post.category)}</span>`);
+        const metaHtml = metaParts.length
+          ? `<div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.25rem;font-size:0.75rem;color:var(--sg-muted-text);">${metaParts.join("")}</div>`
+          : "";
+
+        return `<a href="/site/p/blog/${escapeHtml(post.slug)}" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1.25rem;text-decoration:none;color:inherit;">${imgHtml}<div style="flex:1;min-width:0;"><div style="font-size:0.875rem;font-weight:500;color:var(--sg-text);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(post.title)}</div>${metaHtml}</div></a>`;
+      })
+      .join("");
+    contentHtml = itemsHtml;
+  }
+
+  return `<div ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="background-color:var(--sg-bg);border-radius:var(--sg-card-radius, 0.75rem);border:1px solid var(--sg-border, #e5e7eb);overflow:hidden;">${titleHtml}<div style="padding:0.5rem 0;">${contentHtml}</div></div>`;
+}
+
+// ---------------------------------------------------------------------------
+// BlogTagCloud
+// ---------------------------------------------------------------------------
+
+export function exportBlogTagCloud(
+  block: Block,
+  _depth: number,
+  _basePath?: string,
+  _theme?: ThemeTokens,
+): string {
+  const {
+    title = "Tags",
+    tags = [],
+    variant = "badges",
+  } = (block as any).props;
+
+  const titleHtml = title
+    ? `<div style="padding:1rem 1.25rem;border-bottom:1px solid var(--sg-border, #e5e7eb);"><h3 style="font-size:1rem;font-weight:600;margin:0;color:var(--sg-text);">${escapeHtml(title)}</h3></div>`
+    : "";
+
+  let contentHtml = "";
+  if (tags.length === 0) {
+    contentHtml = `<p style="color:var(--sg-muted-text);font-size:0.875rem;text-align:center;margin:0;">Nenhuma tag encontrada</p>`;
+  } else if (variant === "badges") {
+    const badgesHtml = tags
+      .map(
+        (tag: any) =>
+          `<span style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.3rem 0.75rem;border-radius:9999px;font-size:0.8125rem;font-weight:500;background-color:var(--sg-surface, #f3f4f6);color:var(--sg-text);">${escapeHtml(tag.name)}<span style="font-size:0.6875rem;color:var(--sg-muted-text);opacity:0.7;">(${tag.count})</span></span>`,
+      )
+      .join("");
+    contentHtml = `<div style="display:flex;flex-wrap:wrap;gap:0.5rem;">${badgesHtml}</div>`;
+  } else {
+    const listHtml = tags
+      .map(
+        (tag: any) =>
+          `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border-radius:var(--sg-card-radius, 0.5rem);font-size:0.875rem;color:var(--sg-text);"><span>${escapeHtml(tag.name)}</span><span style="font-size:0.75rem;color:var(--sg-muted-text);background-color:var(--sg-surface, #f3f4f6);padding:0.125rem 0.5rem;border-radius:9999px;">${tag.count}</span></div>`,
+      )
+      .join("");
+    contentHtml = `<div style="display:flex;flex-direction:column;gap:0.25rem;">${listHtml}</div>`;
+  }
+
+  return `<div ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="background-color:var(--sg-bg);border-radius:var(--sg-card-radius, 0.75rem);border:1px solid var(--sg-border, #e5e7eb);overflow:hidden;">${titleHtml}<div style="padding:1rem 1.25rem;">${contentHtml}</div></div>`;
 }

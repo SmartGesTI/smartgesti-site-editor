@@ -20,6 +20,12 @@ export const gridBlock: BlockDefinition = {
       max: 12,
       group: "Layout",
     },
+    colTemplate: {
+      label: "Template de Colunas",
+      description: "CSS grid-template-columns (ex: '1fr 320px'). Se definido, sobrescreve 'Colunas'.",
+      inputType: "text",
+      group: "Layout",
+    },
     gap: {
       label: "Gap",
       inputType: "text",

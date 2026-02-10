@@ -69,6 +69,8 @@ export type BlockType =
   | "blogPostDetail"
   | "blogCategoryFilter"
   | "blogSearchBar"
+  | "blogRecentPosts"
+  | "blogTagCloud"
   // Seções avançadas
   | "productShowcase"
   | "aboutSection"
@@ -121,6 +123,8 @@ export interface GridBlock extends BlockBase {
   type: "grid";
   props: {
     cols?: number | { sm?: number; md?: number; lg?: number };
+    /** CSS grid-template-columns override (ex: "1fr 320px", "2fr 1fr"). Tem prioridade sobre cols. */
+    colTemplate?: string;
     gap?: string;
     children?: Block[];
   };
@@ -1078,6 +1082,12 @@ export interface BlogPostDetailBlock extends BlockBase {
     showTags?: boolean;
     showReadingTime?: boolean;
     contentMaxWidth?: string;
+    /** Nome do autor (populado pela hydration, editável no admin) */
+    authorName?: string;
+    /** Avatar URL do autor */
+    authorAvatar?: string;
+    /** Bio curta do autor */
+    authorBio?: string;
     // SEO fields (populated by ContentProvider, readOnly in editor)
     metaTitle?: string;
     metaDescription?: string;
@@ -1117,6 +1127,48 @@ export interface BlogSearchBarBlock extends BlockBase {
     filterCategories?: boolean;
     filterTags?: boolean;
     filterDate?: boolean;
+  };
+}
+
+/**
+ * BlogRecentPosts - Widget com os posts mais recentes do blog
+ */
+export interface BlogRecentPostsBlock extends BlockBase {
+  type: "blogRecentPosts";
+  props: {
+    /** Título do widget (ex: "Posts Recentes") */
+    title?: string;
+    /** Quantidade de posts a exibir */
+    count?: number;
+    /** Posts hidratados pela contentHydration */
+    posts?: Array<{
+      title: string;
+      slug: string;
+      date?: string;
+      image?: string;
+      category?: string;
+    }>;
+    /** Mostrar miniatura */
+    showThumbnail?: boolean;
+    /** Mostrar data */
+    showDate?: boolean;
+    /** Mostrar badge de categoria */
+    showCategory?: boolean;
+  };
+}
+
+/**
+ * BlogTagCloud - Widget com nuvem de tags do blog
+ */
+export interface BlogTagCloudBlock extends BlockBase {
+  type: "blogTagCloud";
+  props: {
+    /** Título do widget (ex: "Tags") */
+    title?: string;
+    /** Tags hidratadas pela contentHydration — array de {name, count} */
+    tags?: Array<{ name: string; count: number }>;
+    /** Estilo: "badges" | "list" */
+    variant?: "badges" | "list";
   };
 }
 
@@ -1335,6 +1387,8 @@ export type Block =
   | BlogPostDetailBlock
   | BlogCategoryFilterBlock
   | BlogSearchBarBlock
+  | BlogRecentPostsBlock
+  | BlogTagCloudBlock
   // Seções avançadas
   | ProductShowcaseBlock
   | AboutSectionBlock

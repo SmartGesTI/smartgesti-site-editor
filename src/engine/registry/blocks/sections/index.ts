@@ -29,3 +29,5 @@ export * from "./blogSearchBar";
 export * from "./productShowcase";
 export * from "./aboutSection";
 export * from "./contactSection";
+export * from "./blogRecentPosts";
+export * from "./blogTagCloud";

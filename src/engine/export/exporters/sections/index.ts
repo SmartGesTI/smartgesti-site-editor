@@ -36,6 +36,8 @@ import {
   exportBlogPostDetail,
   exportBlogCategoryFilter,
   exportBlogSearchBar,
+  exportBlogRecentPosts,
+  exportBlogTagCloud,
 } from "./BlogPostExporters";
 import {
   exportProductShowcase,
@@ -73,6 +75,8 @@ htmlExportRegistry.register("blogPostCard", exportBlogPostCard);
 htmlExportRegistry.register("blogPostDetail", exportBlogPostDetail);
 htmlExportRegistry.register("blogCategoryFilter", exportBlogCategoryFilter);
 htmlExportRegistry.register("blogSearchBar", exportBlogSearchBar);
+htmlExportRegistry.register("blogRecentPosts", exportBlogRecentPosts);
+htmlExportRegistry.register("blogTagCloud", exportBlogTagCloud);
 htmlExportRegistry.register("teamCard", exportTeamCard);
 htmlExportRegistry.register("courseCardGrid", exportCourseCardGrid);
 htmlExportRegistry.register("countdown", exportCountdown);

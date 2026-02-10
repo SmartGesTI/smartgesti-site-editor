@@ -186,6 +186,7 @@ function hydrateGridBlock(
 
 /**
  * Hydrates a single-mode page: fetches one item and populates detail blocks.
+ * Also fetches sidebar data (recent posts, tags, categories) for widgets.
  */
 async function hydrateSinglePage(
   page: SitePage,
@@ -201,10 +202,58 @@ async function hydrateSinglePage(
 
   const blockProps = provider.toBlockProps(item);
 
-  // Hydrate all detail blocks on the page
-  const hydratedStructure = page.structure.map((block) =>
-    hydrateDetailBlock(block, blockProps, item),
-  );
+  // Fetch recent posts for sidebar widgets
+  let recentPosts: Array<{ title: string; slug: string; date?: string; image?: string; category?: string }> = [];
+  let tagCloud: Array<{ name: string; count: number }> = [];
+  let sidebarCardProps: Record<string, unknown>[] = [];
+
+  try {
+    const recentResult = await provider.fetchList({ limit: 10, sort: 'published_at' });
+    const allItems = recentResult.items || [];
+
+    // Map to card props for category filter hydration
+    sidebarCardProps = allItems.map((i) => provider.toBlockProps(i));
+
+    // Map recent posts (exclude current post)
+    recentPosts = allItems
+      .filter((i) => i.slug !== idOrSlug && i.slug)
+      .slice(0, 5)
+      .map((i) => {
+        const d = i.data as Record<string, any>;
+        return {
+          title: (d.title as string) ?? '',
+          slug: i.slug as string,
+          date: i.metadata?.publishedAt
+            ? new Date(i.metadata.publishedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+            : undefined,
+          image: (d.featuredImage as string) ?? undefined,
+          category: (d.category as string) ?? undefined,
+        };
+      });
+
+    // Extract tags from all posts
+    const allTags = new Map<string, number>();
+    for (const i of allItems) {
+      const tags = (i.data as Record<string, any>).tags as string[] | undefined;
+      if (tags) {
+        for (const tag of tags) {
+          allTags.set(tag, (allTags.get(tag) ?? 0) + 1);
+        }
+      }
+    }
+    tagCloud = Array.from(allTags.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  } catch (err) {
+    logger.warn(`Failed to fetch sidebar data for page "${page.id}":`, err);
+  }
+
+  // Hydrate all blocks on the page
+  const hydratedStructure = page.structure
+    .map((block) => hydrateDetailBlock(block, blockProps, item))
+    .map((block) => hydrateRecentPostsBlock(block, recentPosts))
+    .map((block) => hydrateTagCloudBlock(block, tagCloud))
+    .map((block) => hydrateCategoryFilterBlock(block, sidebarCardProps));
 
   // Extract SEO from content item and set on page
   const seo = extractSeoFromContent(item, blockProps);
@@ -289,6 +338,74 @@ function extractSeoFromContent(
     ogImage,
     ogType: "article",
   };
+}
+
+/**
+ * Hydrates blogRecentPosts blocks with recent post data.
+ */
+function hydrateRecentPostsBlock(
+  block: Block,
+  recentPosts: Array<{ title: string; slug: string; date?: string; image?: string; category?: string }>,
+): Block {
+  if (block.type === "blogRecentPosts") {
+    return {
+      ...block,
+      props: {
+        ...block.props,
+        posts: recentPosts,
+      },
+    } as Block;
+  }
+
+  // Recurse into children
+  const props = block.props as Record<string, unknown>;
+  if (props.children && Array.isArray(props.children)) {
+    return {
+      ...block,
+      props: {
+        ...props,
+        children: (props.children as Block[]).map((child) =>
+          hydrateRecentPostsBlock(child, recentPosts),
+        ),
+      },
+    } as Block;
+  }
+
+  return block;
+}
+
+/**
+ * Hydrates blogTagCloud blocks with tag data.
+ */
+function hydrateTagCloudBlock(
+  block: Block,
+  tags: Array<{ name: string; count: number }>,
+): Block {
+  if (block.type === "blogTagCloud") {
+    return {
+      ...block,
+      props: {
+        ...block.props,
+        tags,
+      },
+    } as Block;
+  }
+
+  // Recurse into children
+  const props = block.props as Record<string, unknown>;
+  if (props.children && Array.isArray(props.children)) {
+    return {
+      ...block,
+      props: {
+        ...props,
+        children: (props.children as Block[]).map((child) =>
+          hydrateTagCloudBlock(child, tags),
+        ),
+      },
+    } as Block;
+  }
+
+  return block;
 }
 
 /**

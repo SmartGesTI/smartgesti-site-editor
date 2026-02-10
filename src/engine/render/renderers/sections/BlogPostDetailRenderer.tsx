@@ -44,7 +44,32 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
     showTags = true,
     showReadingTime = true,
     contentMaxWidth = "720px",
+    authorName,
+    authorAvatar,
+    authorBio,
   } = block.props;
+
+  const displayName = authorName || "Nome do Autor";
+  const displayBio = authorBio || "";
+
+  function AuthorAvatarOrPlaceholder({ size }: { size: string }) {
+    if (authorAvatar) {
+      return (
+        <img
+          src={authorAvatar}
+          alt={displayName}
+          style={{
+            width: size,
+            height: size,
+            borderRadius: "50%",
+            objectFit: "cover",
+            flexShrink: 0,
+          }}
+        />
+      );
+    }
+    return <AuthorPlaceholderAvatar size={size} />;
+  }
 
   return (
     <article
@@ -216,7 +241,7 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
                   backgroundColor: "var(--sg-surface, #f9fafb)",
                 }}
               >
-                <AuthorPlaceholderAvatar size="3.5rem" />
+                <AuthorAvatarOrPlaceholder size="3.5rem" />
                 <div>
                   <div
                     style={{
@@ -230,18 +255,20 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
                     Escrito por
                   </div>
                   <div style={{ fontWeight: 600, fontSize: "1rem" }}>
-                    Nome do Autor
+                    {displayName}
                   </div>
-                  <p
-                    style={{
-                      color: "var(--sg-muted-text)",
-                      fontSize: "0.9375rem",
-                      lineHeight: 1.5,
-                      margin: "0.25rem 0 0",
-                    }}
-                  >
-                    Bio do autor carregada do banco de dados.
-                  </p>
+                  {displayBio && (
+                    <p
+                      style={{
+                        color: "var(--sg-muted-text)",
+                        fontSize: "0.9375rem",
+                        lineHeight: 1.5,
+                        margin: "0.25rem 0 0",
+                      }}
+                    >
+                      {displayBio}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -254,7 +281,7 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
                   gap: "0.75rem",
                 }}
               >
-                <AuthorPlaceholderAvatar size="2.5rem" />
+                <AuthorAvatarOrPlaceholder size="2.5rem" />
                 <div>
                   <div
                     style={{
@@ -265,7 +292,7 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
                     Escrito por
                   </div>
                   <div style={{ fontWeight: 600, fontSize: "0.9375rem" }}>
-                    Nome do Autor
+                    {displayName}
                   </div>
                 </div>
               </div>
@@ -280,7 +307,7 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
               >
                 Escrito por{" "}
                 <span style={{ fontWeight: 600, color: "var(--sg-text)" }}>
-                  Nome do Autor
+                  {displayName}
                 </span>
               </p>
             )}

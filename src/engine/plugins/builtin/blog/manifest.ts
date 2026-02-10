@@ -106,7 +106,7 @@ export const blogPlugin: PluginRegistration = {
     icon: "FileText",
 
     capabilities: {
-      blocks: ["blogPostCard", "blogPostGrid", "blogPostDetail", "blogCategoryFilter", "blogSearchBar"],
+      blocks: ["blogPostCard", "blogPostGrid", "blogPostDetail", "blogCategoryFilter", "blogSearchBar", "blogRecentPosts", "blogTagCloud"],
 
       pageTemplates: [
         {
@@ -132,7 +132,6 @@ export const blogPlugin: PluginRegistration = {
             paramMapping: { slug: ":slug" },
           },
           editRestrictions: {
-            lockedStructure: true,
             nonRemovable: true,
           },
         },
@@ -354,7 +353,7 @@ export const blogPlugin: PluginRegistration = {
       logger.debug("Blog listing page created");
     }
 
-    // ── 4. Criar página "Post" (detalhe) ──
+    // ── 4. Criar página "Post" (detalhe com sidebar) ──
     if (!existingPageIds.has("blog-post")) {
       const postPageStructure: Block[] = [];
 
@@ -362,25 +361,107 @@ export const blogPlugin: PluginRegistration = {
         postPageStructure.push(cloneBlock(homeNavbar, "post-page-navbar"));
       }
 
+      // Grid layout: conteúdo principal + sidebar
       postPageStructure.push({
-        id: "blog-detail-main",
-        type: "blogPostDetail",
+        id: "blog-detail-layout",
+        type: "grid",
         props: {
-          title: "Feira de Ciências 2026: Inovação e Criatividade",
-          content: SAMPLE_POST_CONTENT,
-          featuredImage:
-            "https://images.unsplash.com/photo-1567168544230-3b9e5ec47659?w=1200&h=600&fit=crop",
-          date: "05 Fev 2026",
-          category: "Eventos",
-          authorVariant: "inline",
-          readingTime: "5 min de leitura",
-          tags: ["Feira de Ciências", "Eventos", "Sustentabilidade", "Projetos"],
-          showFeaturedImage: true,
-          showAuthor: true,
-          showDate: true,
-          showTags: true,
-          showReadingTime: true,
-          contentMaxWidth: "720px",
+          colTemplate: "1fr 320px",
+          gap: "2rem",
+          children: [
+            // Coluna principal: blogPostDetail
+            {
+              id: "blog-detail-main",
+              type: "blogPostDetail",
+              props: {
+                title: "Feira de Ciências 2026: Inovação e Criatividade",
+                content: SAMPLE_POST_CONTENT,
+                featuredImage:
+                  "https://images.unsplash.com/photo-1567168544230-3b9e5ec47659?w=1200&h=600&fit=crop",
+                date: "05 Fev 2026",
+                category: "Eventos",
+                authorVariant: "inline",
+                readingTime: "5 min de leitura",
+                tags: ["Feira de Ciências", "Eventos", "Sustentabilidade", "Projetos"],
+                showFeaturedImage: true,
+                showAuthor: true,
+                showDate: true,
+                showTags: true,
+                showReadingTime: true,
+                contentMaxWidth: "720px",
+              },
+            },
+            // Sidebar: stack vertical com widgets
+            {
+              id: "blog-detail-sidebar",
+              type: "stack",
+              props: {
+                direction: "col",
+                gap: "1.5rem",
+                children: [
+                  {
+                    id: "blog-sidebar-search",
+                    type: "blogSearchBar",
+                    props: {
+                      placeholder: "Buscar posts...",
+                      variant: "simple",
+                      showIcon: true,
+                      searchUrl: "/site/p/blog",
+                    },
+                  },
+                  {
+                    id: "blog-sidebar-categories",
+                    type: "blogCategoryFilter",
+                    props: {
+                      title: "Categorias",
+                      categories: SAMPLE_BLOG_CARDS.map((c) => ({
+                        name: c.category,
+                        slug: c.category.toLowerCase().replace(/\s+/g, "-"),
+                        count: 1,
+                      })),
+                      variant: "list",
+                      showCount: true,
+                      showAll: true,
+                      allLabel: "Todas",
+                      filterUrl: "/site/p/blog",
+                    },
+                  },
+                  {
+                    id: "blog-sidebar-recent",
+                    type: "blogRecentPosts",
+                    props: {
+                      title: "Posts Recentes",
+                      count: 5,
+                      showThumbnail: true,
+                      showDate: true,
+                      showCategory: false,
+                      posts: SAMPLE_BLOG_CARDS.map((c) => ({
+                        title: c.title,
+                        slug: c.linkHref.replace("/site/p/blog/", ""),
+                        date: c.date,
+                        image: c.image,
+                        category: c.category,
+                      })),
+                    },
+                  },
+                  {
+                    id: "blog-sidebar-tags",
+                    type: "blogTagCloud",
+                    props: {
+                      title: "Tags",
+                      tags: [
+                        { name: "Eventos", count: 3 },
+                        { name: "Educação", count: 2 },
+                        { name: "Institucional", count: 1 },
+                        { name: "Sustentabilidade", count: 1 },
+                      ],
+                      variant: "badges",
+                    },
+                  },
+                ],
+              },
+            },
+          ] as Block[],
         },
       } as Block);
 
@@ -402,11 +483,10 @@ export const blogPlugin: PluginRegistration = {
           paramMapping: { slug: ":slug" },
         },
         editRestrictions: {
-          lockedStructure: true,
           nonRemovable: true,
         },
       });
-      logger.debug("Blog post detail page created");
+      logger.debug("Blog post detail page created with sidebar layout");
     }
 
     return {
@@ -472,6 +552,16 @@ export const blogPlugin: PluginRegistration = {
     if (blockType === "blogCategoryFilter") {
       return {
         lockedFields: ["categories"],
+      };
+    }
+    if (blockType === "blogRecentPosts") {
+      return {
+        lockedFields: ["posts"],
+      };
+    }
+    if (blockType === "blogTagCloud") {
+      return {
+        lockedFields: ["tags"],
       };
     }
     return undefined;

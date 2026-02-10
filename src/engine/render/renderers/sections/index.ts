@@ -27,6 +27,8 @@ import { renderBlogSearchBar } from "./BlogSearchBarRenderer";
 import { renderProductShowcase } from "./ProductShowcaseRenderer";
 import { renderAboutSection } from "./AboutSectionRenderer";
 import { renderContactSection } from "./ContactSectionRenderer";
+import { renderBlogRecentPosts } from "./BlogRecentPostsRenderer";
+import { renderBlogTagCloud } from "./BlogTagCloudRenderer";
 
 // Registrar renderizadores
 renderRegistry.register("hero", renderHero);
@@ -52,3 +54,5 @@ renderRegistry.register("blogSearchBar", renderBlogSearchBar);
 renderRegistry.register("productShowcase", renderProductShowcase);
 renderRegistry.register("aboutSection", renderAboutSection);
 renderRegistry.register("contactSection", renderContactSection);
+renderRegistry.register("blogRecentPosts", renderBlogRecentPosts);
+renderRegistry.register("blogTagCloud", renderBlogTagCloud);
