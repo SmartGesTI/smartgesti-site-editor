@@ -70,6 +70,36 @@ export async function hydratePageWithContent(
 }
 
 /**
+ * Pagination metadata passed from hydration to grid blocks.
+ */
+interface PaginationMeta {
+  currentPage: number;
+  totalPages: number;
+  paginationBaseUrl: string;
+}
+
+/**
+ * Builds a pagination base URL from the page slug and current filter params.
+ * Preserves search/category so pagination links keep the active filters.
+ * Uses /site/p/ prefix to match the consumer route pattern (same as viewAllHref, linkHref).
+ */
+function buildPaginationBaseUrl(
+  page: SitePage,
+  fetchParams?: ContentListParams,
+): string {
+  // Always paginate on the blog listing page — home page widget points to blog page
+  const slug = page.slug && page.slug !== "home" ? page.slug : "blog";
+  const basePath = `/site/p/${slug}`;
+
+  const params = new URLSearchParams();
+  const filter = fetchParams?.filter as Record<string, string> | undefined;
+  if (filter?.search) params.set("busca", filter.search);
+  if (filter?.category) params.set("categoria", filter.category);
+
+  return params.toString() ? `${basePath}?${params.toString()}` : basePath;
+}
+
+/**
  * Hydrates a list-mode page: fetches items and populates grid blocks.
  */
 async function hydrateListPage(
@@ -88,9 +118,21 @@ async function hydrateListPage(
   // Convert items to block props (empty array if no results — shows empty state, never mock data)
   const cardProps = (result.items || []).map((item) => provider.toBlockProps(item));
 
+  // Build pagination metadata (only when there are multiple pages)
+  // _noPagination flag suppresses pagination for synthetic dataSource (e.g., home page blog widget)
+  const noPagination = !!(page.dataSource?.defaultParams as Record<string, unknown> | undefined)?._noPagination;
+  const totalPages = Math.ceil((result.total || 0) / (result.limit || params.limit || 12));
+  const pagination: PaginationMeta | undefined = !noPagination && totalPages > 1
+    ? {
+        currentPage: result.page || 1,
+        totalPages,
+        paginationBaseUrl: buildPaginationBaseUrl(page, fetchParams),
+      }
+    : undefined;
+
   // Hydrate all grid blocks and category filters on the page
   const hydratedStructure = page.structure.map((block) => {
-    let hydrated = hydrateGridBlock(block, cardProps);
+    let hydrated = hydrateGridBlock(block, cardProps, pagination);
     hydrated = hydrateCategoryFilterBlock(hydrated, cardProps);
     return hydrated;
   });
@@ -102,19 +144,25 @@ async function hydrateListPage(
 }
 
 /**
- * Hydrates grid blocks (blogPostGrid, etc.) with card data.
+ * Hydrates grid blocks (blogPostGrid, etc.) with card data and pagination.
  */
 function hydrateGridBlock(
   block: Block,
   cardProps: Record<string, unknown>[],
+  pagination?: PaginationMeta,
 ): Block {
-  // Direct match: blogPostGrid gets cards populated
+  // Direct match: blogPostGrid gets cards + pagination populated
   if (block.type === "blogPostGrid") {
     return {
       ...block,
       props: {
         ...block.props,
         cards: cardProps,
+        ...(pagination ? {
+          currentPage: pagination.currentPage,
+          totalPages: pagination.totalPages,
+          paginationBaseUrl: pagination.paginationBaseUrl,
+        } : {}),
       },
     };
   }
@@ -127,7 +175,7 @@ function hydrateGridBlock(
       props: {
         ...props,
         children: (props.children as Block[]).map((child) =>
-          hydrateGridBlock(child, cardProps),
+          hydrateGridBlock(child, cardProps, pagination),
         ),
       },
     };

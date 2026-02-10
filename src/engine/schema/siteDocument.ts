@@ -1049,6 +1049,10 @@ export interface BlogPostGridBlock extends BlockBase {
     showViewAll?: boolean;
     viewAllText?: string;
     viewAllHref?: string;
+    /** Pagination — set by content hydration, not user-editable */
+    currentPage?: number;
+    totalPages?: number;
+    paginationBaseUrl?: string;
   };
 }
 

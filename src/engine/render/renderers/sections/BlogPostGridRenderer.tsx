@@ -6,6 +6,34 @@
 import React from "react";
 import { renderBlogPostCard } from "./BlogPostCardRenderer";
 
+/**
+ * Builds a pagination URL appending ?pagina=N (or &pagina=N if URL has params).
+ * Page 1 returns base URL without param (cleaner URL).
+ */
+function buildPageUrl(baseUrl: string, page: number): string {
+  if (page <= 1) return baseUrl;
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  return `${baseUrl}${separator}pagina=${page}`;
+}
+
+/**
+ * Generates an array of page numbers to display, with -1 for ellipsis.
+ * Shows all pages if <= 7, otherwise uses ellipsis pattern.
+ */
+function getPageNumbers(current: number, total: number): number[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const pages: number[] = [1];
+  if (current > 3) pages.push(-1);
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  for (let i = start; i <= end; i++) pages.push(i);
+  if (current < total - 2) pages.push(-1);
+  if (pages[pages.length - 1] !== total) pages.push(total);
+  return pages;
+}
+
 export function renderBlogPostGrid(block: any): React.ReactNode {
   const {
     title,
@@ -16,6 +44,9 @@ export function renderBlogPostGrid(block: any): React.ReactNode {
     showViewAll = false,
     viewAllText = "Ver todos",
     viewAllHref = "#",
+    currentPage = 1,
+    totalPages = 1,
+    paginationBaseUrl = "#",
   } = block.props;
 
   return (
@@ -113,6 +144,141 @@ export function renderBlogPostGrid(block: any): React.ReactNode {
               {viewAllText}
             </a>
           </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <nav
+            data-block-group="Paginação"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "0.375rem",
+              marginTop: "2.5rem",
+            }}
+          >
+            {/* Previous */}
+            {currentPage > 1 ? (
+              <a
+                href={buildPageUrl(paginationBaseUrl, currentPage - 1)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "2.25rem",
+                  height: "2.25rem",
+                  borderRadius: "var(--sg-card-radius, 0.5rem)",
+                  border: "1px solid var(--sg-border, #e5e7eb)",
+                  textDecoration: "none",
+                  color: "var(--sg-text)",
+                  fontSize: "0.875rem",
+                }}
+              >
+                ‹
+              </a>
+            ) : (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "2.25rem",
+                  height: "2.25rem",
+                  borderRadius: "var(--sg-card-radius, 0.5rem)",
+                  border: "1px solid var(--sg-border, #e5e7eb)",
+                  color: "var(--sg-muted-text)",
+                  fontSize: "0.875rem",
+                  opacity: 0.4,
+                }}
+              >
+                ‹
+              </span>
+            )}
+
+            {/* Page numbers */}
+            {getPageNumbers(currentPage, totalPages).map((page, idx) =>
+              page === -1 ? (
+                <span
+                  key={`ellipsis-${idx}`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "2.25rem",
+                    height: "2.25rem",
+                    color: "var(--sg-muted-text)",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  …
+                </span>
+              ) : (
+                <a
+                  key={page}
+                  href={buildPageUrl(paginationBaseUrl, page)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "2.25rem",
+                    height: "2.25rem",
+                    borderRadius: "var(--sg-card-radius, 0.5rem)",
+                    border: `1px solid ${page === currentPage ? "var(--sg-primary)" : "var(--sg-border, #e5e7eb)"}`,
+                    backgroundColor:
+                      page === currentPage ? "var(--sg-primary)" : "transparent",
+                    color:
+                      page === currentPage
+                        ? "var(--sg-primary-text, #fff)"
+                        : "var(--sg-text)",
+                    textDecoration: "none",
+                    fontWeight: page === currentPage ? 600 : 400,
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  {page}
+                </a>
+              ),
+            )}
+
+            {/* Next */}
+            {currentPage < totalPages ? (
+              <a
+                href={buildPageUrl(paginationBaseUrl, currentPage + 1)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "2.25rem",
+                  height: "2.25rem",
+                  borderRadius: "var(--sg-card-radius, 0.5rem)",
+                  border: "1px solid var(--sg-border, #e5e7eb)",
+                  textDecoration: "none",
+                  color: "var(--sg-text)",
+                  fontSize: "0.875rem",
+                }}
+              >
+                ›
+              </a>
+            ) : (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "2.25rem",
+                  height: "2.25rem",
+                  borderRadius: "var(--sg-card-radius, 0.5rem)",
+                  border: "1px solid var(--sg-border, #e5e7eb)",
+                  color: "var(--sg-muted-text)",
+                  fontSize: "0.875rem",
+                  opacity: 0.4,
+                }}
+              >
+                ›
+              </span>
+            )}
+          </nav>
         )}
       </div>
     </section>

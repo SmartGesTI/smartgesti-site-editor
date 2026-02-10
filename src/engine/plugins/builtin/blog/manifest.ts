@@ -348,6 +348,7 @@ export const blogPlugin: PluginRegistration = {
         dataSource: {
           provider: "blog-posts",
           mode: "list",
+          defaultParams: { limit: 15 },
         },
       });
       logger.debug("Blog listing page created");

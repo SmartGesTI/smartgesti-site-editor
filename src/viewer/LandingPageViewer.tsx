@@ -293,7 +293,7 @@ export function LandingPageViewer({
     if (!hasDataSource && hasBlogBlocks) {
       pageToHydrate = {
         ...resolvedPage,
-        dataSource: { mode: "list" as const, provider: "blog-posts" },
+        dataSource: { mode: "list" as const, provider: "blog-posts", defaultParams: { limit: 9, _noPagination: true } },
       };
     }
 

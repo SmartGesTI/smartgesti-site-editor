@@ -124,6 +124,70 @@ export function exportBlogPostCard(
 // BlogPostGrid
 // ---------------------------------------------------------------------------
 
+/**
+ * Builds a pagination URL appending ?pagina=N (or &pagina=N if URL has params).
+ * Page 1 returns base URL without param (cleaner URL).
+ */
+function buildPageUrl(baseUrl: string, page: number): string {
+  if (page <= 1) return baseUrl;
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  return `${baseUrl}${separator}pagina=${page}`;
+}
+
+/**
+ * Generates an array of page numbers to display, with -1 for ellipsis.
+ */
+function getPageNumbers(current: number, total: number): number[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const pages: number[] = [1];
+  if (current > 3) pages.push(-1);
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  for (let i = start; i <= end; i++) pages.push(i);
+  if (current < total - 2) pages.push(-1);
+  if (pages[pages.length - 1] !== total) pages.push(total);
+  return pages;
+}
+
+/**
+ * Generates pagination HTML nav element.
+ */
+function generatePaginationHtml(
+  currentPage: number,
+  totalPages: number,
+  paginationBaseUrl: string,
+): string {
+  if (totalPages <= 1) return "";
+
+  const btnBase = "display:inline-flex;align-items:center;justify-content:center;width:2.25rem;height:2.25rem;border-radius:var(--sg-card-radius, 0.5rem);text-decoration:none;font-size:0.875rem;";
+  const borderNormal = "border:1px solid var(--sg-border, #e5e7eb);";
+  const borderActive = "border:1px solid var(--sg-primary);";
+
+  // Previous
+  const prevHtml = currentPage > 1
+    ? `<a href="${escapeHtml(buildPageUrl(paginationBaseUrl, currentPage - 1))}" style="${btnBase}${borderNormal}color:var(--sg-text);">&lsaquo;</a>`
+    : `<span style="${btnBase}${borderNormal}color:var(--sg-muted-text);opacity:0.4;">&lsaquo;</span>`;
+
+  // Page numbers
+  const pageNumbers = getPageNumbers(currentPage, totalPages);
+  const pagesHtml = pageNumbers.map((page, idx) => {
+    if (page === -1) {
+      return `<span style="${btnBase}color:var(--sg-muted-text);">&hellip;</span>`;
+    }
+    const isActive = page === currentPage;
+    return `<a href="${escapeHtml(buildPageUrl(paginationBaseUrl, page))}" style="${btnBase}${isActive ? borderActive : borderNormal}background-color:${isActive ? "var(--sg-primary)" : "transparent"};color:${isActive ? "var(--sg-primary-text, #fff)" : "var(--sg-text)"};font-weight:${isActive ? "600" : "400"};">${page}</a>`;
+  }).join("");
+
+  // Next
+  const nextHtml = currentPage < totalPages
+    ? `<a href="${escapeHtml(buildPageUrl(paginationBaseUrl, currentPage + 1))}" style="${btnBase}${borderNormal}color:var(--sg-text);">&rsaquo;</a>`
+    : `<span style="${btnBase}${borderNormal}color:var(--sg-muted-text);opacity:0.4;">&rsaquo;</span>`;
+
+  return `<nav data-block-group="Paginação" style="display:flex;justify-content:center;align-items:center;gap:0.375rem;margin-top:2.5rem;">${prevHtml}${pagesHtml}${nextHtml}</nav>`;
+}
+
 export function exportBlogPostGrid(
   block: Block,
   depth: number,
@@ -139,6 +203,9 @@ export function exportBlogPostGrid(
     showViewAll = false,
     viewAllText,
     viewAllHref,
+    currentPage = 1,
+    totalPages = 1,
+    paginationBaseUrl = "#",
   } = (block as any).props;
 
   // Responsive grid: 1 col (mobile) -> 2 cols (tablet) -> N cols (desktop)
@@ -181,7 +248,9 @@ export function exportBlogPostGrid(
       ? `<div data-block-group="Rodapé" style="text-align: center; margin-top: 2.5rem;"><a href="${escapeHtml(viewAllHref || "#")}" style="display: inline-block; padding: 0.75rem 1.5rem; background-color: var(--sg-primary); color: var(--sg-primary-text, #fff); font-weight: 600; border-radius: var(--sg-button-radius); text-decoration: none;">${escapeHtml(viewAllText)}</a></div>`
       : "";
 
-  return `<style>${mediaQueries}</style><section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div data-block-group="Layout" id="${gridId}" style="${inlineStyles}">${cardsHtml}</div>${viewAllHtml}</div></section>`;
+  const paginationHtml = generatePaginationHtml(currentPage, totalPages, paginationBaseUrl);
+
+  return `<style>${mediaQueries}</style><section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div data-block-group="Layout" id="${gridId}" style="${inlineStyles}">${cardsHtml}</div>${viewAllHtml}${paginationHtml}</div></section>`;
 }
 
 // ---------------------------------------------------------------------------
