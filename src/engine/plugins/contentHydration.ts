@@ -130,10 +130,40 @@ async function hydrateListPage(
       }
     : undefined;
 
-  // Hydrate all grid blocks and category filters on the page
+  // Build recent posts for sidebar blogRecentPosts widget
+  const recentPosts = (result.items || []).slice(0, 5).map((i) => {
+    const d = i.data as Record<string, any>;
+    return {
+      title: (d.title as string) ?? '',
+      slug: i.slug as string,
+      date: i.metadata?.publishedAt
+        ? new Date(i.metadata.publishedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+        : undefined,
+      image: (d.featuredImage as string) ?? undefined,
+      category: (d.category as string) ?? undefined,
+    };
+  });
+
+  // Extract tags from all posts for sidebar blogTagCloud widget
+  const allTags = new Map<string, number>();
+  for (const i of (result.items || [])) {
+    const tags = (i.data as Record<string, any>).tags as string[] | undefined;
+    if (tags) {
+      for (const tag of tags) {
+        allTags.set(tag, (allTags.get(tag) ?? 0) + 1);
+      }
+    }
+  }
+  const tagCloud = Array.from(allTags.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+
+  // Hydrate all grid blocks, category filters, recent posts and tag cloud on the page
   const hydratedStructure = page.structure.map((block) => {
     let hydrated = hydrateGridBlock(block, cardProps, pagination);
     hydrated = hydrateCategoryFilterBlock(hydrated, cardProps);
+    hydrated = hydrateRecentPostsBlock(hydrated, recentPosts);
+    hydrated = hydrateTagCloudBlock(hydrated, tagCloud);
     return hydrated;
   });
 

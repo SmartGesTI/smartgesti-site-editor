@@ -55,6 +55,116 @@ const SAMPLE_BLOG_CARDS = [
     linkHref: "/site/p/blog/dicas-preparar-ano-letivo",
     linkText: "Ler mais",
   },
+  {
+    title: "Projeto de Robótica Conquista Prêmio Regional",
+    excerpt:
+      "Nossa equipe de robótica conquistou o primeiro lugar na competição regional. Saiba como foi essa jornada!",
+    image:
+      "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop",
+    category: "Conquistas",
+    date: "22 Jan 2026",
+    linkHref: "/site/p/blog/robotica-premio-regional",
+    linkText: "Ler mais",
+  },
+  {
+    title: "Como a Tecnologia Transforma a Educação",
+    excerpt:
+      "Descubra como ferramentas digitais e metodologias ativas estão revolucionando o aprendizado em sala de aula.",
+    image:
+      "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&h=400&fit=crop",
+    category: "Educação",
+    date: "18 Jan 2026",
+    linkHref: "/site/p/blog/tecnologia-educacao",
+    linkText: "Ler mais",
+  },
+  {
+    title: "Calendário Escolar 2026: Datas Importantes",
+    excerpt:
+      "Confira todas as datas importantes do ano letivo 2026, incluindo feriados, provas e eventos especiais.",
+    image:
+      "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800&h=400&fit=crop",
+    category: "Institucional",
+    date: "10 Jan 2026",
+    linkHref: "/site/p/blog/calendario-escolar-2026",
+    linkText: "Ler mais",
+  },
+  {
+    title: "Atividades Extracurriculares: Inscrições Abertas",
+    excerpt:
+      "Música, esportes, artes e idiomas. Conheça as atividades disponíveis e inscreva seu filho!",
+    image:
+      "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=800&h=400&fit=crop",
+    category: "Novidades",
+    date: "05 Jan 2026",
+    linkHref: "/site/p/blog/atividades-extracurriculares",
+    linkText: "Ler mais",
+  },
+  {
+    title: "Parceria com Universidades para Projetos de Pesquisa",
+    excerpt:
+      "Alunos do Ensino Médio agora podem participar de projetos de iniciação científica em parceria com universidades da região.",
+    image:
+      "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&h=400&fit=crop",
+    category: "Conquistas",
+    date: "28 Dez 2025",
+    linkHref: "/site/p/blog/parceria-universidades",
+    linkText: "Ler mais",
+  },
+  {
+    title: "Semana da Leitura: Escritores Visitam a Escola",
+    excerpt:
+      "Autores renomados da literatura infanto-juvenil participaram de bate-papos e oficinas com nossos alunos.",
+    image:
+      "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=400&fit=crop",
+    category: "Eventos",
+    date: "20 Dez 2025",
+    linkHref: "/site/p/blog/semana-leitura",
+    linkText: "Ler mais",
+  },
+  {
+    title: "Olimpíada de Matemática: Resultados Impressionantes",
+    excerpt:
+      "Nossos alunos conquistaram 5 medalhas de ouro e 8 de prata na Olimpíada Regional de Matemática 2025.",
+    image:
+      "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&h=400&fit=crop",
+    category: "Conquistas",
+    date: "15 Dez 2025",
+    linkHref: "/site/p/blog/olimpiada-matematica",
+    linkText: "Ler mais",
+  },
+  {
+    title: "Nova Biblioteca Digital para Alunos e Professores",
+    excerpt:
+      "A escola lança plataforma digital com mais de 10.000 livros, artigos e materiais didáticos acessíveis de qualquer dispositivo.",
+    image:
+      "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800&h=400&fit=crop",
+    category: "Novidades",
+    date: "10 Dez 2025",
+    linkHref: "/site/p/blog/biblioteca-digital",
+    linkText: "Ler mais",
+  },
+  {
+    title: "Formatura do Ensino Médio: Celebrando Conquistas",
+    excerpt:
+      "Uma noite emocionante de celebração para os formandos de 2025. Confira os melhores momentos da cerimônia.",
+    image:
+      "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?w=800&h=400&fit=crop",
+    category: "Eventos",
+    date: "05 Dez 2025",
+    linkHref: "/site/p/blog/formatura-2025",
+    linkText: "Ler mais",
+  },
+  {
+    title: "Projeto Horta Escolar: Aprendendo com a Natureza",
+    excerpt:
+      "Alunos do Fundamental cultivam alimentos orgânicos e aprendem sobre sustentabilidade, nutrição e trabalho em equipe.",
+    image:
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=400&fit=crop",
+    category: "Educação",
+    date: "28 Nov 2025",
+    linkHref: "/site/p/blog/horta-escolar",
+    linkText: "Ler mais",
+  },
 ];
 
 // ─── Conteúdo HTML rico para o post de exemplo ───
@@ -188,16 +298,20 @@ export const blogPlugin: PluginRegistration = {
       const homeIdx = newPages.findIndex((p) => p.id === homePage.id);
       if (homeIdx >= 0) {
         const navbarProps = homeNavbar.props as Record<string, any>;
-        const existingLinks: Array<{ text: string; href: string }> =
+        let existingLinks: Array<{ text: string; href: string }> =
           Array.isArray(navbarProps.links) ? [...navbarProps.links] : [];
+
+        // Limpar link antigo com href errado (/p/blog sem /site prefix)
+        existingLinks = existingLinks.filter((l) => l.href !== "/p/blog");
+
         const hasBlogLink = existingLinks.some(
-          (l) => l.href === "/p/blog",
+          (l) => l.href === "/site/p/blog",
         );
 
         if (!hasBlogLink) {
           // Inserir "Blog" antes do último link (geralmente "Contato")
           const insertIdx = existingLinks.length > 0 ? existingLinks.length - 1 : 0;
-          existingLinks.splice(insertIdx, 0, { text: "Blog", href: "/p/blog" });
+          existingLinks.splice(insertIdx, 0, { text: "Blog", href: "/site/p/blog" });
 
           // Atualizar navbar na home page com o novo link
           const updatedStructure = newPages[homeIdx].structure.map((b) => {
@@ -231,7 +345,7 @@ export const blogPlugin: PluginRegistration = {
             title: "Blog",
             subtitle: "Últimas publicações",
             columns: 3,
-            cards: SAMPLE_BLOG_CARDS,
+            cards: SAMPLE_BLOG_CARDS.slice(0, 3),
             variant: "default",
             showViewAll: true,
             viewAllText: "Ver todos os posts",
@@ -258,7 +372,7 @@ export const blogPlugin: PluginRegistration = {
       }
     }
 
-    // ── 3. Criar página "Blog" (listagem completa) ──
+    // ── 3. Criar página "Blog" (listagem — layout magazine com sidebar) ──
     if (!existingPageIds.has("blog")) {
       const blogPageStructure: Block[] = [];
 
@@ -267,68 +381,125 @@ export const blogPlugin: PluginRegistration = {
         blogPageStructure.push(cloneBlock(homeNavbar, "blog-page-navbar"));
       }
 
-      // Hero banner do blog
-      blogPageStructure.push({
-        id: "blog-page-hero",
-        type: "hero",
-        props: {
-          title: "Blog",
-          subtitle: "Novidades & Publicações",
-          description:
-            "Acompanhe as últimas novidades, eventos e conquistas da nossa comunidade escolar.",
-          variant: "centered",
-          align: "center",
-          overlay: true,
-          overlayColor: "rgba(79, 70, 229, 0.9)",
-          background: "#4f46e5",
-          minHeight: "280px",
-        },
-      } as Block);
+      // Extrair categorias únicas dos sample cards
+      const uniqueCategories = [...new Set(SAMPLE_BLOG_CARDS.map((c) => c.category))];
 
-      // Search bar
+      // Grid layout: conteúdo principal (magazine) + sidebar
       blogPageStructure.push({
-        id: "blog-search-bar",
-        type: "blogSearchBar",
+        id: "blog-listing-layout",
+        type: "grid",
         props: {
-          placeholder: "Buscar posts...",
-          variant: "simple",
-          showIcon: true,
-          searchUrl: "/site/p/blog",
-        },
-      } as Block);
-
-      // Category filter
-      blogPageStructure.push({
-        id: "blog-category-filter",
-        type: "blogCategoryFilter",
-        props: {
-          title: "",
-          categories: SAMPLE_BLOG_CARDS.map((c) => ({
-            name: c.category,
-            slug: c.category.toLowerCase().replace(/\s+/g, "-"),
-            count: 1,
-          })),
-          variant: "chips",
-          showCount: false,
-          showAll: true,
-          allLabel: "Todas",
-          filterUrl: "/site/p/blog",
-        },
-      } as Block);
-
-      // Grid de posts
-      blogPageStructure.push({
-        id: "blog-grid-main",
-        type: "blogPostGrid",
-        props: {
-          title: "",
-          subtitle: "",
-          columns: 3,
-          cards: SAMPLE_BLOG_CARDS,
-          variant: "default",
-          showViewAll: false,
-          viewAllText: "Ver todos",
-          viewAllHref: "/site/p/blog",
+          cols: 2,
+          colTemplate: "1fr 320px",
+          gap: "2.5rem",
+          maxWidth: "1200px",
+          padding: "2rem",
+          paddingTop: "7rem",
+          paddingBottom: "6rem",
+          bg: "var(--sg-bg)",
+          children: [
+            // Coluna principal: blogPostGrid com variant "magazine"
+            {
+              id: "blog-grid-main",
+              type: "blogPostGrid",
+              props: {
+                title: "",
+                subtitle: "",
+                columns: 3,
+                cards: SAMPLE_BLOG_CARDS,
+                variant: "magazine",
+                showViewAll: false,
+              },
+            },
+            // Sidebar: stack vertical com widgets
+            {
+              id: "blog-listing-sidebar",
+              type: "stack",
+              props: {
+                direction: "col",
+                gap: "1.5rem",
+                sticky: true,
+                stickyOffset: "100px",
+                children: [
+                  {
+                    id: "blog-listing-search",
+                    type: "blogSearchBar",
+                    props: {
+                      placeholder: "Buscar posts...",
+                      variant: "simple",
+                      showIcon: true,
+                      searchUrl: "/site/p/blog",
+                      borderRadius: "0.75rem",
+                      shadow: "sm",
+                    },
+                  },
+                  {
+                    id: "blog-listing-categories",
+                    type: "blogCategoryFilter",
+                    props: {
+                      title: "Categorias",
+                      categories: uniqueCategories.map((name) => ({
+                        name,
+                        slug: name.toLowerCase().replace(/\s+/g, "-"),
+                        count: SAMPLE_BLOG_CARDS.filter((c) => c.category === name).length,
+                      })),
+                      variant: "list",
+                      showCount: true,
+                      showAll: true,
+                      allLabel: "Todas",
+                      filterUrl: "/site/p/blog",
+                      linkColor: "#374151",
+                      linkHoverColor: "#2563eb",
+                      borderRadius: "0.75rem",
+                      shadow: "sm",
+                    },
+                  },
+                  {
+                    id: "blog-listing-recent",
+                    type: "blogRecentPosts",
+                    props: {
+                      title: "Posts Recentes",
+                      count: 5,
+                      showThumbnail: true,
+                      showDate: true,
+                      showCategory: false,
+                      posts: SAMPLE_BLOG_CARDS.slice(0, 5).map((c) => ({
+                        title: c.title,
+                        slug: c.linkHref.replace("/site/p/blog/", ""),
+                        date: c.date,
+                        image: c.image,
+                        category: c.category,
+                      })),
+                      linkColor: "#374151",
+                      linkHoverColor: "#2563eb",
+                      borderRadius: "0.75rem",
+                      shadow: "sm",
+                    },
+                  },
+                  {
+                    id: "blog-listing-tags",
+                    type: "blogTagCloud",
+                    props: {
+                      title: "Tags",
+                      tags: [
+                        { name: "Eventos", count: 3 },
+                        { name: "Educação", count: 4 },
+                        { name: "Institucional", count: 2 },
+                        { name: "Tecnologia", count: 2 },
+                        { name: "Conquistas", count: 1 },
+                        { name: "Sustentabilidade", count: 1 },
+                      ],
+                      variant: "badges",
+                      linkColor: "#374151",
+                      linkHoverColor: "#2563eb",
+                      borderRadius: "0.75rem",
+                      shadow: "sm",
+                    },
+                  },
+                ],
+              },
+            },
+          ] as Block[],
         },
       } as Block);
 
@@ -350,7 +521,7 @@ export const blogPlugin: PluginRegistration = {
           defaultParams: { limit: 15 },
         },
       });
-      logger.debug("Blog listing page created");
+      logger.debug("Blog listing page created with magazine layout");
     }
 
     // ── 4. Criar página "Post" (detalhe com sidebar) ──
@@ -543,12 +714,12 @@ export const blogPlugin: PluginRegistration = {
           );
         }
 
-        // Remover link "Blog" (/p/blog) da navbar
+        // Remover link "Blog" (/site/p/blog) da navbar
         structure = structure.map((b) => {
           if (b.type !== "navbar") return b;
           const props = b.props as Record<string, any>;
           const links: Array<{ text: string; href: string }> = Array.isArray(props.links) ? props.links : [];
-          const filtered = links.filter((l) => l.href !== "/p/blog");
+          const filtered = links.filter((l) => l.href !== "/site/p/blog" && l.href !== "/p/blog");
           if (filtered.length !== links.length) {
             return { ...b, props: { ...props, links: filtered } } as Block;
           }

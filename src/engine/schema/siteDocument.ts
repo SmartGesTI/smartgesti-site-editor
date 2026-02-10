@@ -1075,7 +1075,7 @@ export interface BlogPostGridBlock extends BlockBase {
       limit?: number;
       filter?: Record<string, unknown>;
     };
-    variant?: "default" | "featured" | "minimal";
+    variant?: "default" | "featured" | "minimal" | "magazine";
     showViewAll?: boolean;
     viewAllText?: string;
     viewAllHref?: string;

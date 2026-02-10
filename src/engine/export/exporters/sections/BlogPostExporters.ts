@@ -190,6 +190,42 @@ function generatePaginationHtml(
   return `<nav data-block-group="Paginação" style="display:flex;justify-content:center;align-items:center;gap:0.375rem;margin-top:2.5rem;">${prevHtml}${pagesHtml}${nextHtml}</nav>`;
 }
 
+/**
+ * Generates the magazine hero card HTML (first post with image overlay).
+ */
+function generateMagazineHeroHtml(card: any): string {
+  const imgHtml = card.image
+    ? `<img src="${escapeHtml(card.image)}" alt="${escapeHtml(card.title || "")}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" />`
+    : "";
+
+  const categoryHtml = card.category
+    ? `<span style="display:inline-block;padding:0.25rem 0.75rem;background-color:var(--sg-primary);color:var(--sg-primary-text, #fff);font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;border-radius:0.25rem;margin-bottom:0.75rem;">${escapeHtml(card.category)}</span>`
+    : "";
+
+  const excerptHtml = card.excerpt
+    ? `<p style="font-size:1rem;line-height:1.5;color:rgba(255,255,255,0.85);margin-bottom:0.75rem;max-width:600px;">${escapeHtml(card.excerpt)}</p>`
+    : "";
+
+  const authorParts: string[] = [];
+  if (card.authorAvatar) {
+    authorParts.push(`<img src="${escapeHtml(card.authorAvatar)}" alt="${escapeHtml(card.authorName || "")}" style="width:1.75rem;height:1.75rem;border-radius:50%;object-fit:cover;" />`);
+  }
+  if (card.authorName) {
+    authorParts.push(`<span style="font-weight:500;">${escapeHtml(card.authorName)}</span>`);
+  }
+  if (card.authorName && card.date) {
+    authorParts.push(`<span>&middot;</span>`);
+  }
+  if (card.date) {
+    authorParts.push(`<span>${escapeHtml(card.date)}</span>`);
+  }
+  const metaHtml = authorParts.length
+    ? `<div style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;color:rgba(255,255,255,0.8);">${authorParts.join("")}</div>`
+    : "";
+
+  return `<a href="${escapeHtml(card.linkHref || "#")}" data-block-group="Post em Destaque" style="display:block;position:relative;width:100%;min-height:420px;border-radius:var(--sg-card-radius, 0.75rem);overflow:hidden;margin-bottom:2.5rem;text-decoration:none;color:#fff;background-color:#1a1a2e;">${imgHtml}<div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.15) 100%);"></div><div style="position:absolute;bottom:0;left:0;right:0;padding:2rem 2.5rem;">${categoryHtml}<h2 style="font-size:2rem;font-weight:700;line-height:1.2;margin-bottom:0.5rem;color:#fff;">${escapeHtml(card.title || "")}</h2>${excerptHtml}${metaHtml}</div></a>`;
+}
+
 export function exportBlogPostGrid(
   block: Block,
   depth: number,
@@ -202,6 +238,7 @@ export function exportBlogPostGrid(
     subtitle,
     columns = 3,
     cards = [],
+    variant = "default",
     showViewAll = false,
     viewAllText,
     viewAllHref,
@@ -209,6 +246,10 @@ export function exportBlogPostGrid(
     totalPages = 1,
     paginationBaseUrl = "#",
   } = (block as any).props;
+
+  const isMagazine = variant === "magazine";
+  const heroCard = isMagazine && cards.length > 0 ? cards[0] : null;
+  const gridCards: any[] = isMagazine ? cards.slice(1) : cards;
 
   // Responsive grid: 1 col (mobile) -> 2 cols (tablet) -> N cols (desktop)
   const gridId = generateScopedId(block.id || "", "blog-post-grid");
@@ -219,31 +260,53 @@ export function exportBlogPostGrid(
     "2rem",
   );
 
-  const headerHtml =
-    title || subtitle
-      ? `<div data-block-group="Cabeçalho" style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text);">${escapeHtml(subtitle)}</p>` : ""}</div>`
-      : "";
+  // Magazine hero
+  const heroHtml = heroCard ? generateMagazineHeroHtml(heroCard) : "";
+
+  // Header: magazine uses a different heading style
+  let headerHtml = "";
+  if (isMagazine) {
+    if (gridCards.length > 0) {
+      headerHtml = `<div data-block-group="Cabeçalho" style="margin-bottom:2rem;"><h3 style="font-size:0.875rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--sg-text);margin-bottom:0.75rem;">Posts Recentes</h3><div style="height:2px;background-color:var(--sg-primary);width:3rem;"></div></div>`;
+    }
+  } else if (title || subtitle) {
+    headerHtml = `<div data-block-group="Cabeçalho" style="text-align: center; margin-bottom: 3rem;">${title ? `<h2 style="font-size: var(--sg-heading-h2); margin-bottom: 0.5rem;">${escapeHtml(title)}</h2>` : ""}${subtitle ? `<p style="color: var(--sg-muted-text);">${escapeHtml(subtitle)}</p>` : ""}</div>`;
+  }
 
   if (!renderChild) {
     throw new Error("exportBlogPostGrid requires renderChild function");
   }
 
-  const cardsHtml = cards.length > 0
-    ? cards
-        .map((c: any, i: number) =>
-          renderChild(
-            {
-              id: `${block.id}-card-${i}`,
-              type: "blogPostCard",
-              props: c,
-            } as Block,
-            depth + 1,
-            basePath,
-            theme,
-          ),
-        )
-        .join("")
-    : `<div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--sg-muted-text); border: 2px dashed var(--sg-border, #e5e7eb); border-radius: var(--sg-card-radius, 0.5rem);"><p style="font-size: 1rem; margin-bottom: 0.5rem;">Nenhum post encontrado</p><p style="font-size: 0.875rem;">Os posts aparecerão aqui quando forem publicados.</p></div>`;
+  // Resolve card variant for rendering
+  const resolveCardVariant = (index: number): string => {
+    if (variant === "featured" && index === 0) return "horizontal";
+    if (variant === "minimal") return "minimal";
+    return "default";
+  };
+
+  let gridContentHtml = "";
+  if (gridCards.length > 0) {
+    gridContentHtml = gridCards
+      .map((c: any, i: number) =>
+        renderChild(
+          {
+            id: `${block.id}-card-${isMagazine ? i + 1 : i}`,
+            type: "blogPostCard",
+            props: { ...c, variant: resolveCardVariant(i) },
+          } as Block,
+          depth + 1,
+          basePath,
+          theme,
+        ),
+      )
+      .join("");
+  } else if (!heroCard) {
+    gridContentHtml = `<div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--sg-muted-text); border: 2px dashed var(--sg-border, #e5e7eb); border-radius: var(--sg-card-radius, 0.5rem);"><p style="font-size: 1rem; margin-bottom: 0.5rem;">Nenhum post encontrado</p><p style="font-size: 0.875rem;">Os posts aparecerão aqui quando forem publicados.</p></div>`;
+  }
+
+  const gridHtml = gridContentHtml
+    ? `<div data-block-group="Layout" id="${gridId}" style="${inlineStyles}">${gridContentHtml}</div>`
+    : "";
 
   const viewAllHtml =
     showViewAll && viewAllText
@@ -252,7 +315,10 @@ export function exportBlogPostGrid(
 
   const paginationHtml = generatePaginationHtml(currentPage, totalPages, paginationBaseUrl);
 
-  return `<style>${mediaQueries}</style><section ${dataBlockIdAttr(block.id)} style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">${headerHtml}<div data-block-group="Layout" id="${gridId}" style="${inlineStyles}">${cardsHtml}</div>${viewAllHtml}${paginationHtml}</div></section>`;
+  const sectionPadding = isMagazine ? "0" : "4rem 0";
+  const innerStyle = isMagazine ? "" : "max-width: 1200px; margin: 0 auto; padding: 0 1rem;";
+
+  return `<style>${mediaQueries}</style><section ${dataBlockIdAttr(block.id)} style="padding: ${sectionPadding}; background-color: var(--sg-bg);"><div style="${innerStyle}">${heroHtml}${headerHtml}${gridHtml}${viewAllHtml}${paginationHtml}</div></section>`;
 }
 
 // ---------------------------------------------------------------------------

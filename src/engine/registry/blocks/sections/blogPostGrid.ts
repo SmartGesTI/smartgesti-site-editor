@@ -70,6 +70,7 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
       inputType: "select",
       options: [
         { label: "Padrão", value: "default" },
+        { label: "Magazine", value: "magazine" },
         { label: "Destaque", value: "featured" },
         { label: "Minimal", value: "minimal" },
       ],
