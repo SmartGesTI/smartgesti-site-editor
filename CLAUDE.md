@@ -276,17 +276,26 @@ src/
 - **Backlog List**: 901710728590
 - **PM Agent**: `clickup-pm-editor` (em `.claude/agents/`) — roda automaticamente em background para gerenciar tarefas no ClickUp
 
-### Comunicacao com Atlas (Gerente Global)
+### REGRA: Nao responda ao Bruno sem antes notificar o Atlas
 
-**Ao concluir uma feature ou etapa significativa**, notifique o Atlas:
+Ao concluir qualquer etapa significativa (feature, plano, fix):
+1. **PRIMEIRO**: execute `notify-atlas.sh`
+2. **DEPOIS**: reporte ao Bruno incluindo "✅ Atlas notificado"
+
+Se nao incluir "✅ Atlas notificado" na resposta, significa que esqueceu.
+
+**Comandos de notificacao**:
 ```bash
+# Feature/etapa concluida
 /home/bruno/GithubPessoal/SmartGesTI/scripts/notify-atlas.sh \
   --from editor --type feature_complete --summary "Descricao" \
   --commits "hash1,hash2" --task "task-id"
-```
 
-**Para mudancas que afetam projetos consumidores** (Ensino, Portifolios):
-```bash
+# Plano criado/aprovado
+/home/bruno/GithubPessoal/SmartGesTI/scripts/notify-atlas.sh \
+  --from editor --type plan_ready --summary "Descricao do plano"
+
+# Mudanca que afeta projetos consumidores (Ensino, Portifolios)
 /home/bruno/GithubPessoal/SmartGesTI/scripts/notify-atlas.sh \
   --from editor --type cross_project_impact \
   --summary "Descricao da mudanca" --affected "ensino,portfolios"
