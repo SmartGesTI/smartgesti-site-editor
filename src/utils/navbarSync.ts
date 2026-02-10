@@ -87,13 +87,17 @@ export function findNavbarBlocks(document: SiteDocument): NavbarBlockInfo[] {
 }
 
 /**
- * Gera array de links do navbar a partir das páginas do documento
+ * Gera array de links do navbar a partir das páginas do documento.
+ * Filtra páginas dinâmicas (isDynamic: true) como "blog/:slug"
+ * que não devem aparecer como links de navegação.
  */
 export function generateNavbarLinks(pages: SitePage[]): NavbarLink[] {
-  return pages.map((page) => ({
-    text: page.name,
-    href: page.slug === "home" ? "/" : `/p/${page.slug}`,
-  }));
+  return pages
+    .filter((page) => !page.isDynamic)
+    .map((page) => ({
+      text: page.name,
+      href: page.slug === "home" ? "/" : `/p/${page.slug}`,
+    }));
 }
 
 /**

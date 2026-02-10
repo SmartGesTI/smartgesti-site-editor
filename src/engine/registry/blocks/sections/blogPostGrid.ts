@@ -12,7 +12,7 @@ const sampleCards = [
     image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=400&fit=crop",
     category: "Novidades",
     date: "15 Jan 2025",
-    linkHref: "/blog/bem-vindo",
+    linkHref: "/site/p/blog/bem-vindo",
     linkText: "Ler mais",
   },
   {
@@ -21,7 +21,7 @@ const sampleCards = [
     image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=400&fit=crop",
     category: "Educação",
     date: "20 Jan 2025",
-    linkHref: "/blog/dicas-estudantes",
+    linkHref: "/site/p/blog/dicas-estudantes",
     linkText: "Ler mais",
   },
   {
@@ -30,7 +30,7 @@ const sampleCards = [
     image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&h=400&fit=crop",
     category: "Institucional",
     date: "01 Fev 2025",
-    linkHref: "/blog/novidades-semestre",
+    linkHref: "/site/p/blog/novidades-semestre",
     linkText: "Ler mais",
   },
 ];
@@ -50,7 +50,7 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
     variant: "default",
     showViewAll: false,
     viewAllText: "Ver todos",
-    viewAllHref: "/blog",
+    viewAllHref: "/site/p/blog",
   },
   inspectorMeta: {
     title: { label: "Título", inputType: "text", group: "Cabeçalho" },

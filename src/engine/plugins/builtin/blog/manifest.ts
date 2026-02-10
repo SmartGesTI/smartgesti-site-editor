@@ -183,7 +183,41 @@ export const blogPlugin: PluginRegistration = {
     const homeNavbar = homePage?.structure.find((b) => b.type === "navbar");
     const homeFooter = homePage?.structure.find((b) => b.type === "footer");
 
-    // ── 1. Injetar seção de blog na home page (antes do footer) ──
+    // ── 1. Adicionar link "Blog" à navbar da home page ──
+    // Preserva os links existentes e apenas insere "Blog" antes do último item.
+    if (homePage && homeNavbar) {
+      const homeIdx = newPages.findIndex((p) => p.id === homePage.id);
+      if (homeIdx >= 0) {
+        const navbarProps = homeNavbar.props as Record<string, any>;
+        const existingLinks: Array<{ text: string; href: string }> =
+          Array.isArray(navbarProps.links) ? [...navbarProps.links] : [];
+        const hasBlogLink = existingLinks.some(
+          (l) => l.href === "/p/blog",
+        );
+
+        if (!hasBlogLink) {
+          // Inserir "Blog" antes do último link (geralmente "Contato")
+          const insertIdx = existingLinks.length > 0 ? existingLinks.length - 1 : 0;
+          existingLinks.splice(insertIdx, 0, { text: "Blog", href: "/p/blog" });
+
+          // Atualizar navbar na home page com o novo link
+          const updatedStructure = newPages[homeIdx].structure.map((b) => {
+            if (b.id === homeNavbar.id) {
+              return { ...b, props: { ...b.props, links: existingLinks } } as Block;
+            }
+            return b;
+          });
+          newPages[homeIdx] = { ...newPages[homeIdx], structure: updatedStructure };
+          logger.debug("Blog link added to home navbar");
+
+          // Atualizar referência para que clones nas páginas do blog usem navbar com link
+          // (homeNavbar é const, então criamos a versão atualizada para uso nos clones)
+          (homeNavbar as any).props = { ...navbarProps, links: existingLinks };
+        }
+      }
+    }
+
+    // ── 2. Injetar seção de blog na home page (antes do footer) ──
     if (homePage) {
       const homeIdx = newPages.findIndex((p) => p.id === homePage.id);
       const alreadyInjected = homePage.structure.some(
@@ -225,7 +259,7 @@ export const blogPlugin: PluginRegistration = {
       }
     }
 
-    // ── 2. Criar página "Blog" (listagem completa) ──
+    // ── 3. Criar página "Blog" (listagem completa) ──
     if (!existingPageIds.has("blog")) {
       const blogPageStructure: Block[] = [];
 
@@ -295,7 +329,7 @@ export const blogPlugin: PluginRegistration = {
           variant: "default",
           showViewAll: false,
           viewAllText: "Ver todos",
-          viewAllHref: "/blog",
+          viewAllHref: "/site/p/blog",
         },
       } as Block);
 
@@ -319,7 +353,7 @@ export const blogPlugin: PluginRegistration = {
       logger.debug("Blog listing page created");
     }
 
-    // ── 3. Criar página "Post" (detalhe) ──
+    // ── 4. Criar página "Post" (detalhe) ──
     if (!existingPageIds.has("blog-post")) {
       const postPageStructure: Block[] = [];
 
@@ -386,18 +420,34 @@ export const blogPlugin: PluginRegistration = {
     const newPages = document.pages
       // Remover páginas do plugin
       .filter((page) => page.pluginId !== "blog")
-      // Remover seção de blog injetada na home page
+      // Remover seção de blog injetada + link "Blog" da navbar
       .map((page) => {
-        const hasInjected = page.structure.some(
+        let structure = page.structure;
+
+        // Remover seção de blog injetada
+        const hasInjected = structure.some(
           (b) => b.id === BLOG_HOME_SECTION_ID,
         );
         if (hasInjected) {
-          return {
-            ...page,
-            structure: page.structure.filter(
-              (b) => b.id !== BLOG_HOME_SECTION_ID,
-            ),
-          };
+          structure = structure.filter(
+            (b) => b.id !== BLOG_HOME_SECTION_ID,
+          );
+        }
+
+        // Remover link "Blog" (/p/blog) da navbar
+        structure = structure.map((b) => {
+          if (b.type !== "navbar") return b;
+          const props = b.props as Record<string, any>;
+          const links: Array<{ text: string; href: string }> = Array.isArray(props.links) ? props.links : [];
+          const filtered = links.filter((l) => l.href !== "/p/blog");
+          if (filtered.length !== links.length) {
+            return { ...b, props: { ...props, links: filtered } } as Block;
+          }
+          return b;
+        });
+
+        if (structure !== page.structure) {
+          return { ...page, structure };
         }
         return page;
       });
