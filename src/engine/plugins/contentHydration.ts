@@ -85,18 +85,14 @@ async function hydrateListPage(
 
   const result = await provider.fetchList(params);
 
-  if (!result.items || result.items.length === 0) {
-    return page;
-  }
-
-  // Convert items to block props
-  const cardProps = result.items.map((item) => provider.toBlockProps(item));
+  // Convert items to block props (empty array if no results — shows empty state, never mock data)
+  const cardProps = (result.items || []).map((item) => provider.toBlockProps(item));
 
   // Hydrate all grid blocks and category filters on the page
   const hydratedStructure = page.structure.map((block) => {
-    let result = hydrateGridBlock(block, cardProps);
-    result = hydrateCategoryFilterBlock(result, cardProps);
-    return result;
+    let hydrated = hydrateGridBlock(block, cardProps);
+    hydrated = hydrateCategoryFilterBlock(hydrated, cardProps);
+    return hydrated;
   });
 
   return {
@@ -266,7 +262,7 @@ function hydrateCategoryFilterBlock(
 
     const categories = Array.from(categoryMap.entries()).map(([name, count]) => ({
       name,
-      slug: name.toLowerCase().replace(/\s+/g, "-"),
+      slug: name,
       count,
     }));
 

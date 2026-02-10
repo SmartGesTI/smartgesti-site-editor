@@ -17,7 +17,7 @@ import {
   createEmptySiteDocument,
   defaultThemeTokens,
 } from "../engine";
-import type { ContentProvider } from "../engine/plugins/types";
+import type { ContentProvider, ContentListParams } from "../engine/plugins/types";
 import { matchDynamicPage } from "../engine/plugins/dynamicPageResolver";
 import {
   hydratePageWithContent,
@@ -56,6 +56,11 @@ interface LandingPageViewerProps {
    */
   contentProviders?: ContentProvider[];
   /**
+   * Params for content list filtering (search, category).
+   * Consumer extracts these from URL query params (e.g., ?busca=X&categoria=Y).
+   */
+  contentListParams?: ContentListParams;
+  /**
    * Callback for internal navigation (link clicks inside iframe).
    * Receives the href from clicked links. Consumer should use router navigation.
    */
@@ -83,6 +88,7 @@ export function LandingPageViewer({
   schoolSlug,
   schoolData: _schoolData, // reservado para header/navbar dinâmico (logo, nome da escola)
   contentProviders,
+  contentListParams,
   onNavigate,
 }: LandingPageViewerProps) {
   const [document, setDocument] = useState<SiteDocument | null>(null);
@@ -94,7 +100,7 @@ export function LandingPageViewer({
   const onNavigateRef = useRef(onNavigate);
   onNavigateRef.current = onNavigate;
 
-  // Inject click interceptor into iframe HTML so link clicks propagate to parent
+  // Inject click + form submit interceptor into iframe HTML so interactions propagate to parent
   const injectClickInterceptor = useCallback((html: string): string => {
     const script = `<script>
 (function() {
@@ -112,6 +118,17 @@ export function LandingPageViewer({
         window.parent.postMessage({ type: 'viewer-navigate', href: href }, '*');
         return;
       }
+    }
+  }, true);
+  document.addEventListener('submit', function(e) {
+    var form = e.target;
+    if (form && form.tagName === 'FORM') {
+      e.preventDefault();
+      e.stopPropagation();
+      var action = form.getAttribute('action') || '';
+      var params = new URLSearchParams(new FormData(form));
+      var href = action + (params.toString() ? '?' + params.toString() : '');
+      window.parent.postMessage({ type: 'viewer-navigate', href: href }, '*');
     }
   }, true);
 })();
@@ -280,7 +297,7 @@ export function LandingPageViewer({
       };
     }
 
-    hydratePageWithContent(pageToHydrate, providerMap, urlParams)
+    hydratePageWithContent(pageToHydrate, providerMap, urlParams, contentListParams)
       .then((hydratedPage) => {
         if (stale) return;
 
@@ -307,7 +324,7 @@ export function LandingPageViewer({
     return () => {
       stale = true;
     };
-  }, [document, pageSlug, contentProviders, schoolSlug]);
+  }, [document, pageSlug, contentProviders, schoolSlug, contentListParams]);
 
   if (isLoading) {
     return (
@@ -532,12 +549,16 @@ function renderPageToHtml(
       : undefined;
 
   try {
+    const exportOptions: Record<string, unknown> = {};
+    if (layoutFromPage) exportOptions.layoutFromPage = layoutFromPage;
+    if (document.metadata) exportOptions.siteMetadata = document.metadata;
+
     const html = exportPageToHtml(
       pageWithStructure,
       documentWithTheme,
       useCache,
       basePath,
-      layoutFromPage ? { layoutFromPage } : undefined,
+      Object.keys(exportOptions).length > 0 ? exportOptions as any : undefined,
     );
 
     if (!html || !html.trim()) {
