@@ -112,6 +112,10 @@ export interface StackBlock extends BlockBase {
     align?: "start" | "center" | "end" | "stretch";
     justify?: "start" | "center" | "end" | "space-between" | "space-around";
     wrap?: boolean;
+    /** Sticky positioning (stays fixed while scrolling). Disabled on mobile. */
+    sticky?: boolean;
+    /** Top offset when sticky (ex: "80px" for below navbar). Default "80px". */
+    stickyOffset?: string;
     children?: Block[];
   };
 }
@@ -126,6 +130,10 @@ export interface GridBlock extends BlockBase {
     /** CSS grid-template-columns override (ex: "1fr 320px", "2fr 1fr"). Tem prioridade sobre cols. */
     colTemplate?: string;
     gap?: string;
+    /** Max-width of the grid container (ex: "1200px"). Centers with auto margin. */
+    maxWidth?: string;
+    /** Horizontal padding (ex: "2rem"). Applied to the grid wrapper. */
+    padding?: string;
     children?: Block[];
   };
 }

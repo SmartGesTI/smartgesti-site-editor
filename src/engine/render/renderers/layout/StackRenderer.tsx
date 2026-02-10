@@ -1,6 +1,7 @@
 /**
  * Stack Renderer
  * Renderiza bloco de stack com flex layout
+ * Suporte a sticky positioning para sidebars
  */
 
 import React from "react";
@@ -17,6 +18,8 @@ export function renderStack(
     align = "stretch",
     justify = "start",
     wrap = false,
+    sticky = false,
+    stickyOffset = "80px",
     children = [],
   } = block.props;
 
@@ -40,23 +43,42 @@ export function renderStack(
             ? "space-between"
             : "space-around";
 
+  // Sticky: position sticky + top offset + align-self flex-start (required in grid)
+  const stickyStyles: React.CSSProperties = sticky
+    ? {
+        position: "sticky",
+        top: stickyOffset,
+        alignSelf: "flex-start",
+      }
+    : {};
+
+  // Responsive: disable sticky on mobile via media query
+  const responsiveStyle = sticky
+    ? `@media (max-width: 767px) { #stack-${block.id} { position: static !important; align-self: stretch !important; } }`
+    : "";
+
   return (
-    <div
-      key={block.id}
-      style={{
-        display: "flex",
-        flexDirection,
-        gap,
-        alignItems,
-        justifyContent,
-        flexWrap: wrap ? "wrap" : "nowrap",
-      }}
-    >
-      {children.map((child) => (
-        <React.Fragment key={child.id}>
-          {renderBlockNode(child, depth + 1)}
-        </React.Fragment>
-      ))}
-    </div>
+    <React.Fragment key={block.id}>
+      {responsiveStyle && <style>{responsiveStyle}</style>}
+      <div
+        id={`stack-${block.id}`}
+        key={block.id}
+        style={{
+          display: "flex",
+          flexDirection,
+          gap,
+          alignItems,
+          justifyContent,
+          flexWrap: wrap ? "wrap" : "nowrap",
+          ...stickyStyles,
+        }}
+      >
+        {children.map((child) => (
+          <React.Fragment key={child.id}>
+            {renderBlockNode(child, depth + 1)}
+          </React.Fragment>
+        ))}
+      </div>
+    </React.Fragment>
   );
 }

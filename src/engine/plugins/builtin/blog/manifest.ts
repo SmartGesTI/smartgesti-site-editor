@@ -361,13 +361,15 @@ export const blogPlugin: PluginRegistration = {
         postPageStructure.push(cloneBlock(homeNavbar, "post-page-navbar"));
       }
 
-      // Grid layout: conteúdo principal + sidebar
+      // Grid layout: conteúdo principal + sidebar (com container e espaçamento)
       postPageStructure.push({
         id: "blog-detail-layout",
         type: "grid",
         props: {
           colTemplate: "1fr 320px",
-          gap: "2rem",
+          gap: "2.5rem",
+          maxWidth: "1200px",
+          padding: "2rem",
           children: [
             // Coluna principal: blogPostDetail
             {
@@ -391,13 +393,15 @@ export const blogPlugin: PluginRegistration = {
                 contentMaxWidth: "720px",
               },
             },
-            // Sidebar: stack vertical com widgets
+            // Sidebar: stack vertical com widgets (sticky por padrão)
             {
               id: "blog-detail-sidebar",
               type: "stack",
               props: {
                 direction: "col",
                 gap: "1.5rem",
+                sticky: true,
+                stickyOffset: "80px",
                 children: [
                   {
                     id: "blog-sidebar-search",

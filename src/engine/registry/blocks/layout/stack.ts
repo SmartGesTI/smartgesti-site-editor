@@ -13,6 +13,8 @@ export const stackBlock: BlockDefinition = {
     align: "stretch",
     justify: "start",
     wrap: false,
+    sticky: false,
+    stickyOffset: "80px",
   },
   inspectorMeta: {
     direction: {
@@ -51,6 +53,18 @@ export const stackBlock: BlockDefinition = {
         { label: "Space Around", value: "space-around" },
       ],
       group: "Layout",
+    },
+    sticky: {
+      label: "Fixo ao Rolar",
+      description: "Mantém o bloco visível enquanto o conteúdo rola (desativado em mobile)",
+      inputType: "checkbox",
+      group: "Comportamento",
+    },
+    stickyOffset: {
+      label: "Distância do Topo",
+      description: "Espaço do topo quando fixo (ex: 80px para abaixo da navbar)",
+      inputType: "text",
+      group: "Comportamento",
     },
   },
 };

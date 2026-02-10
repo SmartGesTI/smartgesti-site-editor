@@ -1,6 +1,7 @@
 /**
  * Stack Block Exporter
  * Responsive direction: column (mobile) → row (desktop) when direction="row"
+ * Suporte a sticky positioning para sidebars
  */
 
 import { Block } from "../../../schema/siteDocument";
@@ -22,6 +23,8 @@ export function exportStack(
     align = "stretch",
     justify = "start",
     wrap = false,
+    sticky = false,
+    stickyOffset = "80px",
     children = [],
   } = (block as any).props;
 
@@ -55,16 +58,31 @@ export function exportStack(
             ? "space-between"
             : "space-around";
 
-  // Media queries apenas se for responsivo (row em desktop)
-  const mediaQueries = isMobileFirst
+  // Media queries for responsive direction
+  let mediaQueries = isMobileFirst
     ? generateFlexDirectionMediaQueries(stackId, mobileDirection as any, desktopDirection as any)
     : "";
+
+  // Sticky: add position sticky on desktop, disable on mobile
+  const stickyInline = sticky
+    ? ` position: sticky; top: ${stickyOffset}; align-self: flex-start;`
+    : "";
+
+  if (sticky) {
+    mediaQueries += `
+    @media (max-width: ${BREAKPOINTS.md}) {
+      #${stackId} {
+        position: static !important;
+        align-self: stretch !important;
+      }
+    }`;
+  }
 
   const childrenHtml = children
     .map((c: Block) => renderChild(c, depth + 1, basePath, theme))
     .join("");
 
-  const inlineStyles = `display: flex; flex-direction: ${mobileDirection}; gap: ${gap}; align-items: ${alignItems}; justify-content: ${justifyContent}; flex-wrap: ${wrap ? "wrap" : "nowrap"};`;
+  const inlineStyles = `display: flex; flex-direction: ${mobileDirection}; gap: ${gap}; align-items: ${alignItems}; justify-content: ${justifyContent}; flex-wrap: ${wrap ? "wrap" : "nowrap"};${stickyInline}`;
 
   return mediaQueries
     ? `<style>${mediaQueries}</style><div id="${stackId}" ${dataBlockIdAttr(block.id)} style="${inlineStyles}">${childrenHtml}</div>`

@@ -31,6 +31,18 @@ export const gridBlock: BlockDefinition = {
       inputType: "text",
       group: "Layout",
     },
+    maxWidth: {
+      label: "Largura Máxima",
+      description: "Largura máxima do container (ex: '1200px'). Centraliza com margem automática.",
+      inputType: "text",
+      group: "Espaçamento",
+    },
+    padding: {
+      label: "Padding Lateral",
+      description: "Espaçamento horizontal interno (ex: '2rem')",
+      inputType: "text",
+      group: "Espaçamento",
+    },
   },
 };
 

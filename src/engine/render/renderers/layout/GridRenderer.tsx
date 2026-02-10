@@ -2,6 +2,7 @@
  * Grid Renderer
  * Renderiza bloco de grid com CSS Grid
  * Suporte a colTemplate para templates customizados (ex: "1fr 320px")
+ * Suporte a maxWidth e padding para espaçamento
  */
 
 import React from "react";
@@ -12,7 +13,7 @@ export function renderGrid(
   block: GridBlock,
   depth: number,
 ): React.ReactNode {
-  const { cols = 3, colTemplate, gap = "1rem", children = [] } = block.props;
+  const { cols = 3, colTemplate, gap = "1rem", maxWidth, padding, children = [] } = block.props;
 
   const gridCols =
     typeof cols === "number" ? cols : cols.lg || cols.md || cols.sm || 3;
@@ -24,23 +25,47 @@ export function renderGrid(
     ? `@media (max-width: 767px) { #grid-${block.id} { grid-template-columns: 1fr !important; } }`
     : "";
 
+  // Wrapper styles for maxWidth + padding (container-like behavior)
+  const wrapperStyle: React.CSSProperties = {};
+  if (maxWidth || padding) {
+    if (maxWidth) {
+      wrapperStyle.maxWidth = maxWidth;
+      wrapperStyle.marginLeft = "auto";
+      wrapperStyle.marginRight = "auto";
+    }
+    if (padding) {
+      wrapperStyle.paddingLeft = padding;
+      wrapperStyle.paddingRight = padding;
+    }
+  }
+
+  const hasWrapper = maxWidth || padding;
+
+  const gridDiv = (
+    <div
+      id={`grid-${block.id}`}
+      style={{
+        display: "grid",
+        gridTemplateColumns,
+        gap,
+      }}
+    >
+      {children.map((child) => (
+        <React.Fragment key={child.id}>
+          {renderBlockNode(child, depth + 1)}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+
   return (
     <React.Fragment key={block.id}>
       {responsiveStyle && <style>{responsiveStyle}</style>}
-      <div
-        id={`grid-${block.id}`}
-        style={{
-          display: "grid",
-          gridTemplateColumns,
-          gap,
-        }}
-      >
-        {children.map((child) => (
-          <React.Fragment key={child.id}>
-            {renderBlockNode(child, depth + 1)}
-          </React.Fragment>
-        ))}
-      </div>
+      {hasWrapper ? (
+        <div style={wrapperStyle}>{gridDiv}</div>
+      ) : (
+        gridDiv
+      )}
     </React.Fragment>
   );
 }
