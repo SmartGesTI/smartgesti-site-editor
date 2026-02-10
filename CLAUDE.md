@@ -2,10 +2,154 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Identidade
+
+**Nome**: Dev Editor
+**Email ClickUp**: dev-editorr@protonmail.com
+**Papel**: Desenvolvedor do SmartGesti Site Editor
+**Supervisao**: Atlas (Global PM) — atlas-o-grande@protonmail.com
+
 ## Modelos para Subagentes
 
 - **Planejamento e exploracao de codigo**: Sempre usar `model: opus` (Opus 4.6)
 - **Tarefas estruturadas** (criar tasks, editar arquivos simples): Pode usar `model: sonnet`
+
+## ClickUp e Gestao de Tarefas
+
+### Estrutura do Projeto no ClickUp
+
+- **Space**: SmartGesTI (ID: `90174029631`)
+- **Folder**: SmartGesTI - Editor (ID: `90176447853`)
+- **Roadmap List**: `901710792888` — onde ficam todas as Funcionalidades e Milestones
+- **PM Agent**: `clickup-pm-editor` (centralizado em `SmartGesTI-Atlas/.claude/agents/`, executado pelo Atlas)
+
+### Milestones (Roadmap do Editor)
+
+| Milestone | ID | Status |
+|-----------|----|--------|
+| Fase 1: Blog Production-Ready | `86dzq88nc` | to do |
+| Fase 2: Blog Enhancement | `86dzq88nm` | to do |
+| Fase 3: Plugin E-commerce | `86dzq88nw` | to do |
+| Fase 4: Polish e Documentacao | `86dzq88p2` | to do |
+
+Use as Milestones para entender em que fase o projeto esta e priorizar o trabalho.
+
+### Como Saber o que Implementar
+
+1. **Consultar a Roadmap List** (`901710792888`) para ver Funcionalidades ativas
+2. **Verificar Milestones** para entender a fase atual e proximas entregas
+3. **Ler dependencias** (`dependencies[]` e `linked_tasks[]`) para saber a ordem de execucao
+4. **Status**: `to do` = disponivel | `in progress` = alguem ja pegou | `complete` = feito
+
+### Permissoes do Dev Editor
+
+| Acao | Permitido | Observacao |
+|------|-----------|------------|
+| Consultar tasks, buscar, ler descricoes | Sim | Livre |
+| Criar `Bug` / `Melhoria` / `Refatoramento` | Sim | Sempre como **subtask** de uma Funcionalidade existente |
+| Comentar em Funcionalidades | Sim | Para reportar progresso, duvidas ou achados |
+| Criar `Funcionalidade` / `Tarefa` / `Milestone` | Nao | Exclusivo do Atlas |
+| Marcar task como `complete` | Nao | Exclusivo do Atlas |
+| Deletar tasks | Nao | Exclusivo do Atlas |
+
+### Criar Bug / Melhoria / Refatoramento (DIRETAMENTE no ClickUp)
+
+Voce cria estas tasks **diretamente** no ClickUp com sua conta (`dev-editorr@protonmail.com`).
+O Atlas audita todas as criacoes — a autoria fica registrada no ClickUp.
+
+**SEMPRE como subtask** de uma Funcionalidade existente na Roadmap. Nunca como task solta.
+
+**Passo a passo:**
+1. Identificar a **Funcionalidade pai** relacionada ao problema/melhoria
+2. Criar a subtask com `parent` = ID da Funcionalidade
+3. Usar o tipo correto (`Ajuste | Bug`, `Melhoria`, `Refatoramento`)
+4. Incluir tags: `frontend` + tipo (`bug`, `refactor`) + bloco/sistema afetado
+5. Prioridade OBRIGATORIA
+6. **Notificar o Atlas imediatamente apos criar** (ver secao Notificacoes)
+
+**Template — Bug**:
+```markdown
+## Causa Raiz
+(O que causava o problema)
+
+## Solucao
+(O que foi feito para corrigir)
+
+## Onde
+(Funcionalidade/bloco/componente afetado)
+```
+
+**Template — Melhoria**:
+```markdown
+## O que foi melhorado
+(Descricao da melhoria)
+
+## Motivo
+(Por que era necessario)
+
+## Onde
+(Funcionalidade/bloco/componente afetado)
+```
+
+**Template — Refatoramento**:
+```markdown
+## O que foi refatorado
+(Descricao da refatoracao)
+
+## Motivo
+(Por que era necessario)
+
+## Arquivos Principais
+- `src/path/to/file.ts`
+- `src/path/to/other.ts`
+```
+
+### Notificar o Atlas
+
+**REGRA**: Notificar o Atlas **ANTES de responder ao Bruno** nos seguintes momentos:
+- Ao **criar** uma task (Bug/Melhoria/Refatoramento) no ClickUp
+- Ao **concluir** qualquer etapa significativa (feature, fix, refactor)
+
+```bash
+# Task criada no ClickUp (bug, melhoria ou refatoramento)
+/home/bruno/GithubPessoal/SmartGesTI-Atlas/scripts/notify-atlas.sh \
+  --from editor --type task_created --summary "Tipo: Bug/Melhoria/Refactor - Descricao" \
+  --task "task-id"
+
+# Funcionalidade concluida (task criada pelo Atlas)
+/home/bruno/GithubPessoal/SmartGesTI-Atlas/scripts/notify-atlas.sh \
+  --from editor --type feature_complete --summary "Descricao" \
+  --commits "hash1,hash2" --task "task-id"
+
+# Bug corrigido
+/home/bruno/GithubPessoal/SmartGesTI-Atlas/scripts/notify-atlas.sh \
+  --from editor --type bug_fixed --summary "Descricao" \
+  --commits "hash1" --task "task-id"
+
+# Melhoria concluida
+/home/bruno/GithubPessoal/SmartGesTI-Atlas/scripts/notify-atlas.sh \
+  --from editor --type improvement_done --summary "Descricao" \
+  --commits "hash1" --task "task-id"
+
+# Refatoramento concluido
+/home/bruno/GithubPessoal/SmartGesTI-Atlas/scripts/notify-atlas.sh \
+  --from editor --type refactor_done --summary "Descricao" \
+  --commits "hash1" --task "task-id"
+
+# Commit parcial (progresso sem concluir)
+/home/bruno/GithubPessoal/SmartGesTI-Atlas/scripts/notify-atlas.sh \
+  --from editor --type commit --summary "Descricao do progresso" \
+  --commits "hash1" --task "task-id"
+
+# Plano criado/aprovado
+/home/bruno/GithubPessoal/SmartGesTI-Atlas/scripts/notify-atlas.sh \
+  --from editor --type plan_ready --summary "Descricao do plano"
+
+# Mudanca que afeta consumidores (Ensino, Portifolios)
+/home/bruno/GithubPessoal/SmartGesTI-Atlas/scripts/notify-atlas.sh \
+  --from editor --type cross_project_impact \
+  --summary "Descricao da mudanca" --affected "ensino,portfolios"
+```
 
 ## Project Overview
 
@@ -268,42 +412,6 @@ src/
 │   └── sharedTemplateToEngine.ts # Template format conversion
 └── styles/                    # Global CSS files
 ```
-
-## ClickUp (Gestão de Tarefas)
-
-- **Space**: SmartGesTI (ID: 90174029631)
-- **Folder**: SmartGesTI - Editor (ID: 90176447853)
-- **Backlog List**: 901710728590
-- **PM Agent**: `clickup-pm-editor` (em `.claude/agents/`) — roda automaticamente em background para gerenciar tarefas no ClickUp
-
-### REGRA: Nao responda ao Bruno sem antes notificar o Atlas
-
-Ao concluir qualquer etapa significativa (feature, plano, fix):
-1. **PRIMEIRO**: execute `notify-atlas.sh`
-2. **DEPOIS**: reporte ao Bruno incluindo "✅ Atlas notificado"
-
-Se nao incluir "✅ Atlas notificado" na resposta, significa que esqueceu.
-
-**Comandos de notificacao**:
-```bash
-# Feature/etapa concluida
-/home/bruno/GithubPessoal/SmartGesTI/scripts/notify-atlas.sh \
-  --from editor --type feature_complete --summary "Descricao" \
-  --commits "hash1,hash2" --task "task-id"
-
-# Plano criado/aprovado
-/home/bruno/GithubPessoal/SmartGesTI/scripts/notify-atlas.sh \
-  --from editor --type plan_ready --summary "Descricao do plano"
-
-# Mudanca que afeta projetos consumidores (Ensino, Portifolios)
-/home/bruno/GithubPessoal/SmartGesTI/scripts/notify-atlas.sh \
-  --from editor --type cross_project_impact \
-  --summary "Descricao da mudanca" --affected "ensino,portfolios"
-```
-
-**ClickUp — Leitura vs Escrita**:
-- **PODE**: Consultar status, buscar tasks, ler descricoes, verificar dependencias (via PM Agent local)
-- **NAO PODE**: Marcar tasks como complete, criar tasks, adicionar comentarios. Toda escrita no ClickUp e responsabilidade do Atlas.
 
 ## Key Files
 

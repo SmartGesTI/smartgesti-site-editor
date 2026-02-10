@@ -1,9 +1,5 @@
 {
   "mcpServers": {
-    "clickup": {
-      "type": "http",
-      "url": "https://mcp.clickup.com/mcp"
-    },
     "supabase": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp?project_ref=kyszbkkhggzugadamgku"
