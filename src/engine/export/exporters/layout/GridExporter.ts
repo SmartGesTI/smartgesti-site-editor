@@ -22,7 +22,7 @@ export function exportGrid(
   theme?: ThemeTokens,
   renderChild?: (block: Block, _depth: number, basePath?: string, theme?: ThemeTokens) => string,
 ): string {
-  const { cols = 3, colTemplate, gap = "1rem", maxWidth, padding, children = [] } = (block as any).props;
+  const { cols = 3, colTemplate, gap = "1rem", maxWidth, padding, paddingTop, children = [] } = (block as any).props;
 
   if (!renderChild) {
     throw new Error("exportGrid requires renderChild function");
@@ -46,6 +46,9 @@ export function exportGrid(
   if (padding) {
     wrapperParts.push(`padding-left: ${padding}`);
     wrapperParts.push(`padding-right: ${padding}`);
+  }
+  if (paddingTop) {
+    wrapperParts.push(`padding-top: ${paddingTop}`);
   }
   const hasWrapper = wrapperParts.length > 0;
   const wrapperStyle = wrapperParts.join("; ");

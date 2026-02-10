@@ -13,7 +13,7 @@ export function renderGrid(
   block: GridBlock,
   depth: number,
 ): React.ReactNode {
-  const { cols = 3, colTemplate, gap = "1rem", maxWidth, padding, children = [] } = block.props;
+  const { cols = 3, colTemplate, gap = "1rem", maxWidth, padding, paddingTop, children = [] } = block.props;
 
   const gridCols =
     typeof cols === "number" ? cols : cols.lg || cols.md || cols.sm || 3;
@@ -27,7 +27,7 @@ export function renderGrid(
 
   // Wrapper styles for maxWidth + padding (container-like behavior)
   const wrapperStyle: React.CSSProperties = {};
-  if (maxWidth || padding) {
+  if (maxWidth || padding || paddingTop) {
     if (maxWidth) {
       wrapperStyle.maxWidth = maxWidth;
       wrapperStyle.marginLeft = "auto";
@@ -37,9 +37,12 @@ export function renderGrid(
       wrapperStyle.paddingLeft = padding;
       wrapperStyle.paddingRight = padding;
     }
+    if (paddingTop) {
+      wrapperStyle.paddingTop = paddingTop;
+    }
   }
 
-  const hasWrapper = maxWidth || padding;
+  const hasWrapper = maxWidth || padding || paddingTop;
 
   const gridDiv = (
     <div

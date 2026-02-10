@@ -358,10 +358,14 @@ export const blogPlugin: PluginRegistration = {
       const postPageStructure: Block[] = [];
 
       if (homeNavbar) {
-        postPageStructure.push(cloneBlock(homeNavbar, "post-page-navbar"));
+        const navClone = cloneBlock(homeNavbar, "post-page-navbar");
+        // Garantir navbar fixa no topo (position:fixed) mesmo se home não tem
+        (navClone.props as Record<string, any>).sticky = true;
+        postPageStructure.push(navClone);
       }
 
       // Grid layout: conteúdo principal + sidebar (com container e espaçamento)
+      // paddingTop compensa a navbar fixa (position:fixed sai do fluxo)
       postPageStructure.push({
         id: "blog-detail-layout",
         type: "grid",
@@ -370,6 +374,7 @@ export const blogPlugin: PluginRegistration = {
           gap: "2.5rem",
           maxWidth: "1200px",
           padding: "2rem",
+          paddingTop: "6rem",
           children: [
             // Coluna principal: blogPostDetail
             {

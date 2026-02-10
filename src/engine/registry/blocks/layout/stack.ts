@@ -27,8 +27,15 @@ export const stackBlock: BlockDefinition = {
       group: "Layout",
     },
     gap: {
-      label: "Gap",
-      inputType: "text",
+      label: "Distância entre Itens",
+      inputType: "select",
+      options: [
+        { label: "Compacto", value: "0.5rem" },
+        { label: "Pequeno", value: "1rem" },
+        { label: "Padrão", value: "1.5rem" },
+        { label: "Espaçoso", value: "2rem" },
+        { label: "Largo", value: "3rem" },
+      ],
       group: "Layout",
     },
     align: {
@@ -56,14 +63,22 @@ export const stackBlock: BlockDefinition = {
     },
     sticky: {
       label: "Fixo ao Rolar",
-      description: "Mantém o bloco visível enquanto o conteúdo rola (desativado em mobile)",
+      description: "Mantém o bloco visível enquanto rola (desativado em mobile)",
       inputType: "checkbox",
       group: "Comportamento",
     },
     stickyOffset: {
       label: "Distância do Topo",
-      description: "Espaço do topo quando fixo (ex: 80px para abaixo da navbar)",
-      inputType: "text",
+      description: "Espaço do topo quando fixo",
+      inputType: "select",
+      options: [
+        { label: "Rente ao Topo", value: "0px" },
+        { label: "Pequeno (1rem)", value: "1rem" },
+        { label: "Navbar Padrão (80px)", value: "80px" },
+        { label: "Navbar + Respiro (100px)", value: "100px" },
+        { label: "Grande (120px)", value: "120px" },
+      ],
+      showWhen: { field: "sticky", equals: true },
       group: "Comportamento",
     },
   },
