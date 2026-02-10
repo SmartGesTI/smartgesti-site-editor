@@ -366,10 +366,12 @@ export const blogPlugin: PluginRegistration = {
 
       // Grid layout: conteúdo principal + sidebar (com container e espaçamento)
       // paddingTop compensa a navbar fixa (position:fixed sai do fluxo)
+      // cols: 2 para que "Iguais" funcione corretamente (2 filhos = 2 colunas)
       postPageStructure.push({
         id: "blog-detail-layout",
         type: "grid",
         props: {
+          cols: 2,
           colTemplate: "1fr 320px",
           gap: "2.5rem",
           maxWidth: "1200px",
