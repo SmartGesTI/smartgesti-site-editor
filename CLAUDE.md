@@ -301,7 +301,9 @@ Se nao incluir "✅ Atlas notificado" na resposta, significa que esqueceu.
   --summary "Descricao da mudanca" --affected "ensino,portfolios"
 ```
 
-**Para consultas rapidas ao ClickUp** (verificar status, buscar task), o PM Agent local (`clickup-pm-editor`) pode ser usado normalmente.
+**ClickUp — Leitura vs Escrita**:
+- **PODE**: Consultar status, buscar tasks, ler descricoes, verificar dependencias (via PM Agent local)
+- **NAO PODE**: Marcar tasks como complete, criar tasks, adicionar comentarios. Toda escrita no ClickUp e responsabilidade do Atlas.
 
 ## Key Files
 
