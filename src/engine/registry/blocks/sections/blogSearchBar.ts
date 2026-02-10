@@ -16,6 +16,8 @@ export const blogSearchBarBlock: BlockDefinition<"blogSearchBar"> = {
     filterCategories: false,
     filterTags: false,
     filterDate: false,
+    borderRadius: "0.75rem",
+    shadow: "none",
   },
   inspectorMeta: {
     placeholder: { label: "Placeholder", inputType: "text", group: "Conteúdo" },
@@ -48,6 +50,26 @@ export const blogSearchBarBlock: BlockDefinition<"blogSearchBar"> = {
       inputType: "checkbox",
       group: "Filtros",
       showWhen: { field: "variant", equals: "with-filters" },
+    },
+    borderRadius: {
+      label: "Arredondamento",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "0" },
+        { label: "Padrão", value: "0.75rem" },
+        { label: "Grande", value: "1.25rem" },
+      ],
+      group: "Aparência",
+    },
+    shadow: {
+      label: "Sombra",
+      inputType: "select",
+      options: [
+        { label: "Nenhuma", value: "none" },
+        { label: "Suave", value: "sm" },
+        { label: "Média", value: "md" },
+      ],
+      group: "Aparência",
     },
   },
 };

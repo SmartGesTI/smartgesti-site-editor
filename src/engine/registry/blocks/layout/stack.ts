@@ -56,6 +56,13 @@ export const stackBlock: BlockDefinition = {
       ],
       group: "Layout",
     },
+    wrap: {
+      label: "Quebrar Linha",
+      description: "Permite que itens quebrem para próxima linha",
+      inputType: "checkbox",
+      showWhen: { field: "direction", equals: "row" },
+      group: "Layout",
+    },
     sticky: {
       label: "Fixo ao Rolar",
       description: "Mantém o bloco visível enquanto rola (desativado em mobile)",
@@ -69,7 +76,8 @@ export const stackBlock: BlockDefinition = {
       options: [
         { label: "Rente", value: "0px" },
         { label: "Navbar", value: "80px" },
-        { label: "Grande", value: "120px" },
+        { label: "Navbar + Espaço", value: "100px" },
+        { label: "Grande", value: "140px" },
       ],
       showWhen: { field: "sticky", equals: true },
       group: "Comportamento",

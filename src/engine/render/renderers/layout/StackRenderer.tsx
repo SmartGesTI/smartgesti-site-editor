@@ -20,6 +20,7 @@ export function renderStack(
     wrap = false,
     sticky = false,
     stickyOffset = "80px",
+    paddingBottom,
     children = [],
   } = block.props;
 
@@ -52,10 +53,20 @@ export function renderStack(
       }
     : {};
 
-  // Responsive: disable sticky on mobile via media query
-  const responsiveStyle = sticky
-    ? `@media (max-width: 767px) { #stack-${block.id} { position: static !important; align-self: stretch !important; } }`
-    : "";
+  // Responsive media queries
+  const mediaQueryParts: string[] = [];
+
+  // direction=row → force column on mobile
+  if (direction === "row") {
+    mediaQueryParts.push(`@media (max-width: 767px) { #stack-${block.id} { flex-direction: column !important; } }`);
+  }
+
+  // Sticky → disable on mobile
+  if (sticky) {
+    mediaQueryParts.push(`@media (max-width: 767px) { #stack-${block.id} { position: static !important; align-self: stretch !important; } }`);
+  }
+
+  const responsiveStyle = mediaQueryParts.join("\n");
 
   return (
     <React.Fragment key={block.id}>
@@ -70,6 +81,7 @@ export function renderStack(
           alignItems,
           justifyContent,
           flexWrap: wrap ? "wrap" : "nowrap",
+          paddingBottom: paddingBottom || undefined,
           ...stickyStyles,
         }}
       >

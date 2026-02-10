@@ -1,9 +1,12 @@
 /**
  * BlogSearchBar Renderer
- * Renderiza barra de busca com 3 variantes: simple, expanded, with-filters
+ * Card widget com barra de busca — 3 variantes: simple, expanded, with-filters
+ * Background: var(--sg-surface) para contraste com layout
+ * Hover: focus ring no input
  */
 
 import React from "react";
+import { resolveWidgetShadow } from "../../../shared/widgetStyles";
 
 function SearchIcon() {
   return (
@@ -36,7 +39,22 @@ export function renderBlogSearchBar(block: any): React.ReactNode {
     filterCategories = false,
     filterTags = false,
     filterDate = false,
+    borderRadius = "0.75rem",
+    shadow = "none",
   } = block.props;
+
+  const widgetId = `widget-search-${block.id}`;
+  const boxShadow = resolveWidgetShadow(shadow);
+
+  const cardStyle: React.CSSProperties = {
+    backgroundColor: "var(--sg-surface, var(--sg-bg))",
+    border: "1px solid var(--sg-border, #e5e7eb)",
+    borderRadius,
+    boxShadow: boxShadow !== "none" ? boxShadow : undefined,
+    overflow: "hidden",
+  };
+
+  const inputRadius = `calc(${borderRadius} * 0.6)`;
 
   const inputStyle: React.CSSProperties = {
     width: "100%",
@@ -46,116 +64,81 @@ export function renderBlogSearchBar(block: any): React.ReactNode {
     paddingBottom: variant === "expanded" ? "0.875rem" : "0.625rem",
     fontSize: variant === "expanded" ? "1.0625rem" : "0.875rem",
     border: variant === "expanded" ? "2px solid var(--sg-border, #e5e7eb)" : "1px solid var(--sg-border, #e5e7eb)",
-    borderRadius: "var(--sg-card-radius, 0.5rem)",
+    borderRadius: inputRadius,
     backgroundColor: "var(--sg-bg)",
     color: "var(--sg-text)",
     outline: "none",
+    transition: "border-color 0.2s, box-shadow 0.2s",
   };
 
   const selectStyle: React.CSSProperties = {
     padding: "0.625rem 0.75rem",
     fontSize: "0.875rem",
     border: "1px solid var(--sg-border, #e5e7eb)",
-    borderRadius: "var(--sg-card-radius, 0.5rem)",
+    borderRadius: inputRadius,
     backgroundColor: "var(--sg-bg)",
     color: "var(--sg-text)",
+    transition: "border-color 0.2s",
   };
 
-  if (variant === "expanded") {
-    return (
-      <form
-        key={block.id}
-        data-block-group="Conteúdo"
-        action={searchUrl}
-        method="get"
-        style={{
-          padding: "2rem 0",
-          backgroundColor: "var(--sg-bg)",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1200px",
-            margin: "0 auto",
-            padding: "0 1rem",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <div style={{ position: "relative", width: "100%", maxWidth: "600px" }}>
-            {showIcon && <SearchIcon />}
-            <input type="search" name="busca" placeholder={placeholder} style={inputStyle} />
-          </div>
-        </div>
-      </form>
-    );
-  }
+  // Focus ring CSS
+  const focusCSS = `
+    #${widgetId} input:focus, #${widgetId} select:focus {
+      border-color: var(--sg-primary);
+      box-shadow: 0 0 0 3px rgba(var(--sg-primary-rgb, 59, 130, 246), 0.15);
+    }
+  `;
+
+  const renderFilters = () => (
+    <>
+      {filterCategories && (
+        <select name="categoria" style={selectStyle}>
+          <option value="">Categoria</option>
+        </select>
+      )}
+      {filterTags && (
+        <select name="tag" style={selectStyle}>
+          <option value="">Tag</option>
+        </select>
+      )}
+      {filterDate && (
+        <select name="periodo" style={selectStyle}>
+          <option value="">Período</option>
+        </select>
+      )}
+    </>
+  );
 
   if (variant === "with-filters") {
     return (
-      <form
-        key={block.id}
-        data-block-group="Conteúdo"
-        action={searchUrl}
-        method="get"
-        style={{
-          padding: "1.5rem 0",
-          backgroundColor: "var(--sg-bg)",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1200px",
-            margin: "0 auto",
-            padding: "0 1rem",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "0.75rem",
-            alignItems: "center",
-          }}
-        >
-          <div style={{ position: "relative", flex: 1, minWidth: "200px" }}>
-            {showIcon && <SearchIcon />}
-            <input type="search" name="busca" placeholder={placeholder} style={inputStyle} />
-          </div>
-          {filterCategories && (
-            <select name="categoria" style={selectStyle}>
-              <option value="">Categoria</option>
-            </select>
-          )}
-          {filterTags && (
-            <select name="tag" style={selectStyle}>
-              <option value="">Tag</option>
-            </select>
-          )}
-          {filterDate && (
-            <select name="periodo" style={selectStyle}>
-              <option value="">Período</option>
-            </select>
-          )}
+      <React.Fragment key={block.id}>
+        <style>{focusCSS}</style>
+        <div id={widgetId} data-block-group="Conteúdo" style={cardStyle}>
+          <form action={searchUrl} method="get" style={{ padding: "1.25rem" }}>
+            <div style={{ position: "relative", marginBottom: "0.75rem" }}>
+              {showIcon && <SearchIcon />}
+              <input type="search" name="busca" placeholder={placeholder} style={inputStyle} />
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              {renderFilters()}
+            </div>
+          </form>
         </div>
-      </form>
+      </React.Fragment>
     );
   }
 
-  // simple variant
   return (
-    <form
-      key={block.id}
-      data-block-group="Conteúdo"
-      action={searchUrl}
-      method="get"
-      style={{
-        padding: "1.5rem 0",
-        backgroundColor: "var(--sg-bg)",
-      }}
-    >
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1rem" }}>
-        <div style={{ position: "relative", width: "100%", maxWidth: "400px" }}>
-          {showIcon && <SearchIcon />}
-          <input type="search" name="busca" placeholder={placeholder} style={inputStyle} />
-        </div>
+    <React.Fragment key={block.id}>
+      <style>{focusCSS}</style>
+      <div id={widgetId} data-block-group="Conteúdo" style={cardStyle}>
+        <form action={searchUrl} method="get" style={{ padding: "1.25rem" }}>
+          <div style={{ position: "relative" }}>
+            {showIcon && <SearchIcon />}
+            <input type="search" name="busca" placeholder={placeholder} style={inputStyle} />
+          </div>
+        </form>
       </div>
-    </form>
+    </React.Fragment>
   );
 }

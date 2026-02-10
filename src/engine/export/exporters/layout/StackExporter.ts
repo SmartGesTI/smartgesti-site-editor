@@ -25,6 +25,7 @@ export function exportStack(
     wrap = false,
     sticky = false,
     stickyOffset = "80px",
+    paddingBottom,
     children = [],
   } = (block as any).props;
 
@@ -82,7 +83,8 @@ export function exportStack(
     .map((c: Block) => renderChild(c, depth + 1, basePath, theme))
     .join("");
 
-  const inlineStyles = `display: flex; flex-direction: ${mobileDirection}; gap: ${gap}; align-items: ${alignItems}; justify-content: ${justifyContent}; flex-wrap: ${wrap ? "wrap" : "nowrap"};${stickyInline}`;
+  const paddingBottomStyle = paddingBottom ? ` padding-bottom: ${paddingBottom};` : "";
+  const inlineStyles = `display: flex; flex-direction: ${mobileDirection}; gap: ${gap}; align-items: ${alignItems}; justify-content: ${justifyContent}; flex-wrap: ${wrap ? "wrap" : "nowrap"};${stickyInline}${paddingBottomStyle}`;
 
   return mediaQueries
     ? `<style>${mediaQueries}</style><div id="${stackId}" ${dataBlockIdAttr(block.id)} style="${inlineStyles}">${childrenHtml}</div>`

@@ -196,6 +196,28 @@ export function LandingPageEditor({
     const darkGradientVariations = new Set([
       "hero-gradient", "hero-parallax", "hero-overlay", "hero-carousel",
     ]);
+    // Blog widget types que recebem cores da paleta
+    const blogWidgetTypes = new Set([
+      "blogCategoryFilter", "blogRecentPosts", "blogTagCloud",
+    ]);
+
+    // Recursivamente patcha blog widgets em children de grid/stack
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const patchNestedBlocks = (blocks: any[], basePath: string) => {
+      for (let i = 0; i < blocks.length; i++) {
+        const b = blocks[i];
+        const bPath = `${basePath}/${i}/props`;
+        if (blogWidgetTypes.has(b.type)) {
+          allPatches.push(
+            { op: "replace", path: `${bPath}/linkColor`, value: derived.themeColors.text },
+            { op: "replace", path: `${bPath}/linkHoverColor`, value: derived.themeColors.primary },
+          );
+        }
+        if (Array.isArray(b.props?.children)) {
+          patchNestedBlocks(b.props.children, `${bPath}/children`);
+        }
+      }
+    };
 
     for (let pageIdx = 0; pageIdx < document.pages.length; pageIdx++) {
       const page = document.pages[pageIdx];
@@ -228,6 +250,8 @@ export function LandingPageEditor({
           );
         }
       }
+      // Patchar blog widgets aninhados (dentro de grid/stack children)
+      patchNestedBlocks(page.structure, `/pages/${pageIdx}/structure`);
     }
 
     applyChange(allPatches, "Update color palette");

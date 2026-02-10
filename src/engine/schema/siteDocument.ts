@@ -116,6 +116,8 @@ export interface StackBlock extends BlockBase {
     sticky?: boolean;
     /** Top offset when sticky (ex: "80px" for below navbar). Default "80px". */
     stickyOffset?: string;
+    /** Bottom padding */
+    paddingBottom?: string;
     children?: Block[];
   };
 }
@@ -127,7 +129,7 @@ export interface GridBlock extends BlockBase {
   type: "grid";
   props: {
     cols?: number | { sm?: number; md?: number; lg?: number };
-    /** CSS grid-template-columns override (ex: "1fr 320px", "2fr 1fr"). Tem prioridade sobre cols. */
+    /** CSS grid-template-columns override (ex: "1fr 320px"). Tem prioridade sobre cols. */
     colTemplate?: string;
     gap?: string;
     /** Max-width of the grid container. Centers with auto margin. */
@@ -136,6 +138,20 @@ export interface GridBlock extends BlockBase {
     padding?: string;
     /** Top padding — useful to clear fixed/sticky navbars. */
     paddingTop?: string;
+    /** Bottom padding */
+    paddingBottom?: string;
+    /** Grid container position when maxWidth is set. Default "center". */
+    contentPosition?: "left" | "center" | "right";
+    /** Background color for the full-width wrapper. */
+    bg?: string;
+    /** Background image URL */
+    bgImage?: string;
+    /** Dark overlay on background image */
+    bgOverlay?: boolean;
+    /** Overlay color (default "rgba(0,0,0,0.5)") */
+    bgOverlayColor?: string;
+    /** CSS gradient (applied as background) */
+    bgGradient?: string;
     children?: Block[];
   };
 }
@@ -1120,6 +1136,18 @@ export interface BlogCategoryFilterBlock extends BlockBase {
     allLabel?: string;
     activeCategory?: string;
     filterUrl?: string;
+    /** Link text color */
+    linkColor?: string;
+    /** Link hover color */
+    linkHoverColor?: string;
+    /** Link hover effect type */
+    linkHoverEffect?: string;
+    /** Link hover intensity (10-100) */
+    linkHoverIntensity?: number;
+    /** Card border radius. Default "0.75rem". */
+    borderRadius?: string;
+    /** Card box shadow: "none" | "sm" | "md". Default "none". */
+    shadow?: string;
   };
 }
 
@@ -1137,6 +1165,10 @@ export interface BlogSearchBarBlock extends BlockBase {
     filterCategories?: boolean;
     filterTags?: boolean;
     filterDate?: boolean;
+    /** Card border radius. Default "0.75rem". */
+    borderRadius?: string;
+    /** Card box shadow: "none" | "sm" | "md". Default "none". */
+    shadow?: string;
   };
 }
 
@@ -1164,6 +1196,18 @@ export interface BlogRecentPostsBlock extends BlockBase {
     showDate?: boolean;
     /** Mostrar badge de categoria */
     showCategory?: boolean;
+    /** Link text color */
+    linkColor?: string;
+    /** Link hover color */
+    linkHoverColor?: string;
+    /** Link hover effect type */
+    linkHoverEffect?: string;
+    /** Link hover intensity (10-100) */
+    linkHoverIntensity?: number;
+    /** Card border radius. Default "0.75rem". */
+    borderRadius?: string;
+    /** Card box shadow: "none" | "sm" | "md". Default "none". */
+    shadow?: string;
   };
 }
 
@@ -1179,6 +1223,18 @@ export interface BlogTagCloudBlock extends BlockBase {
     tags?: Array<{ name: string; count: number }>;
     /** Estilo: "badges" | "list" */
     variant?: "badges" | "list";
+    /** Link text color */
+    linkColor?: string;
+    /** Link hover color */
+    linkHoverColor?: string;
+    /** Link hover effect type */
+    linkHoverEffect?: string;
+    /** Link hover intensity (10-100) */
+    linkHoverIntensity?: number;
+    /** Card border radius. Default "0.75rem". */
+    borderRadius?: string;
+    /** Card box shadow: "none" | "sm" | "md". Default "none". */
+    shadow?: string;
   };
 }
 

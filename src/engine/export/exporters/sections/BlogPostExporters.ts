@@ -12,6 +12,8 @@ import {
   resolveResponsiveColumns,
   generateResponsiveGridStyles,
 } from "../../shared/responsiveGridHelper";
+import { resolveWidgetShadow } from "../../../shared/widgetStyles";
+import { generateLinkHoverStyles } from "../../../shared/hoverEffects";
 
 // ---------------------------------------------------------------------------
 // BlogPostCard
@@ -289,7 +291,7 @@ export function exportBlogPostDetail(
   // Featured image banner
   const featuredImageHtml =
     showFeaturedImage && featuredImage
-      ? `<div data-block-group="Mídia" style="width: 100%; height: 400px; background-image: url(${escapeHtml(featuredImage)}); background-size: cover; background-position: center; border-radius: var(--sg-card-radius); margin-bottom: 2rem;"></div>`
+      ? `<div data-block-group="Mídia" style="width: 100%; margin: 0 auto 2.5rem auto; border-radius: var(--sg-card-radius); overflow: hidden;"><img src="${escapeHtml(featuredImage)}" alt="${escapeHtml(title || "")}" style="width: 100%; height: auto; max-height: 520px; object-fit: cover; display: block;" /></div>`
       : "";
 
   // Category badge
@@ -345,7 +347,7 @@ export function exportBlogPostDetail(
           .join("")}</div>`
       : "";
 
-  return `<article ${dataBlockIdAttr(block.id)} class="sg-blog-post-detail" style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: ${escapeHtml(contentMaxWidth)}; margin: 0 auto; padding: 0 1rem;">${featuredImageHtml}${categoryHtml}${titleHtml}${metaHtml}${contentHtml}${authorHtml}${tagsHtml}</div></article>`;
+  return `<article ${dataBlockIdAttr(block.id)} class="sg-blog-post-detail" style="padding: 0; padding-bottom: 6rem;">${featuredImageHtml}<div style="max-width: ${escapeHtml(contentMaxWidth)}; margin: 0 auto; padding: 0 1rem;">${categoryHtml}${titleHtml}${metaHtml}${contentHtml}${authorHtml}${tagsHtml}</div></article>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -367,67 +369,84 @@ export function exportBlogCategoryFilter(
     allLabel = "Todas",
     activeCategory,
     filterUrl = "#",
+    borderRadius = "0.75rem",
+    shadow = "none",
+    linkColor: linkColorProp,
   } = (block as any).props;
+
+  const linkColor = linkColorProp || "var(--sg-text)";
+  const widgetId = `widget-cat-${block.id || ""}`;
+  const boxShadow = resolveWidgetShadow(shadow);
+  const shadowStyle = boxShadow !== "none" ? `box-shadow:${boxShadow};` : "";
 
   const buildHref = (slug?: string) => {
     if (!slug) return escapeHtml(filterUrl);
     return escapeHtml(`${filterUrl}?categoria=${slug}`);
   };
 
+  // Hover CSS
+  const linkHoverColor = (block as any).props.linkHoverColor || "";
+  const linkHoverEffect = (block as any).props.linkHoverEffect || "background";
+  const linkHoverIntensity = (block as any).props.linkHoverIntensity ?? 50;
+
+  let hoverCSS = "";
+  if (linkHoverColor) {
+    const styles = generateLinkHoverStyles({
+      effect: linkHoverEffect as any,
+      intensity: linkHoverIntensity,
+      hoverColor: linkHoverColor,
+    });
+    const baseRule = styles.base
+      ? `#${widgetId} .sg-cat-chip:not(.sg-cat-active), #${widgetId} .sg-cat-btn:not(.sg-cat-active), #${widgetId} .sg-cat-list-item { ${styles.base}; transition: all 0.3s ease; }`
+      : `#${widgetId} .sg-cat-chip, #${widgetId} .sg-cat-btn, #${widgetId} .sg-cat-list-item { transition: all 0.3s ease; }`;
+    const hoverRule = `#${widgetId} .sg-cat-chip:hover:not(.sg-cat-active), #${widgetId} .sg-cat-btn:hover:not(.sg-cat-active), #${widgetId} .sg-cat-list-item:hover { ${styles.hover}; transition: all 0.3s ease; }`;
+    hoverCSS = `<style>${baseRule}\n${hoverRule}</style>`;
+  } else {
+    hoverCSS = `<style>
+      #${widgetId} .sg-cat-chip:hover { opacity:0.8; transform:translateY(-1px); }
+      #${widgetId} .sg-cat-btn:hover { border-color:var(--sg-primary) !important; color:var(--sg-primary) !important; }
+      #${widgetId} .sg-cat-list-item:hover { background-color:rgba(0,0,0,0.04); }
+    </style>`;
+  }
+
   let itemsHtml = "";
 
   if (variant === "chips") {
-    const allChip = showAll
-      ? `<a href="${escapeHtml(filterUrl)}" style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 0.875rem;border-radius:9999px;font-size:0.875rem;font-weight:500;text-decoration:none;background-color:${!activeCategory ? "var(--sg-primary)" : "var(--sg-surface, #f3f4f6)"};color:${!activeCategory ? "var(--sg-primary-text, #fff)" : "var(--sg-text)"};">${escapeHtml(allLabel)}</a>`
-      : "";
-
-    const chips = categories
-      .map((cat: any) => {
-        const isActive = activeCategory === cat.slug;
-        const countHtml = showCount && cat.count != null ? `<span style="font-size:0.75rem;opacity:0.7;">(${cat.count})</span>` : "";
-        return `<a href="${buildHref(cat.slug)}" style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 0.875rem;border-radius:9999px;font-size:0.875rem;font-weight:500;text-decoration:none;background-color:${isActive ? "var(--sg-primary)" : "var(--sg-surface, #f3f4f6)"};color:${isActive ? "var(--sg-primary-text, #fff)" : "var(--sg-text)"};">${escapeHtml(cat.name)}${countHtml}</a>`;
-      })
-      .join("");
-
+    const chipStyle = (isActive: boolean) => `display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 0.875rem;border-radius:9999px;font-size:0.875rem;font-weight:500;text-decoration:none;background-color:${isActive ? "var(--sg-primary)" : "var(--sg-bg)"};color:${isActive ? "var(--sg-primary-text, #fff)" : linkColor};transition:all 0.2s ease;`;
+    const allChip = showAll ? `<a href="${escapeHtml(filterUrl)}" class="sg-cat-chip" style="${chipStyle(!activeCategory)}">${escapeHtml(allLabel)}</a>` : "";
+    const chips = categories.map((cat: any) => {
+      const isActive = activeCategory === cat.slug;
+      const countHtml = showCount && cat.count != null ? `<span style="font-size:0.75rem;opacity:0.7;">(${cat.count})</span>` : "";
+      return `<a href="${buildHref(cat.slug)}" class="${isActive ? "sg-cat-active" : "sg-cat-chip"}" style="${chipStyle(isActive)}">${escapeHtml(cat.name)}${countHtml}</a>`;
+    }).join("");
     itemsHtml = `<div style="display:flex;flex-wrap:wrap;gap:0.5rem;">${allChip}${chips}</div>`;
   } else if (variant === "buttons") {
-    const allBtn = showAll
-      ? `<a href="${escapeHtml(filterUrl)}" style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:var(--sg-card-radius, 0.5rem);font-size:0.875rem;font-weight:500;text-decoration:none;border:1px solid ${!activeCategory ? "var(--sg-primary)" : "var(--sg-border, #e5e7eb)"};background-color:${!activeCategory ? "var(--sg-primary)" : "transparent"};color:${!activeCategory ? "var(--sg-primary-text, #fff)" : "var(--sg-text)"};">${escapeHtml(allLabel)}</a>`
-      : "";
-
-    const btns = categories
-      .map((cat: any) => {
-        const isActive = activeCategory === cat.slug;
-        const countHtml = showCount && cat.count != null ? `<span style="font-size:0.75rem;opacity:0.7;">(${cat.count})</span>` : "";
-        return `<a href="${buildHref(cat.slug)}" style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:var(--sg-card-radius, 0.5rem);font-size:0.875rem;font-weight:500;text-decoration:none;border:1px solid ${isActive ? "var(--sg-primary)" : "var(--sg-border, #e5e7eb)"};background-color:${isActive ? "var(--sg-primary)" : "transparent"};color:${isActive ? "var(--sg-primary-text, #fff)" : "var(--sg-text)"};">${escapeHtml(cat.name)}${countHtml}</a>`;
-      })
-      .join("");
-
+    const btnStyle = (isActive: boolean) => `display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:calc(${borderRadius} * 0.6);font-size:0.875rem;font-weight:500;text-decoration:none;border:1px solid ${isActive ? "var(--sg-primary)" : "var(--sg-border, #e5e7eb)"};background-color:${isActive ? "var(--sg-primary)" : "transparent"};color:${isActive ? "var(--sg-primary-text, #fff)" : linkColor};transition:all 0.2s ease;`;
+    const allBtn = showAll ? `<a href="${escapeHtml(filterUrl)}" class="sg-cat-btn" style="${btnStyle(!activeCategory)}">${escapeHtml(allLabel)}</a>` : "";
+    const btns = categories.map((cat: any) => {
+      const isActive = activeCategory === cat.slug;
+      const countHtml = showCount && cat.count != null ? `<span style="font-size:0.75rem;opacity:0.7;">(${cat.count})</span>` : "";
+      return `<a href="${buildHref(cat.slug)}" class="${isActive ? "sg-cat-active" : "sg-cat-btn"}" style="${btnStyle(isActive)}">${escapeHtml(cat.name)}${countHtml}</a>`;
+    }).join("");
     itemsHtml = `<div style="display:flex;flex-wrap:wrap;gap:0.5rem;">${allBtn}${btns}</div>`;
   } else {
-    // list variant
-    const allItem = showAll
-      ? `<a href="${escapeHtml(filterUrl)}" style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0.75rem;border-radius:var(--sg-card-radius, 0.5rem);font-size:0.875rem;font-weight:${!activeCategory ? "600" : "400"};text-decoration:none;background-color:${!activeCategory ? "var(--sg-surface, #f3f4f6)" : "transparent"};color:${!activeCategory ? "var(--sg-primary)" : "var(--sg-text)"};">${escapeHtml(allLabel)}</a>`
-      : "";
-
-    const items = categories
-      .map((cat: any) => {
-        const isActive = activeCategory === cat.slug;
-        const countHtml = showCount && cat.count != null
-          ? `<span style="font-size:0.75rem;color:var(--sg-muted-text);background-color:var(--sg-surface, #f3f4f6);padding:0.125rem 0.5rem;border-radius:9999px;">${cat.count}</span>`
-          : "";
-        return `<a href="${buildHref(cat.slug)}" style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0.75rem;border-radius:var(--sg-card-radius, 0.5rem);font-size:0.875rem;font-weight:${isActive ? "600" : "400"};text-decoration:none;background-color:${isActive ? "var(--sg-surface, #f3f4f6)" : "transparent"};color:${isActive ? "var(--sg-primary)" : "var(--sg-text)"};">${escapeHtml(cat.name)}${countHtml}</a>`;
-      })
-      .join("");
-
-    itemsHtml = `<div style="display:flex;flex-direction:column;gap:0.25rem;">${allItem}${items}</div>`;
+    const listStyle = (isActive: boolean) => `display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0.75rem;border-radius:calc(${borderRadius} * 0.5);font-size:0.875rem;font-weight:${isActive ? "600" : "400"};text-decoration:none;background-color:${isActive ? "var(--sg-bg)" : "transparent"};color:${isActive ? "var(--sg-primary)" : linkColor};transition:all 0.2s ease;`;
+    const allItem = showAll ? `<a href="${escapeHtml(filterUrl)}" class="sg-cat-list-item" style="${listStyle(!activeCategory)}">${escapeHtml(allLabel)}</a>` : "";
+    const items = categories.map((cat: any) => {
+      const isActive = activeCategory === cat.slug;
+      const countHtml = showCount && cat.count != null ? `<span style="font-size:0.75rem;color:var(--sg-muted-text);background-color:var(--sg-bg);padding:0.125rem 0.5rem;border-radius:9999px;">${cat.count}</span>` : "";
+      return `<a href="${buildHref(cat.slug)}" class="sg-cat-list-item" style="${listStyle(isActive)}">${escapeHtml(cat.name)}${countHtml}</a>`;
+    }).join("");
+    itemsHtml = `<div style="display:flex;flex-direction:column;gap:0.125rem;">${allItem}${items}</div>`;
   }
 
   const titleHtml = title
-    ? `<h3 style="font-size:1rem;font-weight:600;margin-bottom:1rem;color:var(--sg-text);">${escapeHtml(title)}</h3>`
+    ? `<div style="padding:1rem 1.25rem;border-bottom:1px solid var(--sg-border, #e5e7eb);"><h3 style="font-size:1rem;font-weight:600;margin:0;color:var(--sg-text);">${escapeHtml(title)}</h3></div>`
     : "";
 
-  return `<div ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="padding:1.5rem 0;background-color:var(--sg-bg);"><div style="max-width:1200px;margin:0 auto;padding:0 1rem;">${titleHtml}${itemsHtml}</div></div>`;
+  const contentPad = variant === "list" ? "padding:0.5rem 0.75rem;" : "padding:1rem 1.25rem;";
+
+  return `${hoverCSS}<div id="${widgetId}" ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="background-color:var(--sg-surface, var(--sg-bg));border:1px solid var(--sg-border, #e5e7eb);border-radius:${borderRadius};${shadowStyle}overflow:hidden;">${titleHtml}<div style="${contentPad}">${itemsHtml}</div></div>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -448,41 +467,47 @@ export function exportBlogSearchBar(
     filterCategories = false,
     filterTags = false,
     filterDate = false,
+    borderRadius = "0.75rem",
+    shadow = "none",
   } = (block as any).props;
+
+  const widgetId = `widget-search-${block.id || ""}`;
+  const boxShadow = resolveWidgetShadow(shadow);
+  const shadowStyle = boxShadow !== "none" ? `box-shadow:${boxShadow};` : "";
+  const inputRadius = `calc(${borderRadius} * 0.6)`;
+
+  const focusCSS = `<style>
+    #${widgetId} input:focus, #${widgetId} select:focus {
+      border-color: var(--sg-primary);
+      box-shadow: 0 0 0 3px rgba(var(--sg-primary-rgb, 59, 130, 246), 0.15);
+    }
+  </style>`;
 
   const searchIconSvg = showIcon
     ? `<svg style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);width:1.25rem;height:1.25rem;color:var(--sg-muted-text);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" stroke-linecap="round"/></svg>`
     : "";
 
   const inputPadding = showIcon ? "padding-left:2.5rem;" : "";
+  const isExpanded = variant === "expanded";
+  const inputBorder = isExpanded ? "2px" : "1px";
+  const inputFontSize = isExpanded ? "1.0625rem" : "0.875rem";
+  const inputPadY = isExpanded ? "0.875rem" : "0.625rem";
 
-  if (variant === "expanded") {
-    const inputHtml = `<div style="position:relative;width:100%;max-width:600px;">${searchIconSvg}<input type="search" name="busca" placeholder="${escapeHtml(placeholder)}" style="width:100%;${inputPadding}padding-right:1rem;padding-top:0.875rem;padding-bottom:0.875rem;font-size:1.0625rem;border:2px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);outline:none;" /></div>`;
+  const inputStyle = `width:100%;${inputPadding}padding-right:1rem;padding-top:${inputPadY};padding-bottom:${inputPadY};font-size:${inputFontSize};border:${inputBorder} solid var(--sg-border, #e5e7eb);border-radius:${inputRadius};background-color:var(--sg-bg);color:var(--sg-text);outline:none;transition:border-color 0.2s, box-shadow 0.2s;`;
+  const selectStyle = `padding:0.625rem 0.75rem;font-size:0.875rem;border:1px solid var(--sg-border, #e5e7eb);border-radius:${inputRadius};background-color:var(--sg-bg);color:var(--sg-text);transition:border-color 0.2s;`;
 
-    return `<form ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" action="${escapeHtml(searchUrl)}" method="get" style="padding:2rem 0;background-color:var(--sg-bg);"><div style="max-width:1200px;margin:0 auto;padding:0 1rem;display:flex;justify-content:center;">${inputHtml}</div></form>`;
-  }
+  const inputHtml = `<div style="position:relative;">${searchIconSvg}<input type="search" name="busca" placeholder="${escapeHtml(placeholder)}" style="${inputStyle}" /></div>`;
 
+  let formContent = inputHtml;
   if (variant === "with-filters") {
-    const inputHtml = `<div style="position:relative;flex:1;min-width:200px;">${searchIconSvg}<input type="search" name="busca" placeholder="${escapeHtml(placeholder)}" style="width:100%;${inputPadding}padding-right:1rem;padding-top:0.625rem;padding-bottom:0.625rem;font-size:0.875rem;border:1px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);outline:none;" /></div>`;
-
     const filters: string[] = [];
-    if (filterCategories) {
-      filters.push(`<select name="categoria" style="padding:0.625rem 0.75rem;font-size:0.875rem;border:1px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);"><option value="">Categoria</option></select>`);
-    }
-    if (filterTags) {
-      filters.push(`<select name="tag" style="padding:0.625rem 0.75rem;font-size:0.875rem;border:1px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);"><option value="">Tag</option></select>`);
-    }
-    if (filterDate) {
-      filters.push(`<select name="periodo" style="padding:0.625rem 0.75rem;font-size:0.875rem;border:1px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);"><option value="">Período</option></select>`);
-    }
-
-    return `<form ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" action="${escapeHtml(searchUrl)}" method="get" style="padding:1.5rem 0;background-color:var(--sg-bg);"><div style="max-width:1200px;margin:0 auto;padding:0 1rem;display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;">${inputHtml}${filters.join("")}</div></form>`;
+    if (filterCategories) filters.push(`<select name="categoria" style="${selectStyle}"><option value="">Categoria</option></select>`);
+    if (filterTags) filters.push(`<select name="tag" style="${selectStyle}"><option value="">Tag</option></select>`);
+    if (filterDate) filters.push(`<select name="periodo" style="${selectStyle}"><option value="">Período</option></select>`);
+    formContent = `${inputHtml}<div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.75rem;">${filters.join("")}</div>`;
   }
 
-  // simple variant
-  const inputHtml = `<div style="position:relative;width:100%;max-width:400px;">${searchIconSvg}<input type="search" name="busca" placeholder="${escapeHtml(placeholder)}" style="width:100%;${inputPadding}padding-right:1rem;padding-top:0.625rem;padding-bottom:0.625rem;font-size:0.875rem;border:1px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);outline:none;" /></div>`;
-
-  return `<form ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" action="${escapeHtml(searchUrl)}" method="get" style="padding:1.5rem 0;background-color:var(--sg-bg);"><div style="max-width:1200px;margin:0 auto;padding:0 1rem;">${inputHtml}</div></form>`;
+  return `${focusCSS}<div id="${widgetId}" ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="background-color:var(--sg-surface, var(--sg-bg));border:1px solid var(--sg-border, #e5e7eb);border-radius:${borderRadius};${shadowStyle}overflow:hidden;"><form action="${escapeHtml(searchUrl)}" method="get" style="padding:1.25rem;">${formContent}</form></div>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -501,7 +526,39 @@ export function exportBlogRecentPosts(
     showThumbnail = true,
     showDate = true,
     showCategory = false,
+    borderRadius = "0.75rem",
+    shadow = "none",
+    linkColor: linkColorProp,
   } = (block as any).props;
+
+  const linkColor = linkColorProp || "var(--sg-text)";
+  const widgetId = `widget-recent-${block.id || ""}`;
+  const boxShadow = resolveWidgetShadow(shadow);
+  const shadowStyle = boxShadow !== "none" ? `box-shadow:${boxShadow};` : "";
+
+  const linkHoverColor = (block as any).props.linkHoverColor || "";
+  const linkHoverEffect = (block as any).props.linkHoverEffect || "background";
+  const linkHoverIntensity = (block as any).props.linkHoverIntensity ?? 50;
+
+  let hoverCSS = "";
+  if (linkHoverColor) {
+    const styles = generateLinkHoverStyles({
+      effect: linkHoverEffect as any,
+      intensity: linkHoverIntensity,
+      hoverColor: linkHoverColor,
+    });
+    const baseRule = styles.base
+      ? `#${widgetId} .sg-recent-post { ${styles.base}; transition: all 0.3s ease; }`
+      : `#${widgetId} .sg-recent-post { transition: all 0.3s ease; }`;
+    const hoverRule = `#${widgetId} .sg-recent-post:hover { ${styles.hover}; transition: all 0.3s ease; }
+    #${widgetId} .sg-recent-post:hover .sg-recent-title { color: ${linkHoverColor}; }`;
+    hoverCSS = `<style>${baseRule}\n${hoverRule}</style>`;
+  } else {
+    hoverCSS = `<style>
+      #${widgetId} .sg-recent-post:hover { background-color:rgba(0,0,0,0.04); }
+      #${widgetId} .sg-recent-post:hover .sg-recent-title { color:var(--sg-primary); }
+    </style>`;
+  }
 
   const titleHtml = title
     ? `<div style="padding:1rem 1.25rem;border-bottom:1px solid var(--sg-border, #e5e7eb);"><h3 style="font-size:1rem;font-weight:600;margin:0;color:var(--sg-text);">${escapeHtml(title)}</h3></div>`
@@ -511,11 +568,11 @@ export function exportBlogRecentPosts(
   if (posts.length === 0) {
     contentHtml = `<p style="padding:1.5rem 1.25rem;color:var(--sg-muted-text);font-size:0.875rem;text-align:center;margin:0;">Nenhum post recente</p>`;
   } else {
-    const itemsHtml = posts
+    contentHtml = posts
       .map((post: any) => {
         const imgHtml =
           showThumbnail && post.image
-            ? `<img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" style="width:64px;height:64px;object-fit:cover;border-radius:var(--sg-card-radius, 0.5rem);flex-shrink:0;" />`
+            ? `<img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" style="width:64px;height:64px;object-fit:cover;border-radius:calc(${borderRadius} * 0.5);flex-shrink:0;" />`
             : "";
 
         const metaParts: string[] = [];
@@ -525,13 +582,12 @@ export function exportBlogRecentPosts(
           ? `<div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.25rem;font-size:0.75rem;color:var(--sg-muted-text);">${metaParts.join("")}</div>`
           : "";
 
-        return `<a href="/site/p/blog/${escapeHtml(post.slug)}" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1.25rem;text-decoration:none;color:inherit;">${imgHtml}<div style="flex:1;min-width:0;"><div style="font-size:0.875rem;font-weight:500;color:var(--sg-text);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(post.title)}</div>${metaHtml}</div></a>`;
+        return `<a href="/site/p/blog/${escapeHtml(post.slug)}" class="sg-recent-post" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1.25rem;text-decoration:none;color:inherit;transition:background-color 0.2s;">${imgHtml}<div style="flex:1;min-width:0;"><div class="sg-recent-title" style="font-size:0.875rem;font-weight:500;color:${linkColor};line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;transition:color 0.2s;">${escapeHtml(post.title)}</div>${metaHtml}</div></a>`;
       })
       .join("");
-    contentHtml = itemsHtml;
   }
 
-  return `<div ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="background-color:var(--sg-bg);border-radius:var(--sg-card-radius, 0.75rem);border:1px solid var(--sg-border, #e5e7eb);overflow:hidden;">${titleHtml}<div style="padding:0.5rem 0;">${contentHtml}</div></div>`;
+  return `${hoverCSS}<div id="${widgetId}" ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="background-color:var(--sg-surface, var(--sg-bg));border-radius:${borderRadius};border:1px solid var(--sg-border, #e5e7eb);${shadowStyle}overflow:hidden;">${titleHtml}<div style="padding:0.5rem 0;">${contentHtml}</div></div>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -548,7 +604,38 @@ export function exportBlogTagCloud(
     title = "Tags",
     tags = [],
     variant = "badges",
+    borderRadius = "0.75rem",
+    shadow = "none",
+    linkColor: linkColorProp,
   } = (block as any).props;
+
+  const linkColor = linkColorProp || "var(--sg-text)";
+  const widgetId = `widget-tags-${block.id || ""}`;
+  const boxShadow = resolveWidgetShadow(shadow);
+  const shadowStyle = boxShadow !== "none" ? `box-shadow:${boxShadow};` : "";
+
+  const linkHoverColor = (block as any).props.linkHoverColor || "";
+  const linkHoverEffect = (block as any).props.linkHoverEffect || "background";
+  const linkHoverIntensity = (block as any).props.linkHoverIntensity ?? 50;
+
+  let hoverCSS = "";
+  if (linkHoverColor) {
+    const styles = generateLinkHoverStyles({
+      effect: linkHoverEffect as any,
+      intensity: linkHoverIntensity,
+      hoverColor: linkHoverColor,
+    });
+    const baseRule = styles.base
+      ? `#${widgetId} .sg-tag-badge, #${widgetId} .sg-tag-list-item { ${styles.base}; transition: all 0.3s ease; }`
+      : `#${widgetId} .sg-tag-badge, #${widgetId} .sg-tag-list-item { transition: all 0.3s ease; }`;
+    const hoverRule = `#${widgetId} .sg-tag-badge:hover, #${widgetId} .sg-tag-list-item:hover { ${styles.hover}; transition: all 0.3s ease; }`;
+    hoverCSS = `<style>${baseRule}\n${hoverRule}</style>`;
+  } else {
+    hoverCSS = `<style>
+      #${widgetId} .sg-tag-badge:hover { opacity:0.8; transform:translateY(-1px); }
+      #${widgetId} .sg-tag-list-item:hover { background-color:rgba(0,0,0,0.04); }
+    </style>`;
+  }
 
   const titleHtml = title
     ? `<div style="padding:1rem 1.25rem;border-bottom:1px solid var(--sg-border, #e5e7eb);"><h3 style="font-size:1rem;font-weight:600;margin:0;color:var(--sg-text);">${escapeHtml(title)}</h3></div>`
@@ -561,7 +648,7 @@ export function exportBlogTagCloud(
     const badgesHtml = tags
       .map(
         (tag: any) =>
-          `<span style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.3rem 0.75rem;border-radius:9999px;font-size:0.8125rem;font-weight:500;background-color:var(--sg-surface, #f3f4f6);color:var(--sg-text);">${escapeHtml(tag.name)}<span style="font-size:0.6875rem;color:var(--sg-muted-text);opacity:0.7;">(${tag.count})</span></span>`,
+          `<span class="sg-tag-badge" style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.3rem 0.75rem;border-radius:9999px;font-size:0.8125rem;font-weight:500;background-color:var(--sg-bg);color:${linkColor};cursor:pointer;transition:all 0.2s ease;">${escapeHtml(tag.name)}<span style="font-size:0.6875rem;color:var(--sg-muted-text);opacity:0.7;">(${tag.count})</span></span>`,
       )
       .join("");
     contentHtml = `<div style="display:flex;flex-wrap:wrap;gap:0.5rem;">${badgesHtml}</div>`;
@@ -569,11 +656,11 @@ export function exportBlogTagCloud(
     const listHtml = tags
       .map(
         (tag: any) =>
-          `<div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border-radius:var(--sg-card-radius, 0.5rem);font-size:0.875rem;color:var(--sg-text);"><span>${escapeHtml(tag.name)}</span><span style="font-size:0.75rem;color:var(--sg-muted-text);background-color:var(--sg-surface, #f3f4f6);padding:0.125rem 0.5rem;border-radius:9999px;">${tag.count}</span></div>`,
+          `<div class="sg-tag-list-item" style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;border-radius:calc(${borderRadius} * 0.5);font-size:0.875rem;color:${linkColor};cursor:pointer;transition:background-color 0.2s;"><span>${escapeHtml(tag.name)}</span><span style="font-size:0.75rem;color:var(--sg-muted-text);background-color:var(--sg-bg);padding:0.125rem 0.5rem;border-radius:9999px;">${tag.count}</span></div>`,
       )
       .join("");
     contentHtml = `<div style="display:flex;flex-direction:column;gap:0.25rem;">${listHtml}</div>`;
   }
 
-  return `<div ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="background-color:var(--sg-bg);border-radius:var(--sg-card-radius, 0.75rem);border:1px solid var(--sg-border, #e5e7eb);overflow:hidden;">${titleHtml}<div style="padding:1rem 1.25rem;">${contentHtml}</div></div>`;
+  return `${hoverCSS}<div id="${widgetId}" ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="background-color:var(--sg-surface, var(--sg-bg));border-radius:${borderRadius};border:1px solid var(--sg-border, #e5e7eb);${shadowStyle}overflow:hidden;">${titleHtml}<div style="padding:1rem 1.25rem;">${contentHtml}</div></div>`;
 }

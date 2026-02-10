@@ -25,11 +25,16 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } | nul
 }
 
 /**
- * Cria cor rgba a partir de hex e opacidade
+ * Cria cor rgba a partir de hex e opacidade.
+ * Para CSS variables e cores não-hex, usa color-mix() para gerar versão semi-transparente.
  */
 export function hexToRgba(hex: string, alpha: number): string {
     const rgb = hexToRgb(hex);
-    if (!rgb) return hex;
+    if (!rgb) {
+        // CSS variables (var(--sg-primary)), named colors, etc. — use color-mix
+        const pct = Math.round(alpha * 100);
+        return `color-mix(in srgb, ${hex} ${pct}%, transparent)`;
+    }
     return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha.toFixed(2)})`;
 }
 

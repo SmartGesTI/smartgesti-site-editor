@@ -309,6 +309,30 @@ export {
   getNavbarVariation,
 } from './engine/presets/navbarVariations'
 
+export {
+  blogPostCardVariations,
+  blogPostCardVariationIds,
+  blogPostDetailVariations,
+  blogPostDetailVariationIds,
+  blogCategoryFilterVariations,
+  blogCategoryFilterVariationIds,
+  blogSearchBarVariations,
+  blogSearchBarVariationIds,
+  blogRecentPostsVariations,
+  blogRecentPostsVariationIds,
+  blogTagCloudVariations,
+  blogTagCloudVariationIds,
+} from './engine/presets/blogVariations'
+
+export type {
+  BlogPostCardVariation,
+  BlogPostDetailVariation,
+  BlogCategoryFilterVariation,
+  BlogSearchBarVariation,
+  BlogRecentPostsVariation,
+  BlogTagCloudVariation,
+} from './engine/presets/blogVariations'
+
 // Generators
 export {
   generateCompleteLandingPage,

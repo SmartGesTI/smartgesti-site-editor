@@ -377,6 +377,8 @@ export const blogPlugin: PluginRegistration = {
           maxWidth: "1200px",
           padding: "2rem",
           paddingTop: "6rem",
+          paddingBottom: "6rem",
+          bg: "var(--sg-bg)",
           children: [
             // Coluna principal: blogPostDetail
             {
@@ -408,7 +410,8 @@ export const blogPlugin: PluginRegistration = {
                 direction: "col",
                 gap: "1.5rem",
                 sticky: true,
-                stickyOffset: "80px",
+                stickyOffset: "100px",
+                paddingBottom: "6rem",
                 children: [
                   {
                     id: "blog-sidebar-search",
@@ -418,6 +421,8 @@ export const blogPlugin: PluginRegistration = {
                       variant: "simple",
                       showIcon: true,
                       searchUrl: "/site/p/blog",
+                      borderRadius: "0.75rem",
+                      shadow: "sm",
                     },
                   },
                   {
@@ -435,6 +440,10 @@ export const blogPlugin: PluginRegistration = {
                       showAll: true,
                       allLabel: "Todas",
                       filterUrl: "/site/p/blog",
+                      linkColor: "#374151",
+                      linkHoverColor: "#2563eb",
+                      borderRadius: "0.75rem",
+                      shadow: "sm",
                     },
                   },
                   {
@@ -453,6 +462,10 @@ export const blogPlugin: PluginRegistration = {
                         image: c.image,
                         category: c.category,
                       })),
+                      linkColor: "#374151",
+                      linkHoverColor: "#2563eb",
+                      borderRadius: "0.75rem",
+                      shadow: "sm",
                     },
                   },
                   {
@@ -467,6 +480,10 @@ export const blogPlugin: PluginRegistration = {
                         { name: "Sustentabilidade", count: 1 },
                       ],
                       variant: "badges",
+                      linkColor: "#374151",
+                      linkHoverColor: "#2563eb",
+                      borderRadius: "0.75rem",
+                      shadow: "sm",
                     },
                   },
                 ],

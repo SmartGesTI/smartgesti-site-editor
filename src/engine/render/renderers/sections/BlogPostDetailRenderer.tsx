@@ -75,16 +75,16 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
     <article
       key={block.id}
       style={{
-        padding: "var(--sg-section-padding-md)",
-        backgroundColor: "var(--sg-bg)",
+        padding: 0,
+        paddingBottom: "6rem",
       }}
     >
-      {/* Featured image — full width banner */}
+      {/* Featured image — fills entire column width */}
       {showFeaturedImage && featuredImage && (
         <div
           data-block-group="Mídia"
           style={{
-            maxWidth: "1200px",
+            width: "100%",
             margin: "0 auto 2.5rem auto",
             borderRadius: "var(--sg-card-radius)",
             overflow: "hidden",
@@ -96,7 +96,7 @@ export function renderBlogPostDetail(block: any): React.ReactNode {
             style={{
               width: "100%",
               height: "auto",
-              maxHeight: "480px",
+              maxHeight: "520px",
               objectFit: "cover",
               display: "block",
             }}
