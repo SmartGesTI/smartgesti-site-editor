@@ -83,6 +83,14 @@ export type {
   FormBlock,
   InputBlock,
 
+  // Blog plugin blocks (new)
+  BlogCategoryFilterBlock,
+  BlogSearchBarBlock,
+
+  // SEO
+  PageSeoConfig,
+  SiteMetadata,
+
   // Document structure
   SiteDocument,
   SitePage,

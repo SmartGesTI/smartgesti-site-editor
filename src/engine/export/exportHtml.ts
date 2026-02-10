@@ -3,7 +3,7 @@
  * Exporta SiteDocument para HTML estático
  */
 
-import { SiteDocument, SitePage, Block } from "../schema/siteDocument";
+import { SiteDocument, SitePage, Block, PageSeoConfig, SiteMetadata } from "../schema/siteDocument";
 import { generateThemeCSSVariables, ThemeTokens } from "../schema/themeTokens";
 import { hashDocument } from "../../utils/documentHash";
 import { htmlExportRegistry, initializeExporters } from "./exporters";
@@ -403,6 +403,95 @@ function escapeHtml(text: string): string {
 export interface ExportPageToHtmlOptions {
   /** Página de referência para layout (navbar + footer). Quando a página atual não é a home, inclui navbar e footer desta página. */
   layoutFromPage?: SitePage;
+  /** SEO overrides for this page (highest priority) */
+  seo?: PageSeoConfig;
+  /** Global site metadata */
+  siteMetadata?: SiteMetadata;
+}
+
+/**
+ * Generates SEO meta tags for a page.
+ * Priority: options.seo > page.seo > auto-extract from blogPostDetail block
+ */
+function generateSeoMetaTags(
+  page: SitePage,
+  options?: ExportPageToHtmlOptions,
+): { tags: string; fullTitle: string; langAttr: string } {
+  const siteMetadata = options?.siteMetadata;
+  const langAttr = siteMetadata?.language || "pt-BR";
+
+  // Merge SEO: options.seo > page.seo > auto-extract from blogPostDetail
+  const optionsSeo = options?.seo || {};
+  const pageSeo = page.seo || {};
+
+  // Auto-extract from blogPostDetail block if present
+  let autoSeo: Partial<PageSeoConfig> = {};
+  const detailBlock = page.structure.find((b) => b.type === "blogPostDetail");
+  if (detailBlock) {
+    const props = (detailBlock as any).props;
+    autoSeo = {
+      metaTitle: props.metaTitle || props.title,
+      metaDescription: props.metaDescription || props.excerpt,
+      ogImage: props.ogImage || props.featuredImage,
+      ogType: "article",
+    };
+  }
+
+  const metaTitle = optionsSeo.metaTitle || pageSeo.metaTitle || autoSeo.metaTitle || page.name;
+  const metaDescription = optionsSeo.metaDescription || pageSeo.metaDescription || autoSeo.metaDescription;
+  const ogImage = optionsSeo.ogImage || pageSeo.ogImage || autoSeo.ogImage || siteMetadata?.defaultOgImage;
+  const ogType = optionsSeo.ogType || pageSeo.ogType || autoSeo.ogType || "website";
+  const canonicalUrl = optionsSeo.canonicalUrl || pageSeo.canonicalUrl;
+  const noIndex = optionsSeo.noIndex ?? pageSeo.noIndex;
+  const siteName = siteMetadata?.siteName;
+
+  const fullTitle = siteName && metaTitle !== siteName
+    ? `${escapeHtml(metaTitle)} | ${escapeHtml(siteName)}`
+    : escapeHtml(metaTitle);
+
+  const parts: string[] = [];
+
+  if (metaDescription) {
+    parts.push(`<meta name="description" content="${escapeHtml(metaDescription)}">`);
+  }
+
+  // Open Graph
+  parts.push(`<meta property="og:title" content="${escapeHtml(metaTitle)}">`);
+  parts.push(`<meta property="og:type" content="${escapeHtml(ogType)}">`);
+  if (metaDescription) {
+    parts.push(`<meta property="og:description" content="${escapeHtml(metaDescription)}">`);
+  }
+  if (ogImage) {
+    parts.push(`<meta property="og:image" content="${escapeHtml(ogImage)}">`);
+  }
+  if (siteName) {
+    parts.push(`<meta property="og:site_name" content="${escapeHtml(siteName)}">`);
+  }
+  if (canonicalUrl) {
+    parts.push(`<meta property="og:url" content="${escapeHtml(canonicalUrl)}">`);
+  }
+
+  // Twitter Card
+  parts.push(`<meta name="twitter:card" content="${ogImage ? "summary_large_image" : "summary"}">`);
+  parts.push(`<meta name="twitter:title" content="${escapeHtml(metaTitle)}">`);
+  if (metaDescription) {
+    parts.push(`<meta name="twitter:description" content="${escapeHtml(metaDescription)}">`);
+  }
+  if (ogImage) {
+    parts.push(`<meta name="twitter:image" content="${escapeHtml(ogImage)}">`);
+  }
+
+  // Canonical URL
+  if (canonicalUrl) {
+    parts.push(`<link rel="canonical" href="${escapeHtml(canonicalUrl)}">`);
+  }
+
+  // Robots
+  if (noIndex) {
+    parts.push(`<meta name="robots" content="noindex, nofollow">`);
+  }
+
+  return { tags: parts.join("\n  "), fullTitle, langAttr };
 }
 
 /**
@@ -467,12 +556,15 @@ export function exportPageToHtml(
     }
   }
 
+  const { tags: seoMetaTags, fullTitle, langAttr } = generateSeoMetaTags(page, options);
+
   const html = `<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="${langAttr}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(page.name)}</title>
+  <title>${fullTitle}</title>
+  ${seoMetaTags}
   <style>
     * {
       margin: 0;

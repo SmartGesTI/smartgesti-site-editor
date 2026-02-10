@@ -106,7 +106,7 @@ export const blogPlugin: PluginRegistration = {
     icon: "FileText",
 
     capabilities: {
-      blocks: ["blogPostCard", "blogPostGrid", "blogPostDetail"],
+      blocks: ["blogPostCard", "blogPostGrid", "blogPostDetail", "blogCategoryFilter", "blogSearchBar"],
 
       pageTemplates: [
         {
@@ -152,6 +152,9 @@ export const blogPlugin: PluginRegistration = {
             { name: "tags", type: "array", label: "Tags" },
             { name: "authorVariant", type: "string", label: "Author Variant" },
             { name: "readingTime", type: "number", label: "Reading Time" },
+            { name: "metaTitle", type: "string", label: "Meta Title (SEO)" },
+            { name: "metaDescription", type: "string", label: "Meta Description (SEO)" },
+            { name: "ogImage", type: "image", label: "Open Graph Image" },
           ],
         },
       ],
@@ -246,6 +249,37 @@ export const blogPlugin: PluginRegistration = {
           overlayColor: "rgba(79, 70, 229, 0.9)",
           background: "#4f46e5",
           minHeight: "280px",
+        },
+      } as Block);
+
+      // Search bar
+      blogPageStructure.push({
+        id: "blog-search-bar",
+        type: "blogSearchBar",
+        props: {
+          placeholder: "Buscar posts...",
+          variant: "simple",
+          showIcon: true,
+          searchUrl: "/site/p/blog",
+        },
+      } as Block);
+
+      // Category filter
+      blogPageStructure.push({
+        id: "blog-category-filter",
+        type: "blogCategoryFilter",
+        props: {
+          title: "",
+          categories: SAMPLE_BLOG_CARDS.map((c) => ({
+            name: c.category,
+            slug: c.category.toLowerCase().replace(/\s+/g, "-"),
+            count: 1,
+          })),
+          variant: "chips",
+          showCount: false,
+          showAll: true,
+          allLabel: "Todas",
+          filterUrl: "/site/p/blog",
         },
       } as Block);
 
@@ -382,6 +416,11 @@ export const blogPlugin: PluginRegistration = {
     if (blockType === "blogPostDetail") {
       return {
         lockedFields: ["content", "date"],
+      };
+    }
+    if (blockType === "blogCategoryFilter") {
+      return {
+        lockedFields: ["categories"],
       };
     }
     return undefined;

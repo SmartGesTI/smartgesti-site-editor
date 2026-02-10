@@ -61,6 +61,11 @@ export interface ContentItem {
     updatedAt: string;
     publishedAt?: string;
     status: "draft" | "published" | "archived";
+    seo?: {
+      metaTitle?: string;
+      metaDescription?: string;
+      ogImage?: string;
+    };
   };
 }
 

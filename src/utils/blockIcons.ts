@@ -51,6 +51,8 @@ const BLOCK_ICONS: Record<string, string> = {
   productShowcase: "🛍️",
   aboutSection: "ℹ️",
   contactSection: "📬",
+  blogCategoryFilter: "🏷️",
+  blogSearchBar: "🔍",
 
   // Formulários
   form: "📋",

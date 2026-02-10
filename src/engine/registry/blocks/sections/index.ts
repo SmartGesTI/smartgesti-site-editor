@@ -24,6 +24,8 @@ export * from "./categoryCardGrid";
 export * from "./blogPostCard";
 export * from "./blogPostGrid";
 export * from "./blogPostDetail";
+export * from "./blogCategoryFilter";
+export * from "./blogSearchBar";
 export * from "./productShowcase";
 export * from "./aboutSection";
 export * from "./contactSection";

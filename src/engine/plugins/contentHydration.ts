@@ -7,7 +7,7 @@
  */
 
 import { logger } from "../../utils/logger";
-import type { SitePage, Block } from "../schema/siteDocument";
+import type { SitePage, Block, PageSeoConfig } from "../schema/siteDocument";
 import type { ContentProvider, ContentItem, ContentListParams } from "./types";
 
 /**
@@ -92,10 +92,12 @@ async function hydrateListPage(
   // Convert items to block props
   const cardProps = result.items.map((item) => provider.toBlockProps(item));
 
-  // Hydrate all grid blocks on the page with the fetched cards
-  const hydratedStructure = page.structure.map((block) =>
-    hydrateGridBlock(block, cardProps),
-  );
+  // Hydrate all grid blocks and category filters on the page
+  const hydratedStructure = page.structure.map((block) => {
+    let result = hydrateGridBlock(block, cardProps);
+    result = hydrateCategoryFilterBlock(result, cardProps);
+    return result;
+  });
 
   return {
     ...page,
@@ -160,9 +162,13 @@ async function hydrateSinglePage(
     hydrateDetailBlock(block, blockProps, item),
   );
 
+  // Extract SEO from content item and set on page
+  const seo = extractSeoFromContent(item, blockProps);
+
   return {
     ...page,
     structure: hydratedStructure,
+    ...(seo ? { seo } : {}),
   };
 }
 
@@ -207,6 +213,81 @@ function hydrateDetailBlock(
         ...props,
         children: (props.children as Block[]).map((child) =>
           hydrateDetailBlock(child, blockProps, item),
+        ),
+      },
+    };
+  }
+
+  return block;
+}
+
+/**
+ * Extracts SEO configuration from a ContentItem and block props.
+ * Priority: item.metadata.seo > blockProps (metaTitle/title, metaDescription/excerpt, ogImage/featuredImage)
+ */
+function extractSeoFromContent(
+  item: ContentItem,
+  blockProps: Record<string, unknown>,
+): PageSeoConfig | undefined {
+  const seoMeta = item.metadata?.seo;
+
+  const metaTitle = seoMeta?.metaTitle || (blockProps.metaTitle as string) || (blockProps.title as string);
+  const metaDescription = seoMeta?.metaDescription || (blockProps.metaDescription as string) || (blockProps.excerpt as string);
+  const ogImage = seoMeta?.ogImage || (blockProps.ogImage as string) || (blockProps.featuredImage as string);
+
+  if (!metaTitle && !metaDescription && !ogImage) {
+    return undefined;
+  }
+
+  return {
+    metaTitle,
+    metaDescription,
+    ogImage,
+    ogType: "article",
+  };
+}
+
+/**
+ * Hydrates blogCategoryFilter blocks with category data extracted from posts.
+ */
+function hydrateCategoryFilterBlock(
+  block: Block,
+  cardProps: Record<string, unknown>[],
+): Block {
+  if (block.type === "blogCategoryFilter") {
+    // Extract unique categories from posts with counts
+    const categoryMap = new Map<string, number>();
+    for (const card of cardProps) {
+      const cat = card.category as string;
+      if (cat) {
+        categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1);
+      }
+    }
+
+    const categories = Array.from(categoryMap.entries()).map(([name, count]) => ({
+      name,
+      slug: name.toLowerCase().replace(/\s+/g, "-"),
+      count,
+    }));
+
+    return {
+      ...block,
+      props: {
+        ...block.props,
+        categories,
+      },
+    };
+  }
+
+  // Recurse into children
+  const props = block.props as Record<string, unknown>;
+  if (props.children && Array.isArray(props.children)) {
+    return {
+      ...block,
+      props: {
+        ...props,
+        children: (props.children as Block[]).map((child) =>
+          hydrateCategoryFilterBlock(child, cardProps),
         ),
       },
     };

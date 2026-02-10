@@ -267,3 +267,140 @@ export function exportBlogPostDetail(
 
   return `<article ${dataBlockIdAttr(block.id)} class="sg-blog-post-detail" style="padding: 4rem 0; background-color: var(--sg-bg);"><div style="max-width: ${escapeHtml(contentMaxWidth)}; margin: 0 auto; padding: 0 1rem;">${featuredImageHtml}${categoryHtml}${titleHtml}${metaHtml}${contentHtml}${authorHtml}${tagsHtml}</div></article>`;
 }
+
+// ---------------------------------------------------------------------------
+// BlogCategoryFilter
+// ---------------------------------------------------------------------------
+
+export function exportBlogCategoryFilter(
+  block: Block,
+  _depth: number,
+  _basePath?: string,
+  _theme?: ThemeTokens,
+): string {
+  const {
+    title,
+    categories = [],
+    variant = "chips",
+    showCount = true,
+    showAll = true,
+    allLabel = "Todas",
+    activeCategory,
+    filterUrl = "#",
+  } = (block as any).props;
+
+  const buildHref = (slug?: string) => {
+    if (!slug) return escapeHtml(filterUrl);
+    return escapeHtml(`${filterUrl}?categoria=${slug}`);
+  };
+
+  let itemsHtml = "";
+
+  if (variant === "chips") {
+    const allChip = showAll
+      ? `<a href="${escapeHtml(filterUrl)}" style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 0.875rem;border-radius:9999px;font-size:0.875rem;font-weight:500;text-decoration:none;background-color:${!activeCategory ? "var(--sg-primary)" : "var(--sg-surface, #f3f4f6)"};color:${!activeCategory ? "var(--sg-primary-text, #fff)" : "var(--sg-text)"};">${escapeHtml(allLabel)}</a>`
+      : "";
+
+    const chips = categories
+      .map((cat: any) => {
+        const isActive = activeCategory === cat.slug;
+        const countHtml = showCount && cat.count != null ? `<span style="font-size:0.75rem;opacity:0.7;">(${cat.count})</span>` : "";
+        return `<a href="${buildHref(cat.slug)}" style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 0.875rem;border-radius:9999px;font-size:0.875rem;font-weight:500;text-decoration:none;background-color:${isActive ? "var(--sg-primary)" : "var(--sg-surface, #f3f4f6)"};color:${isActive ? "var(--sg-primary-text, #fff)" : "var(--sg-text)"};">${escapeHtml(cat.name)}${countHtml}</a>`;
+      })
+      .join("");
+
+    itemsHtml = `<div style="display:flex;flex-wrap:wrap;gap:0.5rem;">${allChip}${chips}</div>`;
+  } else if (variant === "buttons") {
+    const allBtn = showAll
+      ? `<a href="${escapeHtml(filterUrl)}" style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:var(--sg-card-radius, 0.5rem);font-size:0.875rem;font-weight:500;text-decoration:none;border:1px solid ${!activeCategory ? "var(--sg-primary)" : "var(--sg-border, #e5e7eb)"};background-color:${!activeCategory ? "var(--sg-primary)" : "transparent"};color:${!activeCategory ? "var(--sg-primary-text, #fff)" : "var(--sg-text)"};">${escapeHtml(allLabel)}</a>`
+      : "";
+
+    const btns = categories
+      .map((cat: any) => {
+        const isActive = activeCategory === cat.slug;
+        const countHtml = showCount && cat.count != null ? `<span style="font-size:0.75rem;opacity:0.7;">(${cat.count})</span>` : "";
+        return `<a href="${buildHref(cat.slug)}" style="display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:var(--sg-card-radius, 0.5rem);font-size:0.875rem;font-weight:500;text-decoration:none;border:1px solid ${isActive ? "var(--sg-primary)" : "var(--sg-border, #e5e7eb)"};background-color:${isActive ? "var(--sg-primary)" : "transparent"};color:${isActive ? "var(--sg-primary-text, #fff)" : "var(--sg-text)"};">${escapeHtml(cat.name)}${countHtml}</a>`;
+      })
+      .join("");
+
+    itemsHtml = `<div style="display:flex;flex-wrap:wrap;gap:0.5rem;">${allBtn}${btns}</div>`;
+  } else {
+    // list variant
+    const allItem = showAll
+      ? `<a href="${escapeHtml(filterUrl)}" style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0.75rem;border-radius:var(--sg-card-radius, 0.5rem);font-size:0.875rem;font-weight:${!activeCategory ? "600" : "400"};text-decoration:none;background-color:${!activeCategory ? "var(--sg-surface, #f3f4f6)" : "transparent"};color:${!activeCategory ? "var(--sg-primary)" : "var(--sg-text)"};">${escapeHtml(allLabel)}</a>`
+      : "";
+
+    const items = categories
+      .map((cat: any) => {
+        const isActive = activeCategory === cat.slug;
+        const countHtml = showCount && cat.count != null
+          ? `<span style="font-size:0.75rem;color:var(--sg-muted-text);background-color:var(--sg-surface, #f3f4f6);padding:0.125rem 0.5rem;border-radius:9999px;">${cat.count}</span>`
+          : "";
+        return `<a href="${buildHref(cat.slug)}" style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0.75rem;border-radius:var(--sg-card-radius, 0.5rem);font-size:0.875rem;font-weight:${isActive ? "600" : "400"};text-decoration:none;background-color:${isActive ? "var(--sg-surface, #f3f4f6)" : "transparent"};color:${isActive ? "var(--sg-primary)" : "var(--sg-text)"};">${escapeHtml(cat.name)}${countHtml}</a>`;
+      })
+      .join("");
+
+    itemsHtml = `<div style="display:flex;flex-direction:column;gap:0.25rem;">${allItem}${items}</div>`;
+  }
+
+  const titleHtml = title
+    ? `<h3 style="font-size:1rem;font-weight:600;margin-bottom:1rem;color:var(--sg-text);">${escapeHtml(title)}</h3>`
+    : "";
+
+  return `<div ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" style="padding:1.5rem 0;background-color:var(--sg-bg);"><div style="max-width:1200px;margin:0 auto;padding:0 1rem;">${titleHtml}${itemsHtml}</div></div>`;
+}
+
+// ---------------------------------------------------------------------------
+// BlogSearchBar
+// ---------------------------------------------------------------------------
+
+export function exportBlogSearchBar(
+  block: Block,
+  _depth: number,
+  _basePath?: string,
+  _theme?: ThemeTokens,
+): string {
+  const {
+    placeholder = "Buscar posts...",
+    variant = "simple",
+    showIcon = true,
+    searchUrl = "#",
+    filterCategories = false,
+    filterTags = false,
+    filterDate = false,
+  } = (block as any).props;
+
+  const searchIconSvg = showIcon
+    ? `<svg style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);width:1.25rem;height:1.25rem;color:var(--sg-muted-text);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" stroke-linecap="round"/></svg>`
+    : "";
+
+  const inputPadding = showIcon ? "padding-left:2.5rem;" : "";
+
+  if (variant === "expanded") {
+    const inputHtml = `<div style="position:relative;width:100%;max-width:600px;">${searchIconSvg}<input type="search" name="busca" placeholder="${escapeHtml(placeholder)}" style="width:100%;${inputPadding}padding-right:1rem;padding-top:0.875rem;padding-bottom:0.875rem;font-size:1.0625rem;border:2px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);outline:none;" /></div>`;
+
+    return `<form ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" action="${escapeHtml(searchUrl)}" method="get" style="padding:2rem 0;background-color:var(--sg-bg);"><div style="max-width:1200px;margin:0 auto;padding:0 1rem;display:flex;justify-content:center;">${inputHtml}</div></form>`;
+  }
+
+  if (variant === "with-filters") {
+    const inputHtml = `<div style="position:relative;flex:1;min-width:200px;">${searchIconSvg}<input type="search" name="busca" placeholder="${escapeHtml(placeholder)}" style="width:100%;${inputPadding}padding-right:1rem;padding-top:0.625rem;padding-bottom:0.625rem;font-size:0.875rem;border:1px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);outline:none;" /></div>`;
+
+    const filters: string[] = [];
+    if (filterCategories) {
+      filters.push(`<select name="categoria" style="padding:0.625rem 0.75rem;font-size:0.875rem;border:1px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);"><option value="">Categoria</option></select>`);
+    }
+    if (filterTags) {
+      filters.push(`<select name="tag" style="padding:0.625rem 0.75rem;font-size:0.875rem;border:1px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);"><option value="">Tag</option></select>`);
+    }
+    if (filterDate) {
+      filters.push(`<select name="periodo" style="padding:0.625rem 0.75rem;font-size:0.875rem;border:1px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);"><option value="">Período</option></select>`);
+    }
+
+    return `<form ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" action="${escapeHtml(searchUrl)}" method="get" style="padding:1.5rem 0;background-color:var(--sg-bg);"><div style="max-width:1200px;margin:0 auto;padding:0 1rem;display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;">${inputHtml}${filters.join("")}</div></form>`;
+  }
+
+  // simple variant
+  const inputHtml = `<div style="position:relative;width:100%;max-width:400px;">${searchIconSvg}<input type="search" name="busca" placeholder="${escapeHtml(placeholder)}" style="width:100%;${inputPadding}padding-right:1rem;padding-top:0.625rem;padding-bottom:0.625rem;font-size:0.875rem;border:1px solid var(--sg-border, #e5e7eb);border-radius:var(--sg-card-radius, 0.5rem);background-color:var(--sg-bg);color:var(--sg-text);outline:none;" /></div>`;
+
+  return `<form ${dataBlockIdAttr(block.id)} data-block-group="Conteúdo" action="${escapeHtml(searchUrl)}" method="get" style="padding:1.5rem 0;background-color:var(--sg-bg);"><div style="max-width:1200px;margin:0 auto;padding:0 1rem;">${inputHtml}</div></form>`;
+}

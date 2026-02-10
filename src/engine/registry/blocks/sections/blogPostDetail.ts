@@ -42,6 +42,9 @@ export const blogPostDetailBlock: BlockDefinition<"blogPostDetail"> = {
     showTags: { label: "Mostrar Tags", inputType: "checkbox", group: "Visibilidade" },
     showReadingTime: { label: "Mostrar Tempo de Leitura", inputType: "checkbox", group: "Visibilidade" },
     contentMaxWidth: { label: "Largura Máxima do Conteúdo", inputType: "text", group: "Layout" },
+    metaTitle: { label: "Meta Title (SEO)", inputType: "text", group: "SEO", readOnly: true },
+    metaDescription: { label: "Meta Description (SEO)", inputType: "textarea", group: "SEO", readOnly: true },
+    ogImage: { label: "Open Graph Image", inputType: "image-upload", group: "SEO", readOnly: true },
   },
 };
 

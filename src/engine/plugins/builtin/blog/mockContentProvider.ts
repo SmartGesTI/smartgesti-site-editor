@@ -120,6 +120,10 @@ function toBlockProps(item: ContentItem): Record<string, unknown> {
     content: d.content || "",
     featuredImage: d.featuredImage || "",
     tags: Array.isArray(d.tags) ? d.tags : [],
+    // SEO props
+    metaTitle: d.metaTitle || d.title || "",
+    metaDescription: d.metaDescription || d.excerpt || "",
+    ogImage: d.ogImage || d.featuredImage || "",
   };
 }
 

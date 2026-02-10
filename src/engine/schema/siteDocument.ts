@@ -67,6 +67,8 @@ export type BlockType =
   | "blogPostCard"
   | "blogPostGrid"
   | "blogPostDetail"
+  | "blogCategoryFilter"
+  | "blogSearchBar"
   // Seções avançadas
   | "productShowcase"
   | "aboutSection"
@@ -1072,6 +1074,45 @@ export interface BlogPostDetailBlock extends BlockBase {
     showTags?: boolean;
     showReadingTime?: boolean;
     contentMaxWidth?: string;
+    // SEO fields (populated by ContentProvider, readOnly in editor)
+    metaTitle?: string;
+    metaDescription?: string;
+    ogImage?: string;
+  };
+}
+
+/**
+ * BlogCategoryFilter - Filtro de categorias para listagem do blog
+ * Dados populados pelo ContentProvider (categories extraídas dos posts)
+ */
+export interface BlogCategoryFilterBlock extends BlockBase {
+  type: "blogCategoryFilter";
+  props: {
+    title?: string;
+    categories: Array<{ name: string; slug: string; count?: number; image?: string }>;
+    variant: "chips" | "buttons" | "list";
+    showCount?: boolean;
+    showAll?: boolean;
+    allLabel?: string;
+    activeCategory?: string;
+    filterUrl?: string;
+  };
+}
+
+/**
+ * BlogSearchBar - Barra de busca para o blog
+ * Envia busca via form action para URL configurável
+ */
+export interface BlogSearchBarBlock extends BlockBase {
+  type: "blogSearchBar";
+  props: {
+    placeholder?: string;
+    variant: "simple" | "expanded" | "with-filters";
+    showIcon?: boolean;
+    searchUrl?: string;
+    filterCategories?: boolean;
+    filterTags?: boolean;
+    filterDate?: boolean;
   };
 }
 
@@ -1288,6 +1329,8 @@ export type Block =
   | BlogPostCardBlock
   | BlogPostGridBlock
   | BlogPostDetailBlock
+  | BlogCategoryFilterBlock
+  | BlogSearchBarBlock
   // Seções avançadas
   | ProductShowcaseBlock
   | AboutSectionBlock
@@ -1309,6 +1352,27 @@ export type BlockOfType<T extends BlockType> = Extract<Block, { type: T }>;
 export type BlockPropsFor<T extends BlockType> = BlockOfType<T>["props"];
 
 /**
+ * SEO configuration for a page
+ */
+export interface PageSeoConfig {
+  metaTitle?: string;
+  metaDescription?: string;
+  ogImage?: string;
+  ogType?: string;
+  canonicalUrl?: string;
+  noIndex?: boolean;
+}
+
+/**
+ * Global site metadata for SEO
+ */
+export interface SiteMetadata {
+  siteName?: string;
+  defaultOgImage?: string;
+  language?: string;
+}
+
+/**
  * Página do site
  */
 export interface SitePage {
@@ -1326,6 +1390,8 @@ export interface SitePage {
   dataSource?: PageDataSource;
   /** Restrições de edição impostas pelo plugin */
   editRestrictions?: PageEditRestrictions;
+  /** SEO configuration for this page */
+  seo?: PageSeoConfig;
 }
 
 /**
@@ -1349,6 +1415,8 @@ export interface SiteDocument {
   pages: SitePage[];
   /** Configuração de plugins ativos e suas opções */
   plugins?: SitePluginsConfig;
+  /** Global site metadata for SEO */
+  metadata?: SiteMetadata;
 }
 
 /**
