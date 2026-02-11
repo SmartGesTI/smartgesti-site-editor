@@ -423,7 +423,7 @@ export function exportBlogPostCard(
 
   // CTA HTML (link or button)
   const ctaHtml = linkText && linkHref
-    ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStyles.inlineStyles}" data-block-group="Card">${escapeHtml(linkText)}${ctaVariation === "link" ? " →" : ""}</a>`
+    ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStyles.inlineStyles}">${escapeHtml(linkText)}${ctaVariation === "link" ? " →" : ""}</a>`
     : "";
 
   // Full card HTML (sem dataBlockIdAttr para que o clique selecione o parent blogPostGrid)
