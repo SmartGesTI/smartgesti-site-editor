@@ -106,6 +106,7 @@ function generateCTAStyles(config: {
   linkColor: string;
   linkHoverColor: string;
   linkHoverEffect: string;
+  linkHoverIntensity: number;
   buttonVariant: string;
   buttonColor: string;
   buttonTextColor: string;
@@ -122,6 +123,7 @@ function generateCTAStyles(config: {
     linkColor,
     linkHoverColor,
     linkHoverEffect,
+    linkHoverIntensity,
     buttonVariant,
     buttonColor,
     buttonTextColor,
@@ -138,7 +140,7 @@ function generateCTAStyles(config: {
     // Generate link hover styles using shared utility
     const linkHoverResult = generateLinkHoverStyles({
       effect: linkHoverEffect as any,
-      intensity: 50,
+      intensity: linkHoverIntensity,
       hoverColor: linkHoverColor,
     });
 
@@ -249,6 +251,7 @@ export function exportBlogPostCard(
     linkColor = "#2563eb",
     linkHoverColor = "#1d4ed8",
     linkHoverEffect = "underline",
+    linkHoverIntensity = 50,
     buttonVariant = "solid",
     buttonColor = "#2563eb",
     buttonTextColor = "#ffffff",
@@ -380,6 +383,7 @@ export function exportBlogPostCard(
     linkColor,
     linkHoverColor,
     linkHoverEffect,
+    linkHoverIntensity,
     buttonVariant,
     buttonColor,
     buttonTextColor,
@@ -568,6 +572,7 @@ export function exportBlogPostGrid(
     linkColor = "#2563eb",
     linkHoverColor = "#1d4ed8",
     linkHoverEffect = "underline",
+    linkHoverIntensity = 50,
     buttonVariant = "solid",
     buttonColor = "#2563eb",
     buttonTextColor = "#ffffff",
@@ -639,6 +644,7 @@ export function exportBlogPostGrid(
               linkColor,
               linkHoverColor,
               linkHoverEffect,
+              linkHoverIntensity,
               buttonVariant,
               buttonColor,
               buttonTextColor,

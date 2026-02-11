@@ -67,6 +67,7 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
     linkColor: "#2563eb",
     linkHoverColor: "#1d4ed8",
     linkHoverEffect: "underline",
+    linkHoverIntensity: 50,
     // Button (quando ctaVariation === "button")
     buttonVariant: "solid", // solid | outline | ghost
     buttonColor: "#2563eb",
@@ -226,10 +227,22 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
       inputType: "select",
       options: [
         { label: "Sublinhado", value: "underline" },
-        { label: "Brilho", value: "brighten" },
+        { label: "Sublinhado (Centro)", value: "underline-center" },
+        { label: "Fundo Colorido", value: "background" },
+        { label: "Fundo Deslizante", value: "slide-bg" },
         { label: "Escala", value: "scale" },
+        { label: "Brilho Neon", value: "glow" },
         { label: "Nenhum", value: "none" },
       ],
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "link" },
+    },
+    linkHoverIntensity: {
+      label: "Intensidade",
+      inputType: "slider",
+      min: 10,
+      max: 100,
+      step: 10,
       group: "Cards",
       showWhen: { field: "ctaVariation", equals: "link" },
     },

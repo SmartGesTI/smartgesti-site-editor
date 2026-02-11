@@ -1098,7 +1098,8 @@ export interface BlogPostGridBlock extends BlockBase {
     /** Link (quando ctaVariation === "link") */
     linkColor?: string;
     linkHoverColor?: string;
-    linkHoverEffect?: "underline" | "brighten" | "scale" | "none";
+    linkHoverEffect?: "none" | "background" | "underline" | "underline-center" | "slide-bg" | "scale" | "glow";
+    linkHoverIntensity?: number;
     /** Button (quando ctaVariation === "button") - padrão Hero */
     buttonVariant?: "solid" | "outline" | "ghost";
     buttonColor?: string;
