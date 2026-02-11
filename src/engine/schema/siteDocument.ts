@@ -1093,6 +1093,12 @@ export interface BlogPostGridBlock extends BlockBase {
     /** Image effects */
     imageHoverEffect?: "none" | "zoom" | "brightness";
     imageBorderRadius?: string;
+    /** Card content controls */
+    showCategory?: boolean;
+    categoryStyle?: "text" | "badge";
+    showDate?: boolean;
+    showAuthor?: boolean;
+    excerptMaxLength?: number;
     /** CTA "Ler mais" - padrão do sistema (Hero) */
     ctaVariation?: "link" | "button";
     /** Link (quando ctaVariation === "link") */

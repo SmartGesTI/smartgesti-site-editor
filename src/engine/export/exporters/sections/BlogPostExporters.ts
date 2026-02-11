@@ -28,6 +28,14 @@ import { renderInlineSvgIcon } from "../../../shared/iconUtils";
 // ---------------------------------------------------------------------------
 
 /**
+ * Trunca texto com ellipsis (...)
+ */
+function truncateText(text: string, maxLength: number): string {
+  if (!text || text.length <= maxLength) return text;
+  return text.substring(0, maxLength).trim() + "...";
+}
+
+/**
  * Resolve card shadow CSS value
  */
 function resolveCardShadow(shadow: string): string {
@@ -261,9 +269,6 @@ export function exportBlogPostCard(
     linkText = "Ler mais",
     variant = "default",
     showImage = true,
-    showCategory = true,
-    showDate = true,
-    showAuthor = false,
     showReadingTime = false,
     // Card customization
     cardBorderRadius = "0.75rem",
@@ -275,6 +280,12 @@ export function exportBlogPostCard(
     // Image effects
     imageHoverEffect = "zoom",
     imageBorderRadius = "0.75rem",
+    // Card content controls
+    showCategory = true,
+    categoryStyle = "badge",
+    showDate = true,
+    showAuthor = false,
+    excerptMaxLength = 150,
     // CTA customization
     ctaVariation = "link",
     linkColor = "#2563eb",
@@ -328,10 +339,30 @@ export function exportBlogPostCard(
         ? `<div style="width: 40%; min-width: 200px; overflow: hidden; flex-shrink: 0;"><img id="${imageId}" src="${escapeHtml(image)}" alt="${escapeHtml(title)}" style="width: 100%; height: 100%; min-height: 200px; object-fit: cover; display: block;" /></div>`
         : "";
 
-    const metaParts: string[] = [];
-    if (showCategory && category) {
-      metaParts.push(`<span style="font-size: 0.75rem; font-weight: 600; color: var(--sg-primary); text-transform: uppercase;">${escapeHtml(category)}</span>`);
+    // Header com badge (esquerda) e avatar (direita) na mesma linha
+    let headerHtmlH = "";
+    const hasBadgeOrAuthorH = (showCategory && category) || showAuthor;
+
+    if (hasBadgeOrAuthorH) {
+      let badgeHtmlH = "";
+      if (showCategory && category) {
+        if (categoryStyle === "badge") {
+          badgeHtmlH = `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary, #3b82f6); color: white; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 9999px;">${escapeHtml(category)}</span>`;
+        } else {
+          badgeHtmlH = `<span style="display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--sg-primary); text-transform: uppercase; letter-spacing: 0.05em;">${escapeHtml(category)}</span>`;
+        }
+      }
+
+      let avatarHtmlH = "";
+      if (showAuthor) {
+        const avatarSrc = authorAvatar || "https://i.pravatar.cc/150?img=68";
+        avatarHtmlH = `<img src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(authorName || "Autor")}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;" />`;
+      }
+
+      headerHtmlH = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;"><div>${badgeHtmlH}</div><div>${avatarHtmlH}</div></div>`;
     }
+
+    const metaParts: string[] = [];
     if (showDate && date) metaParts.push(escapeHtml(date));
     if (showReadingTime && readingTime) metaParts.push(escapeHtml(readingTime));
 
@@ -339,20 +370,45 @@ export function exportBlogPostCard(
       ? `<div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--sg-muted-text); margin-bottom: 0.75rem;">${metaParts.join(' <span>·</span> ')}</div>`
       : "";
 
-    const authorHtml =
-      showAuthor && authorName
-        ? `<div style="display: flex; align-items: center; gap: 0.5rem; margin-top: auto; padding-top: 0.75rem;">${
-            authorAvatar
-              ? `<img src="${escapeHtml(authorAvatar)}" alt="${escapeHtml(authorName)}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;" />`
-              : ""
-          }<span style="font-size: 0.875rem; color: var(--sg-muted-text);">${escapeHtml(authorName)}</span></div>`
-        : "";
+    const truncatedExcerptH = excerpt ? truncateText(excerpt, excerptMaxLength) : "";
 
-    const ctaHtml = linkText && linkHref
-      ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStyles.inlineStyles}">${escapeHtml(linkText)}${ctaVariation === "link" ? " →" : ""}</a>`
+    // CTA para horizontal (mesma estrutura do default)
+    const ctaStylesH = generateCTAStyles({
+      cardId,
+      ctaId,
+      ctaVariation,
+      linkColor,
+      linkHoverColor,
+      linkHoverEffect,
+      linkHoverIntensity,
+      linkIconName,
+      linkIconPosition,
+      buttonVariant,
+      buttonColor,
+      buttonTextColor,
+      buttonRadius,
+      buttonSize,
+      buttonHoverEffect,
+      buttonHoverIntensity,
+      buttonHoverOverlay,
+      buttonHoverIconName,
+    });
+
+    let ctaContentH = "";
+    if (ctaVariation === "link") {
+      const iconLeft = ctaStylesH.iconHtml && linkIconPosition === "left" ? ctaStylesH.iconHtml + " " : "";
+      const iconRight = ctaStylesH.iconHtml && linkIconPosition === "right" ? " " + ctaStylesH.iconHtml : "";
+      const defaultArrow = !ctaStylesH.iconHtml ? " →" : "";
+      ctaContentH = iconLeft + escapeHtml(linkText) + iconRight + defaultArrow;
+    } else {
+      ctaContentH = escapeHtml(linkText);
+    }
+
+    const ctaHtmlH = linkText && linkHref
+      ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStylesH.inlineStyles}">${ctaContentH}</a>`
       : "";
 
-    return `${allHoverCSS ? `<style>${allHoverCSS}</style>` : ""}<article id="${cardId}" ${dataBlockIdAttr(block.id)} class="sg-blog-post-card" style="display: flex; background-color: var(--sg-surface, #ffffff); border-radius: ${cardBorderRadius}; overflow: hidden; box-shadow: ${cardShadowValue}; border: ${cardBorderStyle};" data-variant="horizontal" data-block-group="Card">${imgHtml}<div style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1;">${metaHtml}<h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${linkHref ? `<a href="${escapeHtml(linkHref)}" style="color: inherit; text-decoration: none;">${escapeHtml(title)}</a>` : escapeHtml(title)}</h3>${excerpt ? `<p style="color: var(--sg-muted-text); font-size: 0.9375rem; margin-bottom: 1rem;">${escapeHtml(excerpt)}</p>` : ""}<div style="margin-top: auto;">${ctaHtml}</div>${authorHtml}</div></article>`;
+    return `${allHoverCSS ? `<style>${allHoverCSS}</style>` : ""}<article id="${cardId}" class="sg-blog-post-card" style="display: flex; background-color: var(--sg-surface, #ffffff); border-radius: ${cardBorderRadius}; overflow: hidden; box-shadow: ${cardShadowValue}; border: ${cardBorderStyle};" data-variant="horizontal" data-block-group="Card">${imgHtml}<div style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1;">${headerHtmlH}${metaHtml}<h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${linkHref ? `<a href="${escapeHtml(linkHref)}" style="color: inherit; text-decoration: none;">${escapeHtml(title)}</a>` : escapeHtml(title)}</h3>${truncatedExcerptH ? `<p style="color: var(--sg-muted-text); font-size: 0.9375rem; margin-bottom: 1rem;">${escapeHtml(truncatedExcerptH)}</p>` : ""}<div style="margin-top: auto;">${ctaHtmlH}</div></div></article>`;
   }
 
   // ---------- variant: minimal ----------
@@ -366,6 +422,10 @@ export function exportBlogPostCard(
       ctaVariation,
       linkColor,
       linkHoverColor,
+      linkHoverEffect,
+      linkHoverIntensity,
+      linkIconName,
+      linkIconPosition,
       buttonVariant,
       buttonColor,
       buttonTextColor,
@@ -374,12 +434,33 @@ export function exportBlogPostCard(
       buttonHoverEffect,
       buttonHoverIntensity,
       buttonHoverOverlay,
+      buttonHoverIconName,
     });
 
-    const metaParts: string[] = [];
-    if (showCategory && category) {
-      metaParts.push(`<span style="font-size: 0.75rem; font-weight: 600; color: var(--sg-primary); text-transform: uppercase;">${escapeHtml(category)}</span>`);
+    // Header com badge (esquerda) e avatar (direita) na mesma linha
+    let headerHtmlM = "";
+    const hasBadgeOrAuthorM = (showCategory && category) || showAuthor;
+
+    if (hasBadgeOrAuthorM) {
+      let badgeHtmlM = "";
+      if (showCategory && category) {
+        if (categoryStyle === "badge") {
+          badgeHtmlM = `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary, #3b82f6); color: white; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 9999px;">${escapeHtml(category)}</span>`;
+        } else {
+          badgeHtmlM = `<span style="display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--sg-primary); text-transform: uppercase; letter-spacing: 0.05em;">${escapeHtml(category)}</span>`;
+        }
+      }
+
+      let avatarHtmlM = "";
+      if (showAuthor) {
+        const avatarSrc = authorAvatar || "https://i.pravatar.cc/150?img=68";
+        avatarHtmlM = `<img src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(authorName || "Autor")}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" />`;
+      }
+
+      headerHtmlM = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;"><div>${badgeHtmlM}</div><div>${avatarHtmlM}</div></div>`;
     }
+
+    const metaParts: string[] = [];
     if (showDate && date) metaParts.push(escapeHtml(date));
     if (showReadingTime && readingTime) metaParts.push(escapeHtml(readingTime));
 
@@ -387,11 +468,24 @@ export function exportBlogPostCard(
       ? `<div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--sg-muted-text); margin-bottom: 0.5rem;">${metaParts.join(' <span>·</span> ')}</div>`
       : "";
 
+    const truncatedExcerptM = excerpt ? truncateText(excerpt, excerptMaxLength) : "";
+
+    // CTA HTML with icon support
+    let ctaContentM = "";
+    if (ctaVariation === "link") {
+      const iconLeft = ctaStyles.iconHtml && linkIconPosition === "left" ? ctaStyles.iconHtml + " " : "";
+      const iconRight = ctaStyles.iconHtml && linkIconPosition === "right" ? " " + ctaStyles.iconHtml : "";
+      const defaultArrow = !ctaStyles.iconHtml ? " →" : "";
+      ctaContentM = iconLeft + escapeHtml(linkText) + iconRight + defaultArrow;
+    } else {
+      ctaContentM = escapeHtml(linkText);
+    }
+
     const ctaHtml = linkText && linkHref
-      ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStyles.inlineStyles}">${escapeHtml(linkText)}${ctaVariation === "link" ? " →" : ""}</a>`
+      ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStyles.inlineStyles}">${ctaContentM}</a>`
       : "";
 
-    return `${ctaStyles.hoverCSS ? `<style>${ctaStyles.hoverCSS}</style>` : ""}<article id="${cardId}" ${dataBlockIdAttr(block.id)} class="sg-blog-post-card" style="padding: 1.25rem 0; border-bottom: 1px solid var(--sg-border, #e5e7eb);" data-variant="minimal" data-block-group="Card">${metaHtml}<h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${linkHref ? `<a href="${escapeHtml(linkHref)}" style="color: inherit; text-decoration: none;">${escapeHtml(title)}</a>` : escapeHtml(title)}</h3>${excerpt ? `<p style="color: var(--sg-muted-text); font-size: 0.875rem; margin-bottom: 0.75rem;">${escapeHtml(excerpt)}</p>` : ""}${ctaHtml}</article>`;
+    return `${ctaStyles.hoverCSS ? `<style>${ctaStyles.hoverCSS}</style>` : ""}<article id="${cardId}" class="sg-blog-post-card" style="padding: 1.25rem 0; border-bottom: 1px solid var(--sg-border, #e5e7eb);" data-variant="minimal" data-block-group="Card">${headerHtmlM}${metaHtml}<h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${linkHref ? `<a href="${escapeHtml(linkHref)}" style="color: inherit; text-decoration: none;">${escapeHtml(title)}</a>` : escapeHtml(title)}</h3>${truncatedExcerptM ? `<p style="color: var(--sg-muted-text); font-size: 0.875rem; margin-bottom: 0.75rem;">${escapeHtml(truncatedExcerptM)}</p>` : ""}${ctaHtml}</article>`;
   }
 
   // ---------- variant: default ----------
@@ -438,27 +532,37 @@ export function exportBlogPostCard(
       ? `<div style="height: 200px; overflow: hidden; border-radius: ${imageBorderRadius} ${imageBorderRadius} 0 0;"><img id="${imageId}" src="${escapeHtml(image)}" alt="${escapeHtml(title)}" style="width: 100%; height: 100%; object-fit: cover; display: block;" /></div>`
       : "";
 
-  // Meta parts (category, date, reading time)
-  const metaParts: string[] = [];
-  if (showCategory && category) {
-    metaParts.push(`<span style="font-size: 0.75rem; font-weight: 600; color: var(--sg-primary); text-transform: uppercase; letter-spacing: 0.05em;">${escapeHtml(category)}</span>`);
+  // Header com badge (esquerda) e avatar (direita) na mesma linha
+  let headerHtml = "";
+  const hasBadgeOrAuthor = (showCategory && category) || showAuthor;
+
+  if (hasBadgeOrAuthor) {
+    let badgeHtml = "";
+    if (showCategory && category) {
+      if (categoryStyle === "badge") {
+        badgeHtml = `<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: var(--sg-primary, #3b82f6); color: white; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 9999px;">${escapeHtml(category)}</span>`;
+      } else {
+        badgeHtml = `<span style="display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--sg-primary); text-transform: uppercase; letter-spacing: 0.05em;">${escapeHtml(category)}</span>`;
+      }
+    }
+
+    let avatarHtml = "";
+    if (showAuthor) {
+      const avatarSrc = authorAvatar || "https://i.pravatar.cc/150?img=68";
+      avatarHtml = `<img src="${escapeHtml(avatarSrc)}" alt="${escapeHtml(authorName || "Autor")}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;" />`;
+    }
+
+    headerHtml = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;"><div>${badgeHtml}</div><div>${avatarHtml}</div></div>`;
   }
+
+  // Meta parts (date, reading time)
+  const metaParts: string[] = [];
   if (showDate && date) metaParts.push(escapeHtml(date));
   if (showReadingTime && readingTime) metaParts.push(escapeHtml(readingTime));
 
   const metaHtml = metaParts.length
     ? `<div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--sg-muted-text); margin-bottom: 0.75rem; flex-wrap: wrap;">${metaParts.join(' <span style="color: var(--sg-muted-text);">·</span> ')}</div>`
     : "";
-
-  // Author HTML
-  const authorHtml =
-    showAuthor && authorName
-      ? `<div style="display: flex; align-items: center; gap: 0.5rem; margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--sg-border, #e5e7eb);">${
-          authorAvatar
-            ? `<img src="${escapeHtml(authorAvatar)}" alt="${escapeHtml(authorName)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" />`
-            : ""
-        }<span style="font-size: 0.875rem; color: var(--sg-muted-text);">${escapeHtml(authorName)}</span></div>`
-      : "";
 
   // CTA HTML (link or button)
   let ctaContent = "";
@@ -477,8 +581,11 @@ export function exportBlogPostCard(
     ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStyles.inlineStyles}">${ctaContent}</a>`
     : "";
 
+  // Truncate excerpt
+  const truncatedExcerpt = excerpt ? truncateText(excerpt, excerptMaxLength) : "";
+
   // Full card HTML (sem dataBlockIdAttr para que o clique selecione o parent blogPostGrid)
-  return `${allHoverCSS ? `<style>${allHoverCSS}</style>` : ""}<article id="${cardId}" class="sg-blog-post-card" style="background-color: var(--sg-surface, #ffffff); border-radius: ${cardBorderRadius}; overflow: hidden; box-shadow: ${cardShadowValue}; border: ${cardBorderStyle}; display: flex; flex-direction: column;" data-variant="default" data-block-group="Card">${imgHtml}<div style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1;">${metaHtml}<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.3;">${linkHref ? `<a href="${escapeHtml(linkHref)}" style="color: inherit; text-decoration: none;">${escapeHtml(title)}</a>` : escapeHtml(title)}</h3>${excerpt ? `<p style="color: var(--sg-muted-text); font-size: 0.9375rem; line-height: 1.6; margin-bottom: 1rem; flex: 1;">${escapeHtml(excerpt)}</p>` : ""}<div style="margin-top: auto;">${ctaHtml}</div>${authorHtml}</div></article>`;
+  return `${allHoverCSS ? `<style>${allHoverCSS}</style>` : ""}<article id="${cardId}" class="sg-blog-post-card" style="background-color: var(--sg-surface, #ffffff); border-radius: ${cardBorderRadius}; overflow: hidden; box-shadow: ${cardShadowValue}; border: ${cardBorderStyle}; display: flex; flex-direction: column;" data-variant="default" data-block-group="Card">${imgHtml}<div style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1;">${headerHtml}${metaHtml}<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.3;">${linkHref ? `<a href="${escapeHtml(linkHref)}" style="color: inherit; text-decoration: none;">${escapeHtml(title)}</a>` : escapeHtml(title)}</h3>${truncatedExcerpt ? `<p style="color: var(--sg-muted-text); font-size: 0.9375rem; line-height: 1.6; margin-bottom: 1rem; flex: 1;">${escapeHtml(truncatedExcerpt)}</p>` : ""}<div style="margin-top: auto;">${ctaHtml}</div></div></article>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -614,6 +721,12 @@ export function exportBlogPostGrid(
     // Image effects
     imageHoverEffect = "zoom",
     imageBorderRadius = "0.75rem",
+    // Card content controls
+    showCategory = true,
+    categoryStyle = "badge",
+    showDate = true,
+    showAuthor = false,
+    excerptMaxLength = 150,
     // CTA customization
     ctaVariation = "link",
     linkColor = "#2563eb",
@@ -690,6 +803,11 @@ export function exportBlogPostGrid(
               cardBorderWidth,
               imageHoverEffect,
               imageBorderRadius,
+              showCategory,
+              categoryStyle,
+              showDate,
+              showAuthor,
+              excerptMaxLength,
               ctaVariation,
               linkColor,
               linkHoverColor,

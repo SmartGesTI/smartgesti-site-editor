@@ -12,6 +12,8 @@ const sampleCards = [
     image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=400&fit=crop",
     category: "Novidades",
     date: "15 Jan 2025",
+    authorName: "Maria Silva",
+    authorAvatar: "https://i.pravatar.cc/150?img=1",
     linkHref: "/site/p/blog/bem-vindo",
     linkText: "Ler mais",
   },
@@ -21,6 +23,8 @@ const sampleCards = [
     image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=400&fit=crop",
     category: "Educação",
     date: "20 Jan 2025",
+    authorName: "João Santos",
+    authorAvatar: "https://i.pravatar.cc/150?img=12",
     linkHref: "/site/p/blog/dicas-estudantes",
     linkText: "Ler mais",
   },
@@ -30,6 +34,8 @@ const sampleCards = [
     image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&h=400&fit=crop",
     category: "Institucional",
     date: "01 Fev 2025",
+    authorName: "Ana Costa",
+    authorAvatar: "https://i.pravatar.cc/150?img=5",
     linkHref: "/site/p/blog/novidades-semestre",
     linkText: "Ler mais",
   },
@@ -61,6 +67,12 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
     // Image effects
     imageHoverEffect: "zoom",
     imageBorderRadius: "0.75rem",
+    // Card content controls
+    showCategory: true,
+    categoryStyle: "badge",
+    showDate: true,
+    showAuthor: false,
+    excerptMaxLength: 150,
     // CTA "Ler mais" - padrão do sistema (Hero)
     ctaVariation: "link", // "link" | "button"
     // Link (quando ctaVariation === "link")
@@ -199,6 +211,44 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
         { label: "Grande", value: "1rem" },
       ],
       group: "Cards",
+    },
+
+    // =========================================================================
+    // GRUPO: Conteúdo do Card
+    // =========================================================================
+    showCategory: {
+      label: "Exibir Categoria",
+      inputType: "checkbox",
+      group: "Conteúdo",
+    },
+    categoryStyle: {
+      label: "Estilo da Categoria",
+      inputType: "select",
+      options: [
+        { label: "Badge", value: "badge" },
+        { label: "Texto Simples", value: "text" },
+      ],
+      group: "Conteúdo",
+      showWhen: { field: "showCategory", equals: true },
+    },
+    showDate: {
+      label: "Exibir Data",
+      inputType: "checkbox",
+      group: "Conteúdo",
+    },
+    showAuthor: {
+      label: "Exibir Autor",
+      inputType: "checkbox",
+      group: "Conteúdo",
+    },
+    excerptMaxLength: {
+      label: "Máximo de Caracteres (Descrição)",
+      inputType: "slider",
+      min: 50,
+      max: 300,
+      step: 10,
+      group: "Conteúdo",
+      description: "Trunca o texto com ... se ultrapassar o limite",
     },
 
     // --- CTA "Ler mais" (dentro do grupo Cards) ---
