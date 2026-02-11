@@ -1108,7 +1108,8 @@ export interface BlogPostGridBlock extends BlockBase {
     buttonSize?: "sm" | "md" | "lg";
     buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse";
     buttonHoverIntensity?: number;
-    buttonHoverOverlay?: "none" | "shine" | "fill" | "bounce" | "border-glow";
+    buttonHoverOverlay?: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow";
+    buttonHoverIconName?: string;
   };
 }
 

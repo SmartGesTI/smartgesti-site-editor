@@ -77,6 +77,7 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
     buttonHoverEffect: "darken",
     buttonHoverIntensity: 20,
     buttonHoverOverlay: "none",
+    buttonHoverIconName: "arrow-right",
   },
   inspectorMeta: {
     title: { label: "Título", inputType: "text", group: "Cabeçalho" },
@@ -323,10 +324,17 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
         { label: "Brilho", value: "shine" },
         { label: "Preenchimento", value: "fill" },
         { label: "Salto", value: "bounce" },
+        { label: "Ícone Animado", value: "icon" },
         { label: "Borda Glow", value: "border-glow" },
       ],
       group: "Cards",
       showWhen: { field: "ctaVariation", equals: "button" },
+    },
+    buttonHoverIconName: {
+      label: "Ícone",
+      inputType: "icon-grid",
+      group: "Cards",
+      showWhen: { field: "buttonHoverOverlay", equals: "icon" },
     },
   },
 };

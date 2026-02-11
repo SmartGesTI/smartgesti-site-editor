@@ -16,7 +16,10 @@ import { resolveWidgetShadow } from "../../../shared/widgetStyles";
 import {
   generateLinkHoverStyles,
   generateButtonHoverStyles,
+  generateButtonOverlayCSS,
+  getButtonHoverKeyframes,
   type ButtonHoverEffect,
+  type ButtonHoverOverlay,
 } from "../../../shared/hoverEffects";
 
 // ---------------------------------------------------------------------------
@@ -115,6 +118,7 @@ function generateCTAStyles(config: {
   buttonHoverEffect: string;
   buttonHoverIntensity: number;
   buttonHoverOverlay: string;
+  buttonHoverIconName: string;
 }): { inlineStyles: string; hoverCSS: string } {
   const {
     cardId,
@@ -131,6 +135,8 @@ function generateCTAStyles(config: {
     buttonSize,
     buttonHoverEffect,
     buttonHoverIntensity,
+    buttonHoverOverlay,
+    buttonHoverIconName,
   } = config;
 
   // Link variation
@@ -203,7 +209,22 @@ function generateCTAStyles(config: {
     if (hoverResult.base) {
       hoverCSS += `#${ctaId} { ${hoverResult.base} }\n`;
     }
-    hoverCSS += `#${ctaId}:hover { ${hoverResult.hover} }`;
+    hoverCSS += `#${ctaId}:hover { ${hoverResult.hover} }\n`;
+
+    // Add keyframes if needed (for pulse effect)
+    if (buttonHoverEffect === "pulse") {
+      hoverCSS += getButtonHoverKeyframes();
+    }
+  }
+
+  // Overlay effects (shine, fill, bounce, icon, border-glow)
+  if (buttonHoverOverlay && buttonHoverOverlay !== "none") {
+    hoverCSS += generateButtonOverlayCSS(`#${ctaId}`, {
+      overlay: buttonHoverOverlay as ButtonHoverOverlay,
+      primaryColor: buttonColor,
+      iconName: buttonHoverIconName,
+      textColor: buttonVariant === "solid" ? buttonTextColor : buttonColor,
+    });
   }
 
   return { inlineStyles, hoverCSS };
@@ -260,6 +281,7 @@ export function exportBlogPostCard(
     buttonHoverEffect = "darken",
     buttonHoverIntensity = 20,
     buttonHoverOverlay = "none",
+    buttonHoverIconName = "arrow-right",
   } = (block as any).props;
 
   // ---------- variant: horizontal ----------
@@ -392,6 +414,7 @@ export function exportBlogPostCard(
     buttonHoverEffect,
     buttonHoverIntensity,
     buttonHoverOverlay,
+    buttonHoverIconName,
   });
 
   // Combine all hover CSS
@@ -581,6 +604,7 @@ export function exportBlogPostGrid(
     buttonHoverEffect = "darken",
     buttonHoverIntensity = 20,
     buttonHoverOverlay = "none",
+    buttonHoverIconName = "arrow-right",
   } = (block as any).props;
 
   const isMagazine = variant === "magazine";
@@ -653,6 +677,7 @@ export function exportBlogPostGrid(
               buttonHoverEffect,
               buttonHoverIntensity,
               buttonHoverOverlay,
+              buttonHoverIconName,
             },
           } as Block,
           depth + 1,
