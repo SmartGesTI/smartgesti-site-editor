@@ -51,18 +51,28 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
     showViewAll: false,
     viewAllText: "Ver todos",
     viewAllHref: "/site/p/blog",
-    // Card styling
+    // Card styling (grupo único)
     cardBorderRadius: "0.75rem",
     cardShadow: "md",
     cardHoverEffect: "lift",
     cardBorder: true,
-    // Link/Button "Ler mais"
-    linkStyle: "link",
-    linkColor: "#2563eb",
-    linkHoverColor: "#1d4ed8",
     // Image effects
     imageHoverEffect: "zoom",
     imageBorderRadius: "0.75rem",
+    // CTA "Ler mais" - padrão do sistema (Hero)
+    ctaVariation: "link", // "link" | "button"
+    // Link (quando ctaVariation === "link")
+    linkColor: "#2563eb",
+    linkHoverColor: "#1d4ed8",
+    // Button (quando ctaVariation === "button")
+    buttonVariant: "solid", // solid | outline | ghost
+    buttonColor: "#2563eb",
+    buttonTextColor: "#ffffff",
+    buttonRadius: 8,
+    buttonSize: "md", // sm | md | lg
+    buttonHoverEffect: "darken",
+    buttonHoverIntensity: 20,
+    buttonHoverOverlay: "none",
   },
   inspectorMeta: {
     title: { label: "Título", inputType: "text", group: "Cabeçalho" },
@@ -101,7 +111,10 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
       group: "Rodapé",
       showWhen: { field: "showViewAll", equals: true },
     },
-    // Card styling
+
+    // =========================================================================
+    // GRUPO: Cards (tudo em um grupo único, organizado com separadores visuais)
+    // =========================================================================
     cardBorderRadius: {
       label: "Arredondamento",
       inputType: "select",
@@ -127,7 +140,7 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
       group: "Cards",
     },
     cardHoverEffect: {
-      label: "Efeito Hover",
+      label: "Efeito Hover do Card",
       inputType: "select",
       options: [
         { label: "Nenhum", value: "none" },
@@ -142,40 +155,20 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
       inputType: "checkbox",
       group: "Cards",
     },
-    // Link/Button "Ler mais"
-    linkStyle: {
-      label: "Estilo do Link",
-      inputType: "select",
-      options: [
-        { label: "Link Simples", value: "link" },
-        { label: "Botão Preenchido", value: "button" },
-        { label: "Botão Outline", value: "button-outline" },
-      ],
-      group: "Link 'Ler mais'",
-    },
-    linkColor: {
-      label: "Cor",
-      inputType: "color-advanced",
-      group: "Link 'Ler mais'",
-    },
-    linkHoverColor: {
-      label: "Cor (Hover)",
-      inputType: "color-advanced",
-      group: "Link 'Ler mais'",
-    },
-    // Image effects
+
+    // --- Imagem (dentro do grupo Cards) ---
     imageHoverEffect: {
-      label: "Efeito Hover",
+      label: "Efeito Hover da Imagem",
       inputType: "select",
       options: [
         { label: "Nenhum", value: "none" },
         { label: "Zoom", value: "zoom" },
         { label: "Brilho", value: "brightness" },
       ],
-      group: "Imagem",
+      group: "Cards",
     },
     imageBorderRadius: {
-      label: "Arredondamento",
+      label: "Arredondamento da Imagem",
       inputType: "select",
       options: [
         { label: "Nenhum", value: "0" },
@@ -183,7 +176,114 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
         { label: "Médio", value: "0.75rem" },
         { label: "Grande", value: "1rem" },
       ],
-      group: "Imagem",
+      group: "Cards",
+    },
+
+    // --- CTA "Ler mais" (dentro do grupo Cards) ---
+    ctaVariation: {
+      label: 'Variação "Ler mais"',
+      inputType: "select",
+      options: [
+        { label: "Link", value: "link" },
+        { label: "Botão", value: "button" },
+      ],
+      group: "Cards",
+    },
+
+    // Link (quando ctaVariation === "link")
+    linkColor: {
+      label: "Cor do Link",
+      inputType: "color-advanced",
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "link" },
+    },
+    linkHoverColor: {
+      label: "Cor (Hover)",
+      inputType: "color-advanced",
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "link" },
+    },
+
+    // Button (quando ctaVariation === "button") - padrão do Hero
+    buttonVariant: {
+      label: "Estilo do Botão",
+      inputType: "select",
+      options: [
+        { label: "Sólido", value: "solid" },
+        { label: "Contorno", value: "outline" },
+        { label: "Ghost", value: "ghost" },
+      ],
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "button" },
+    },
+    buttonColor: {
+      label: "Cor do Botão",
+      inputType: "color-advanced",
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "button" },
+    },
+    buttonTextColor: {
+      label: "Cor do Texto",
+      inputType: "color-advanced",
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "button" },
+    },
+    buttonRadius: {
+      label: "Cantos do Botão",
+      inputType: "slider",
+      min: 0,
+      max: 50,
+      step: 2,
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "button" },
+    },
+    buttonSize: {
+      label: "Tamanho do Botão",
+      inputType: "select",
+      options: [
+        { label: "Pequeno", value: "sm" },
+        { label: "Médio", value: "md" },
+        { label: "Grande", value: "lg" },
+      ],
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "button" },
+    },
+    buttonHoverEffect: {
+      label: "Efeito Hover do Botão",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "none" },
+        { label: "Escurecer", value: "darken" },
+        { label: "Clarear", value: "lighten" },
+        { label: "Escala", value: "scale" },
+        { label: "Brilho Neon", value: "glow" },
+        { label: "Sombra", value: "shadow" },
+        { label: "Pulso", value: "pulse" },
+      ],
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "button" },
+    },
+    buttonHoverIntensity: {
+      label: "Intensidade",
+      inputType: "slider",
+      min: 10,
+      max: 100,
+      step: 10,
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "button" },
+    },
+    buttonHoverOverlay: {
+      label: "Efeito Extra",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "none" },
+        { label: "Brilho", value: "shine" },
+        { label: "Preenchimento", value: "fill" },
+        { label: "Salto", value: "bounce" },
+        { label: "Borda Glow", value: "border-glow" },
+      ],
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "button" },
     },
   },
 };

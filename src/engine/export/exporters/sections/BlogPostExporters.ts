@@ -13,10 +13,184 @@ import {
   generateResponsiveGridStyles,
 } from "../../shared/responsiveGridHelper";
 import { resolveWidgetShadow } from "../../../shared/widgetStyles";
-import { generateLinkHoverStyles } from "../../../shared/hoverEffects";
-import { resolveCardShadow, generateCardHoverStyles } from "../../../shared/cardEffects";
-import { generateImageHoverStyles } from "../../../shared/imageEffects";
-import { getLinkButtonStyles, generateLinkButtonHoverCSS } from "../../../shared/buttonStyles";
+import {
+  generateLinkHoverStyles,
+  generateButtonHoverStyles,
+  type ButtonHoverEffect,
+} from "../../../shared/hoverEffects";
+
+// ---------------------------------------------------------------------------
+// Helper Functions for Card Customization
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve card shadow CSS value
+ */
+function resolveCardShadow(shadow: string): string {
+  const shadowMap: Record<string, string> = {
+    none: "none",
+    sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+    md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+    lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+    xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+  };
+  return shadowMap[shadow] || shadowMap.md;
+}
+
+/**
+ * Generate card hover effect CSS
+ */
+function generateCardHoverCSS(
+  cardId: string,
+  hoverEffect: string,
+  shadow: string,
+): string {
+  if (hoverEffect === "none") return "";
+
+  let hoverStyles = "";
+  switch (hoverEffect) {
+    case "lift":
+      hoverStyles = "transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);";
+      break;
+    case "scale":
+      hoverStyles = "transform: scale(1.02);";
+      break;
+    case "glow":
+      hoverStyles = "box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);";
+      break;
+    default:
+      return "";
+  }
+
+  return `
+    #${cardId} { transition: all 0.3s ease; }
+    #${cardId}:hover { ${hoverStyles} }
+  `;
+}
+
+/**
+ * Generate image hover effect CSS
+ */
+function generateImageHoverCSS(
+  cardId: string,
+  imageId: string,
+  effect: string,
+): string {
+  if (effect === "none") return "";
+
+  let imageStyles = "";
+  switch (effect) {
+    case "zoom":
+      imageStyles = "transform: scale(1.1);";
+      break;
+    case "brightness":
+      imageStyles = "filter: brightness(1.1);";
+      break;
+    default:
+      return "";
+  }
+
+  return `
+    #${imageId} { transition: transform 0.3s ease, filter 0.3s ease; }
+    #${cardId}:hover #${imageId} { ${imageStyles} }
+  `;
+}
+
+/**
+ * Generate CTA (link or button) styles and hover CSS
+ */
+function generateCTAStyles(config: {
+  cardId: string;
+  ctaId: string;
+  ctaVariation: string;
+  linkColor: string;
+  linkHoverColor: string;
+  buttonVariant: string;
+  buttonColor: string;
+  buttonTextColor: string;
+  buttonRadius: number;
+  buttonSize: string;
+  buttonHoverEffect: string;
+  buttonHoverIntensity: number;
+  buttonHoverOverlay: string;
+}): { inlineStyles: string; hoverCSS: string } {
+  const {
+    cardId,
+    ctaId,
+    ctaVariation,
+    linkColor,
+    linkHoverColor,
+    buttonVariant,
+    buttonColor,
+    buttonTextColor,
+    buttonRadius,
+    buttonSize,
+    buttonHoverEffect,
+    buttonHoverIntensity,
+  } = config;
+
+  // Link variation
+  if (ctaVariation === "link") {
+    const inlineStyles = `color: ${linkColor}; font-weight: 600; text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; transition: color 0.2s ease;`;
+    const hoverCSS = `#${ctaId}:hover { color: ${linkHoverColor}; }`;
+    return { inlineStyles, hoverCSS };
+  }
+
+  // Button variation
+  const sizeStyles: Record<string, { padding: string; fontSize: string }> = {
+    sm: { padding: "0.5rem 1rem", fontSize: "0.875rem" },
+    md: { padding: "0.625rem 1.5rem", fontSize: "0.9375rem" },
+    lg: { padding: "0.75rem 2rem", fontSize: "1rem" },
+  };
+  const size = sizeStyles[buttonSize] || sizeStyles.md;
+
+  const baseStyles = [
+    `padding: ${size.padding}`,
+    `font-size: ${size.fontSize}`,
+    "font-weight: 600",
+    "text-decoration: none",
+    "display: inline-flex",
+    "align-items: center",
+    "justify-content: center",
+    "gap: 0.5rem",
+    `border-radius: ${buttonRadius}px`,
+    "transition: all 0.2s ease",
+    "cursor: pointer",
+  ];
+
+  // Variant-specific styles
+  switch (buttonVariant) {
+    case "outline":
+      baseStyles.push(`background-color: transparent`, `border: 2px solid ${buttonColor}`, `color: ${buttonColor}`);
+      break;
+    case "ghost":
+      baseStyles.push(`background-color: transparent`, `border: none`, `color: ${buttonColor}`);
+      break;
+    default: // solid
+      baseStyles.push(`background-color: ${buttonColor}`, `border: 2px solid ${buttonColor}`, `color: ${buttonTextColor}`);
+  }
+
+  const inlineStyles = baseStyles.join("; ");
+
+  // Hover effects
+  let hoverCSS = "";
+  if (buttonHoverEffect !== "none") {
+    const hoverResult = generateButtonHoverStyles({
+      effect: buttonHoverEffect as ButtonHoverEffect,
+      intensity: buttonHoverIntensity,
+      buttonColor,
+      buttonTextColor: buttonVariant === "solid" ? buttonTextColor : buttonColor,
+      variant: buttonVariant as "solid" | "outline" | "ghost",
+    });
+
+    if (hoverResult.base) {
+      hoverCSS += `#${ctaId} { ${hoverResult.base} }\n`;
+    }
+    hoverCSS += `#${ctaId}:hover { ${hoverResult.hover} }`;
+  }
+
+  return { inlineStyles, hoverCSS };
+}
 
 // ---------------------------------------------------------------------------
 // BlogPostCard
@@ -38,28 +212,78 @@ export function exportBlogPostCard(
     authorAvatar,
     readingTime,
     linkHref,
-    linkText,
+    linkText = "Ler mais",
     variant = "default",
     showImage = true,
     showCategory = true,
     showDate = true,
     showAuthor = false,
     showReadingTime = false,
+    // Card customization
+    cardBorderRadius = "0.75rem",
+    cardShadow = "md",
+    cardHoverEffect = "lift",
+    cardBorder = true,
+    // Image effects
+    imageHoverEffect = "zoom",
+    imageBorderRadius = "0.75rem",
+    // CTA customization
+    ctaVariation = "link",
+    linkColor = "#2563eb",
+    linkHoverColor = "#1d4ed8",
+    buttonVariant = "solid",
+    buttonColor = "#2563eb",
+    buttonTextColor = "#ffffff",
+    buttonRadius = 8,
+    buttonSize = "md",
+    buttonHoverEffect = "darken",
+    buttonHoverIntensity = 20,
+    buttonHoverOverlay = "none",
   } = (block as any).props;
 
   // ---------- variant: horizontal ----------
   if (variant === "horizontal") {
+    const cardId = `card-${block.id}`;
+    const imageId = `img-${block.id}`;
+    const ctaId = `cta-${block.id}`;
+
+    const cardShadowValue = resolveCardShadow(cardShadow);
+    const cardBorderStyle = cardBorder ? "1px solid var(--sg-border, #e5e7eb)" : "none";
+
+    const cardHoverCSS = generateCardHoverCSS(cardId, cardHoverEffect, cardShadow);
+    const imageHoverCSS = generateImageHoverCSS(cardId, imageId, imageHoverEffect);
+    const ctaStyles = generateCTAStyles({
+      cardId,
+      ctaId,
+      ctaVariation,
+      linkColor,
+      linkHoverColor,
+      buttonVariant,
+      buttonColor,
+      buttonTextColor,
+      buttonRadius,
+      buttonSize,
+      buttonHoverEffect,
+      buttonHoverIntensity,
+      buttonHoverOverlay,
+    });
+
+    const allHoverCSS = cardHoverCSS + imageHoverCSS + ctaStyles.hoverCSS;
+
     const imgHtml =
       showImage && image
-        ? `<div style="width: 260px; min-height: 180px; flex-shrink: 0; background-image: url(${escapeHtml(image)}); background-size: cover; background-position: center;"></div>`
+        ? `<div style="width: 40%; min-width: 200px; overflow: hidden; flex-shrink: 0;"><img id="${imageId}" src="${escapeHtml(image)}" alt="${escapeHtml(title)}" style="width: 100%; height: 100%; min-height: 200px; object-fit: cover; display: block;" /></div>`
         : "";
 
     const metaParts: string[] = [];
-    if (showCategory && category) metaParts.push(escapeHtml(category));
+    if (showCategory && category) {
+      metaParts.push(`<span style="font-size: 0.75rem; font-weight: 600; color: var(--sg-primary); text-transform: uppercase;">${escapeHtml(category)}</span>`);
+    }
     if (showDate && date) metaParts.push(escapeHtml(date));
     if (showReadingTime && readingTime) metaParts.push(escapeHtml(readingTime));
+
     const metaHtml = metaParts.length
-      ? `<p style="font-size: 0.75rem; color: var(--sg-muted-text); margin-bottom: 0.5rem;">${metaParts.join(" &middot; ")}</p>`
+      ? `<div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--sg-muted-text); margin-bottom: 0.75rem;">${metaParts.join(' <span>·</span> ')}</div>`
       : "";
 
     const authorHtml =
@@ -68,61 +292,123 @@ export function exportBlogPostCard(
             authorAvatar
               ? `<img src="${escapeHtml(authorAvatar)}" alt="${escapeHtml(authorName)}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;" />`
               : ""
-          }<span style="font-size: 0.8rem; color: var(--sg-muted-text);">${escapeHtml(authorName)}</span></div>`
+          }<span style="font-size: 0.875rem; color: var(--sg-muted-text);">${escapeHtml(authorName)}</span></div>`
         : "";
 
-    const linkHtml = linkText
-      ? `<a href="${escapeHtml(linkHref || "#")}" style="color: var(--sg-primary); font-weight: 500; text-decoration: none; font-size: 0.875rem;">${escapeHtml(linkText)}</a>`
+    const ctaHtml = linkText && linkHref
+      ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStyles.inlineStyles}">${escapeHtml(linkText)}${ctaVariation === "link" ? " →" : ""}</a>`
       : "";
 
-    return `<article ${dataBlockIdAttr(block.id)} class="sg-blog-post-card" style="display: flex; background-color: var(--sg-bg); border-radius: var(--sg-card-radius); overflow: hidden; box-shadow: var(--sg-card-shadow);" data-variant="horizontal">${imgHtml}<div style="padding: 1.25rem; display: flex; flex-direction: column; flex: 1;">${metaHtml}<h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${escapeHtml(title)}</h3>${excerpt ? `<p style="color: var(--sg-muted-text); font-size: 0.875rem; margin-bottom: 0.75rem;">${escapeHtml(excerpt)}</p>` : ""}${linkHtml}${authorHtml}</div></article>`;
+    return `${allHoverCSS ? `<style>${allHoverCSS}</style>` : ""}<article id="${cardId}" ${dataBlockIdAttr(block.id)} class="sg-blog-post-card" style="display: flex; background-color: var(--sg-surface, #ffffff); border-radius: ${cardBorderRadius}; overflow: hidden; box-shadow: ${cardShadowValue}; border: ${cardBorderStyle};" data-variant="horizontal" data-block-group="Card">${imgHtml}<div style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1;">${metaHtml}<h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${linkHref ? `<a href="${escapeHtml(linkHref)}" style="color: inherit; text-decoration: none;">${escapeHtml(title)}</a>` : escapeHtml(title)}</h3>${excerpt ? `<p style="color: var(--sg-muted-text); font-size: 0.9375rem; margin-bottom: 1rem;">${escapeHtml(excerpt)}</p>` : ""}<div style="margin-top: auto;">${ctaHtml}</div>${authorHtml}</div></article>`;
   }
 
   // ---------- variant: minimal ----------
   if (variant === "minimal") {
+    const cardId = `card-${block.id}`;
+    const ctaId = `cta-${block.id}`;
+
+    const ctaStyles = generateCTAStyles({
+      cardId,
+      ctaId,
+      ctaVariation,
+      linkColor,
+      linkHoverColor,
+      buttonVariant,
+      buttonColor,
+      buttonTextColor,
+      buttonRadius,
+      buttonSize,
+      buttonHoverEffect,
+      buttonHoverIntensity,
+      buttonHoverOverlay,
+    });
+
     const metaParts: string[] = [];
-    if (showCategory && category) metaParts.push(escapeHtml(category));
+    if (showCategory && category) {
+      metaParts.push(`<span style="font-size: 0.75rem; font-weight: 600; color: var(--sg-primary); text-transform: uppercase;">${escapeHtml(category)}</span>`);
+    }
     if (showDate && date) metaParts.push(escapeHtml(date));
     if (showReadingTime && readingTime) metaParts.push(escapeHtml(readingTime));
+
     const metaHtml = metaParts.length
-      ? `<p style="font-size: 0.75rem; color: var(--sg-muted-text); margin-bottom: 0.5rem;">${metaParts.join(" &middot; ")}</p>`
+      ? `<div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--sg-muted-text); margin-bottom: 0.5rem;">${metaParts.join(' <span>·</span> ')}</div>`
       : "";
 
-    const linkHtml = linkText
-      ? `<a href="${escapeHtml(linkHref || "#")}" style="color: var(--sg-primary); font-weight: 500; text-decoration: none; font-size: 0.875rem;">${escapeHtml(linkText)}</a>`
+    const ctaHtml = linkText && linkHref
+      ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStyles.inlineStyles}">${escapeHtml(linkText)}${ctaVariation === "link" ? " →" : ""}</a>`
       : "";
 
-    return `<article ${dataBlockIdAttr(block.id)} class="sg-blog-post-card" style="padding: 1.25rem 0; border-bottom: 1px solid var(--sg-border, #e5e7eb);" data-variant="minimal">${metaHtml}<h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem;">${escapeHtml(title)}</h3>${excerpt ? `<p style="color: var(--sg-muted-text); font-size: 0.875rem; margin-bottom: 0.5rem;">${escapeHtml(excerpt)}</p>` : ""}${linkHtml}</article>`;
+    return `${ctaStyles.hoverCSS ? `<style>${ctaStyles.hoverCSS}</style>` : ""}<article id="${cardId}" ${dataBlockIdAttr(block.id)} class="sg-blog-post-card" style="padding: 1.25rem 0; border-bottom: 1px solid var(--sg-border, #e5e7eb);" data-variant="minimal" data-block-group="Card">${metaHtml}<h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${linkHref ? `<a href="${escapeHtml(linkHref)}" style="color: inherit; text-decoration: none;">${escapeHtml(title)}</a>` : escapeHtml(title)}</h3>${excerpt ? `<p style="color: var(--sg-muted-text); font-size: 0.875rem; margin-bottom: 0.75rem;">${escapeHtml(excerpt)}</p>` : ""}${ctaHtml}</article>`;
   }
 
   // ---------- variant: default ----------
+
+  // Generate unique IDs for CSS selectors
+  const cardId = `card-${block.id}`;
+  const imageId = `img-${block.id}`;
+  const ctaId = `cta-${block.id}`;
+
+  // Resolve card shadow
+  const cardShadowValue = resolveCardShadow(cardShadow);
+  const cardBorderStyle = cardBorder ? "1px solid var(--sg-border, #e5e7eb)" : "none";
+
+  // Generate hover CSS
+  const cardHoverCSS = generateCardHoverCSS(cardId, cardHoverEffect, cardShadow);
+  const imageHoverCSS = generateImageHoverCSS(cardId, imageId, imageHoverEffect);
+  const ctaStyles = generateCTAStyles({
+    cardId,
+    ctaId,
+    ctaVariation,
+    linkColor,
+    linkHoverColor,
+    buttonVariant,
+    buttonColor,
+    buttonTextColor,
+    buttonRadius,
+    buttonSize,
+    buttonHoverEffect,
+    buttonHoverIntensity,
+    buttonHoverOverlay,
+  });
+
+  // Combine all hover CSS
+  const allHoverCSS = cardHoverCSS + imageHoverCSS + ctaStyles.hoverCSS;
+
+  // Image HTML with customization
   const imgHtml =
     showImage && image
-      ? `<div style="height: 200px; background-image: url(${escapeHtml(image)}); background-size: cover; background-position: center;"></div>`
+      ? `<div style="height: 200px; overflow: hidden; border-radius: ${imageBorderRadius} ${imageBorderRadius} 0 0;"><img id="${imageId}" src="${escapeHtml(image)}" alt="${escapeHtml(title)}" style="width: 100%; height: 100%; object-fit: cover; display: block;" /></div>`
       : "";
 
+  // Meta parts (category, date, reading time)
   const metaParts: string[] = [];
-  if (showCategory && category) metaParts.push(escapeHtml(category));
+  if (showCategory && category) {
+    metaParts.push(`<span style="font-size: 0.75rem; font-weight: 600; color: var(--sg-primary); text-transform: uppercase; letter-spacing: 0.05em;">${escapeHtml(category)}</span>`);
+  }
   if (showDate && date) metaParts.push(escapeHtml(date));
   if (showReadingTime && readingTime) metaParts.push(escapeHtml(readingTime));
+
   const metaHtml = metaParts.length
-    ? `<p style="font-size: 0.75rem; color: var(--sg-muted-text); margin-bottom: 0.5rem;">${metaParts.join(" &middot; ")}</p>`
+    ? `<div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--sg-muted-text); margin-bottom: 0.75rem; flex-wrap: wrap;">${metaParts.join(' <span style="color: var(--sg-muted-text);">·</span> ')}</div>`
     : "";
 
+  // Author HTML
   const authorHtml =
     showAuthor && authorName
-      ? `<div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">${
+      ? `<div style="display: flex; align-items: center; gap: 0.5rem; margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--sg-border, #e5e7eb);">${
           authorAvatar
             ? `<img src="${escapeHtml(authorAvatar)}" alt="${escapeHtml(authorName)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" />`
             : ""
-        }<span style="font-size: 0.8rem; color: var(--sg-muted-text);">${escapeHtml(authorName)}</span></div>`
+        }<span style="font-size: 0.875rem; color: var(--sg-muted-text);">${escapeHtml(authorName)}</span></div>`
       : "";
 
-  const linkHtml = linkText
-    ? `<a href="${escapeHtml(linkHref || "#")}" style="color: var(--sg-primary); font-weight: 500; text-decoration: none; font-size: 0.875rem;">${escapeHtml(linkText)}</a>`
+  // CTA HTML (link or button)
+  const ctaHtml = linkText && linkHref
+    ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStyles.inlineStyles}" data-block-group="Card">${escapeHtml(linkText)}${ctaVariation === "link" ? " →" : ""}</a>`
     : "";
 
-  return `<article ${dataBlockIdAttr(block.id)} class="sg-blog-post-card" style="background-color: var(--sg-bg); border-radius: var(--sg-card-radius); overflow: hidden; box-shadow: var(--sg-card-shadow);" data-variant="default">${imgHtml}<div style="padding: 1.5rem;">${metaHtml}<h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">${escapeHtml(title)}</h3>${excerpt ? `<p style="color: var(--sg-muted-text); font-size: 0.875rem; margin-bottom: 1rem;">${escapeHtml(excerpt)}</p>` : ""}${linkHtml}${authorHtml}</div></article>`;
+  // Full card HTML
+  return `${allHoverCSS ? `<style>${allHoverCSS}</style>` : ""}<article id="${cardId}" ${dataBlockIdAttr(block.id)} class="sg-blog-post-card" style="background-color: var(--sg-surface, #ffffff); border-radius: ${cardBorderRadius}; overflow: hidden; box-shadow: ${cardShadowValue}; border: ${cardBorderStyle}; display: flex; flex-direction: column;" data-variant="default" data-block-group="Card">${imgHtml}<div style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1;">${metaHtml}<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.3;">${linkHref ? `<a href="${escapeHtml(linkHref)}" style="color: inherit; text-decoration: none;">${escapeHtml(title)}</a>` : escapeHtml(title)}</h3>${excerpt ? `<p style="color: var(--sg-muted-text); font-size: 0.9375rem; line-height: 1.6; margin-bottom: 1rem; flex: 1;">${escapeHtml(excerpt)}</p>` : ""}<div style="margin-top: auto;">${ctaHtml}</div>${authorHtml}</div></article>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -248,6 +534,26 @@ export function exportBlogPostGrid(
     currentPage = 1,
     totalPages = 1,
     paginationBaseUrl = "#",
+    // Card customization
+    cardBorderRadius = "0.75rem",
+    cardShadow = "md",
+    cardHoverEffect = "lift",
+    cardBorder = true,
+    // Image effects
+    imageHoverEffect = "zoom",
+    imageBorderRadius = "0.75rem",
+    // CTA customization
+    ctaVariation = "link",
+    linkColor = "#2563eb",
+    linkHoverColor = "#1d4ed8",
+    buttonVariant = "solid",
+    buttonColor = "#2563eb",
+    buttonTextColor = "#ffffff",
+    buttonRadius = 8,
+    buttonSize = "md",
+    buttonHoverEffect = "darken",
+    buttonHoverIntensity = 20,
+    buttonHoverOverlay = "none",
   } = (block as any).props;
 
   const isMagazine = variant === "magazine";
@@ -295,7 +601,28 @@ export function exportBlogPostGrid(
           {
             id: `${block.id}-card-${isMagazine ? i + 1 : i}`,
             type: "blogPostCard",
-            props: { ...c, variant: resolveCardVariant(i) },
+            props: {
+              ...c,
+              variant: resolveCardVariant(i),
+              // Pass customization props from grid to card
+              cardBorderRadius,
+              cardShadow,
+              cardHoverEffect,
+              cardBorder,
+              imageHoverEffect,
+              imageBorderRadius,
+              ctaVariation,
+              linkColor,
+              linkHoverColor,
+              buttonVariant,
+              buttonColor,
+              buttonTextColor,
+              buttonRadius,
+              buttonSize,
+              buttonHoverEffect,
+              buttonHoverIntensity,
+              buttonHoverOverlay,
+            },
           } as Block,
           depth + 1,
           basePath,

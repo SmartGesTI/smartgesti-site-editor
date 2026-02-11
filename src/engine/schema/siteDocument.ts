@@ -1088,13 +1088,23 @@ export interface BlogPostGridBlock extends BlockBase {
     cardShadow?: "none" | "sm" | "md" | "lg" | "xl";
     cardHoverEffect?: "none" | "lift" | "scale" | "glow";
     cardBorder?: boolean;
-    /** Link "Ler mais" styling */
-    linkStyle?: "link" | "button" | "button-outline";
-    linkColor?: string;
-    linkHoverColor?: string;
     /** Image effects */
     imageHoverEffect?: "none" | "zoom" | "brightness";
     imageBorderRadius?: string;
+    /** CTA "Ler mais" - padrão do sistema (Hero) */
+    ctaVariation?: "link" | "button";
+    /** Link (quando ctaVariation === "link") */
+    linkColor?: string;
+    linkHoverColor?: string;
+    /** Button (quando ctaVariation === "button") - padrão Hero */
+    buttonVariant?: "solid" | "outline" | "ghost";
+    buttonColor?: string;
+    buttonTextColor?: string;
+    buttonRadius?: number;
+    buttonSize?: "sm" | "md" | "lg";
+    buttonHoverEffect?: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse";
+    buttonHoverIntensity?: number;
+    buttonHoverOverlay?: "none" | "shine" | "fill" | "bounce" | "border-glow";
   };
 }
 

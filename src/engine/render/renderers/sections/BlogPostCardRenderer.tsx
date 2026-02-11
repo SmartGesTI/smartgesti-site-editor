@@ -1,15 +1,13 @@
 /**
  * BlogPostCard Renderer
- * Renderiza card individual de post de blog com efeitos customizáveis
+ * Renderiza card individual de post de blog
  * Variantes: default (vertical), horizontal (imagem esquerda), minimal (sem imagem)
  *
- * Usa utilitários globais reutilizáveis de card/image/button effects
+ * NOTA: Este renderer não é usado no preview do editor (que usa exportPageToHtml).
+ * Mantido para compatibilidade ou uso futuro.
  */
 
 import React from "react";
-import { resolveCardShadow, generateCardHoverStyles } from "../../../shared/cardEffects";
-import { generateImageHoverStyles } from "../../../shared/imageEffects";
-import { getLinkButtonStyles, generateLinkButtonHoverCSS } from "../../../shared/buttonStyles";
 
 export function renderBlogPostCard(block: any): React.ReactNode {
   const {
@@ -29,45 +27,13 @@ export function renderBlogPostCard(block: any): React.ReactNode {
     showDate = true,
     showAuthor = true,
     showReadingTime = true,
-    // Card customization (reutilizável em qualquer card component)
-    cardBorderRadius = "0.75rem",
-    cardShadow = "md",
-    cardHoverEffect = "lift",
-    cardBorder = true,
-    // Link customization (reutilizável em CTAs)
-    linkStyle = "link",
-    linkColor = "#2563eb",
-    linkHoverColor = "#1d4ed8",
-    // Image customization (reutilizável em galerias, hero, etc)
-    imageHoverEffect = "zoom",
-    imageBorderRadius = "0.75rem",
   } = block.props;
 
   const isHorizontal = variant === "horizontal";
   const isMinimal = variant === "minimal";
   const shouldShowImage = showImage && !isMinimal && image;
 
-  // Generate styles using global utilities
-  const shadow = resolveCardShadow(cardShadow);
-  const cardHover = generateCardHoverStyles(cardHoverEffect, cardShadow === "none" ? "md" : cardShadow);
-  const imageHover = generateImageHoverStyles(imageHoverEffect);
-  const linkBtnStyles = getLinkButtonStyles(linkStyle, { color: linkColor, hoverColor: linkHoverColor });
-
-  // Unique IDs for CSS selectors
-  const cardId = `card-${block.id}`;
-  const linkId = `link-${block.id}`;
-  const imageId = `img-${block.id}`;
-
-  // CSS for hover effects
-  const hoverCSS = `
-    ${cardHover.base ? `#${cardId} { ${cardHover.base} }` : ""}
-    ${cardHover.hover ? `#${cardId}:hover { ${cardHover.hover} }` : ""}
-    ${imageHover.imageBase ? `#${imageId} { ${imageHover.imageBase} }` : ""}
-    ${imageHover.imageHover ? `#${cardId}:hover #${imageId} { ${imageHover.imageHover} }` : ""}
-    ${generateLinkButtonHoverCSS(`#${linkId}`, linkStyle, { color: linkColor, hoverColor: linkHoverColor })}
-  `;
-
-  // Image element with hover effects
+  // Image element
   const imageElement = shouldShowImage ? (
     <div
       style={{
@@ -76,13 +42,10 @@ export function renderBlogPostCard(block: any): React.ReactNode {
         minHeight: isHorizontal ? "200px" : undefined,
         flexShrink: 0,
         overflow: "hidden",
-        borderRadius: isHorizontal
-          ? `${imageBorderRadius} 0 0 ${imageBorderRadius}`
-          : `${imageBorderRadius} ${imageBorderRadius} 0 0`,
+        borderRadius: isHorizontal ? "0.75rem 0 0 0.75rem" : "0.75rem 0.75rem 0 0",
       }}
     >
       <img
-        id={imageId}
         src={image}
         alt={title}
         style={{
@@ -224,42 +187,41 @@ export function renderBlogPostCard(block: any): React.ReactNode {
         )}
       </div>
 
-      {/* Read more link/button with customizable style */}
+      {/* Read more link */}
       {linkHref && linkText && (
         <a
-          id={linkId}
           href={linkHref}
           style={{
-            ...linkBtnStyles,
+            color: "var(--sg-primary)",
+            fontWeight: 600,
+            textDecoration: "none",
+            fontSize: "0.875rem",
             marginTop: "1rem",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.25rem",
           }}
         >
-          {linkText} {linkStyle === "link" ? "\u2192" : ""}
+          {linkText} →
         </a>
       )}
     </div>
   );
 
   return (
-    <React.Fragment key={block.id}>
-      {/* Hover effects CSS */}
-      {hoverCSS && <style>{hoverCSS}</style>}
-
-      {/* Card wrapper with customizable shadow, border, hover */}
-      <article
-        id={cardId}
-        style={{
-          backgroundColor: "var(--sg-surface)",
-          borderRadius: cardBorderRadius,
-          boxShadow: shadow,
-          border: cardBorder ? "1px solid var(--sg-border, #e5e7eb)" : "none",
-          overflow: "hidden",
-          display: isHorizontal ? "flex" : "block",
-        }}
-      >
-        {imageElement}
-        {contentElement}
-      </article>
-    </React.Fragment>
+    <article
+      key={block.id}
+      style={{
+        backgroundColor: "var(--sg-surface)",
+        borderRadius: "0.75rem",
+        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        border: "1px solid var(--sg-border, #e5e7eb)",
+        overflow: "hidden",
+        display: isHorizontal ? "flex" : "block",
+      }}
+    >
+      {imageElement}
+      {contentElement}
+    </article>
   );
 }
