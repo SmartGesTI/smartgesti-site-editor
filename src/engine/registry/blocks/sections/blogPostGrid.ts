@@ -56,6 +56,8 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
     cardShadow: "md",
     cardHoverEffect: "lift",
     cardBorder: true,
+    cardBorderColor: "#e5e7eb",
+    cardBorderWidth: 1,
     // Image effects
     imageHoverEffect: "zoom",
     imageBorderRadius: "0.75rem",
@@ -64,6 +66,7 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
     // Link (quando ctaVariation === "link")
     linkColor: "#2563eb",
     linkHoverColor: "#1d4ed8",
+    linkHoverEffect: "underline",
     // Button (quando ctaVariation === "button")
     buttonVariant: "solid", // solid | outline | ghost
     buttonColor: "#2563eb",
@@ -155,6 +158,21 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
       inputType: "checkbox",
       group: "Cards",
     },
+    cardBorderColor: {
+      label: "Cor da Borda",
+      inputType: "color-advanced",
+      group: "Cards",
+      showWhen: { field: "cardBorder", equals: true },
+    },
+    cardBorderWidth: {
+      label: "Espessura da Borda",
+      inputType: "slider",
+      min: 1,
+      max: 4,
+      step: 1,
+      group: "Cards",
+      showWhen: { field: "cardBorder", equals: true },
+    },
 
     // --- Imagem (dentro do grupo Cards) ---
     imageHoverEffect: {
@@ -200,6 +218,18 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
     linkHoverColor: {
       label: "Cor (Hover)",
       inputType: "color-advanced",
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "link" },
+    },
+    linkHoverEffect: {
+      label: "Efeito Hover",
+      inputType: "select",
+      options: [
+        { label: "Sublinhado", value: "underline" },
+        { label: "Brilho", value: "brighten" },
+        { label: "Escala", value: "scale" },
+        { label: "Nenhum", value: "none" },
+      ],
       group: "Cards",
       showWhen: { field: "ctaVariation", equals: "link" },
     },

@@ -1088,6 +1088,8 @@ export interface BlogPostGridBlock extends BlockBase {
     cardShadow?: "none" | "sm" | "md" | "lg" | "xl";
     cardHoverEffect?: "none" | "lift" | "scale" | "glow";
     cardBorder?: boolean;
+    cardBorderColor?: string;
+    cardBorderWidth?: number;
     /** Image effects */
     imageHoverEffect?: "none" | "zoom" | "brightness";
     imageBorderRadius?: string;
@@ -1096,6 +1098,7 @@ export interface BlogPostGridBlock extends BlockBase {
     /** Link (quando ctaVariation === "link") */
     linkColor?: string;
     linkHoverColor?: string;
+    linkHoverEffect?: "underline" | "brighten" | "scale" | "none";
     /** Button (quando ctaVariation === "button") - padrão Hero */
     buttonVariant?: "solid" | "outline" | "ghost";
     buttonColor?: string;

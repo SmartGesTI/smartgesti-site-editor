@@ -105,6 +105,7 @@ function generateCTAStyles(config: {
   ctaVariation: string;
   linkColor: string;
   linkHoverColor: string;
+  linkHoverEffect: string;
   buttonVariant: string;
   buttonColor: string;
   buttonTextColor: string;
@@ -120,6 +121,7 @@ function generateCTAStyles(config: {
     ctaVariation,
     linkColor,
     linkHoverColor,
+    linkHoverEffect,
     buttonVariant,
     buttonColor,
     buttonTextColor,
@@ -131,8 +133,21 @@ function generateCTAStyles(config: {
 
   // Link variation
   if (ctaVariation === "link") {
-    const inlineStyles = `color: ${linkColor}; font-weight: 600; text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; transition: color 0.2s ease;`;
-    const hoverCSS = `#${ctaId}:hover { color: ${linkHoverColor}; }`;
+    const inlineStyles = `color: ${linkColor}; font-weight: 600; text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; transition: all 0.2s ease; position: relative;`;
+
+    // Generate link hover styles using shared utility
+    const linkHoverResult = generateLinkHoverStyles({
+      effect: linkHoverEffect as any,
+      intensity: 50,
+      hoverColor: linkHoverColor,
+    });
+
+    let hoverCSS = "";
+    if (linkHoverResult.base) {
+      hoverCSS += `#${ctaId} { ${linkHoverResult.base} }\n`;
+    }
+    hoverCSS += `#${ctaId}:hover { ${linkHoverResult.hover} }`;
+
     return { inlineStyles, hoverCSS };
   }
 
@@ -224,6 +239,8 @@ export function exportBlogPostCard(
     cardShadow = "md",
     cardHoverEffect = "lift",
     cardBorder = true,
+    cardBorderColor = "#e5e7eb",
+    cardBorderWidth = 1,
     // Image effects
     imageHoverEffect = "zoom",
     imageBorderRadius = "0.75rem",
@@ -231,6 +248,7 @@ export function exportBlogPostCard(
     ctaVariation = "link",
     linkColor = "#2563eb",
     linkHoverColor = "#1d4ed8",
+    linkHoverEffect = "underline",
     buttonVariant = "solid",
     buttonColor = "#2563eb",
     buttonTextColor = "#ffffff",
@@ -248,7 +266,7 @@ export function exportBlogPostCard(
     const ctaId = `cta-${block.id}`;
 
     const cardShadowValue = resolveCardShadow(cardShadow);
-    const cardBorderStyle = cardBorder ? "1px solid var(--sg-border, #e5e7eb)" : "none";
+    const cardBorderStyle = cardBorder ? `${cardBorderWidth}px solid ${cardBorderColor}` : "none";
 
     const cardHoverCSS = generateCardHoverCSS(cardId, cardHoverEffect, cardShadow);
     const imageHoverCSS = generateImageHoverCSS(cardId, imageId, imageHoverEffect);
@@ -361,6 +379,7 @@ export function exportBlogPostCard(
     ctaVariation,
     linkColor,
     linkHoverColor,
+    linkHoverEffect,
     buttonVariant,
     buttonColor,
     buttonTextColor,
@@ -407,8 +426,8 @@ export function exportBlogPostCard(
     ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStyles.inlineStyles}" data-block-group="Card">${escapeHtml(linkText)}${ctaVariation === "link" ? " →" : ""}</a>`
     : "";
 
-  // Full card HTML
-  return `${allHoverCSS ? `<style>${allHoverCSS}</style>` : ""}<article id="${cardId}" ${dataBlockIdAttr(block.id)} class="sg-blog-post-card" style="background-color: var(--sg-surface, #ffffff); border-radius: ${cardBorderRadius}; overflow: hidden; box-shadow: ${cardShadowValue}; border: ${cardBorderStyle}; display: flex; flex-direction: column;" data-variant="default" data-block-group="Card">${imgHtml}<div style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1;">${metaHtml}<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.3;">${linkHref ? `<a href="${escapeHtml(linkHref)}" style="color: inherit; text-decoration: none;">${escapeHtml(title)}</a>` : escapeHtml(title)}</h3>${excerpt ? `<p style="color: var(--sg-muted-text); font-size: 0.9375rem; line-height: 1.6; margin-bottom: 1rem; flex: 1;">${escapeHtml(excerpt)}</p>` : ""}<div style="margin-top: auto;">${ctaHtml}</div>${authorHtml}</div></article>`;
+  // Full card HTML (sem dataBlockIdAttr para que o clique selecione o parent blogPostGrid)
+  return `${allHoverCSS ? `<style>${allHoverCSS}</style>` : ""}<article id="${cardId}" class="sg-blog-post-card" style="background-color: var(--sg-surface, #ffffff); border-radius: ${cardBorderRadius}; overflow: hidden; box-shadow: ${cardShadowValue}; border: ${cardBorderStyle}; display: flex; flex-direction: column;" data-variant="default" data-block-group="Card">${imgHtml}<div style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1;">${metaHtml}<h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.3;">${linkHref ? `<a href="${escapeHtml(linkHref)}" style="color: inherit; text-decoration: none;">${escapeHtml(title)}</a>` : escapeHtml(title)}</h3>${excerpt ? `<p style="color: var(--sg-muted-text); font-size: 0.9375rem; line-height: 1.6; margin-bottom: 1rem; flex: 1;">${escapeHtml(excerpt)}</p>` : ""}<div style="margin-top: auto;">${ctaHtml}</div>${authorHtml}</div></article>`;
 }
 
 // ---------------------------------------------------------------------------
@@ -539,6 +558,8 @@ export function exportBlogPostGrid(
     cardShadow = "md",
     cardHoverEffect = "lift",
     cardBorder = true,
+    cardBorderColor = "#e5e7eb",
+    cardBorderWidth = 1,
     // Image effects
     imageHoverEffect = "zoom",
     imageBorderRadius = "0.75rem",
@@ -546,6 +567,7 @@ export function exportBlogPostGrid(
     ctaVariation = "link",
     linkColor = "#2563eb",
     linkHoverColor = "#1d4ed8",
+    linkHoverEffect = "underline",
     buttonVariant = "solid",
     buttonColor = "#2563eb",
     buttonTextColor = "#ffffff",
@@ -609,11 +631,14 @@ export function exportBlogPostGrid(
               cardShadow,
               cardHoverEffect,
               cardBorder,
+              cardBorderColor,
+              cardBorderWidth,
               imageHoverEffect,
               imageBorderRadius,
               ctaVariation,
               linkColor,
               linkHoverColor,
+              linkHoverEffect,
               buttonVariant,
               buttonColor,
               buttonTextColor,
