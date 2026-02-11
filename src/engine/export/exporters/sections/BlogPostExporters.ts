@@ -21,6 +21,7 @@ import {
   type ButtonHoverEffect,
   type ButtonHoverOverlay,
 } from "../../../shared/hoverEffects";
+import { renderInlineSvgIcon } from "../../../shared/iconUtils";
 
 // ---------------------------------------------------------------------------
 // Helper Functions for Card Customization
@@ -110,6 +111,8 @@ function generateCTAStyles(config: {
   linkHoverColor: string;
   linkHoverEffect: string;
   linkHoverIntensity: number;
+  linkIconName: string;
+  linkIconPosition: string;
   buttonVariant: string;
   buttonColor: string;
   buttonTextColor: string;
@@ -119,7 +122,7 @@ function generateCTAStyles(config: {
   buttonHoverIntensity: number;
   buttonHoverOverlay: string;
   buttonHoverIconName: string;
-}): { inlineStyles: string; hoverCSS: string } {
+}): { inlineStyles: string; hoverCSS: string; iconHtml: string } {
   const {
     cardId,
     ctaId,
@@ -128,6 +131,8 @@ function generateCTAStyles(config: {
     linkHoverColor,
     linkHoverEffect,
     linkHoverIntensity,
+    linkIconName,
+    linkIconPosition,
     buttonVariant,
     buttonColor,
     buttonTextColor,
@@ -156,7 +161,10 @@ function generateCTAStyles(config: {
     }
     hoverCSS += `#${ctaId}:hover { ${linkHoverResult.hover} }`;
 
-    return { inlineStyles, hoverCSS };
+    // Gerar HTML do ícone (se definido)
+    const iconHtml = linkIconName ? renderInlineSvgIcon(linkIconName, "0.9em") : "";
+
+    return { inlineStyles, hoverCSS, iconHtml };
   }
 
   // Button variation
@@ -227,7 +235,7 @@ function generateCTAStyles(config: {
     });
   }
 
-  return { inlineStyles, hoverCSS };
+  return { inlineStyles, hoverCSS, iconHtml: "" }; // Buttons não usam iconHtml inline
 }
 
 // ---------------------------------------------------------------------------
@@ -273,6 +281,8 @@ export function exportBlogPostCard(
     linkHoverColor = "#1d4ed8",
     linkHoverEffect = "underline",
     linkHoverIntensity = 50,
+    linkIconName = "",
+    linkIconPosition = "right",
     buttonVariant = "solid",
     buttonColor = "#2563eb",
     buttonTextColor = "#ffffff",
@@ -406,6 +416,8 @@ export function exportBlogPostCard(
     linkHoverColor,
     linkHoverEffect,
     linkHoverIntensity,
+    linkIconName,
+    linkIconPosition,
     buttonVariant,
     buttonColor,
     buttonTextColor,
@@ -449,8 +461,20 @@ export function exportBlogPostCard(
       : "";
 
   // CTA HTML (link or button)
+  let ctaContent = "";
+  if (ctaVariation === "link") {
+    // Link com ícone opcional
+    const iconLeft = ctaStyles.iconHtml && linkIconPosition === "left" ? ctaStyles.iconHtml + " " : "";
+    const iconRight = ctaStyles.iconHtml && linkIconPosition === "right" ? " " + ctaStyles.iconHtml : "";
+    const defaultArrow = !ctaStyles.iconHtml ? " →" : ""; // Seta padrão apenas se não tiver ícone customizado
+    ctaContent = iconLeft + escapeHtml(linkText) + iconRight + defaultArrow;
+  } else {
+    // Button sem ícone inline (ícone vem do overlay effect)
+    ctaContent = escapeHtml(linkText);
+  }
+
   const ctaHtml = linkText && linkHref
-    ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStyles.inlineStyles}">${escapeHtml(linkText)}${ctaVariation === "link" ? " →" : ""}</a>`
+    ? `<a id="${ctaId}" href="${escapeHtml(linkHref)}" style="${ctaStyles.inlineStyles}">${ctaContent}</a>`
     : "";
 
   // Full card HTML (sem dataBlockIdAttr para que o clique selecione o parent blogPostGrid)
@@ -596,6 +620,8 @@ export function exportBlogPostGrid(
     linkHoverColor = "#1d4ed8",
     linkHoverEffect = "underline",
     linkHoverIntensity = 50,
+    linkIconName = "",
+    linkIconPosition = "right",
     buttonVariant = "solid",
     buttonColor = "#2563eb",
     buttonTextColor = "#ffffff",
@@ -669,6 +695,8 @@ export function exportBlogPostGrid(
               linkHoverColor,
               linkHoverEffect,
               linkHoverIntensity,
+              linkIconName,
+              linkIconPosition,
               buttonVariant,
               buttonColor,
               buttonTextColor,

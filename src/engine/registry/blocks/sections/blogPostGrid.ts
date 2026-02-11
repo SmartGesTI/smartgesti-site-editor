@@ -68,6 +68,8 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
     linkHoverColor: "#1d4ed8",
     linkHoverEffect: "underline",
     linkHoverIntensity: 50,
+    linkIconName: "", // Vazio = sem ícone (padrão)
+    linkIconPosition: "right",
     // Button (quando ctaVariation === "button")
     buttonVariant: "solid", // solid | outline | ghost
     buttonColor: "#2563eb",
@@ -244,6 +246,23 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
       min: 10,
       max: 100,
       step: 10,
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "link" },
+    },
+    linkIconName: {
+      label: "Ícone",
+      inputType: "icon-grid",
+      group: "Cards",
+      showWhen: { field: "ctaVariation", equals: "link" },
+      description: "Opcional - deixe vazio para não exibir ícone",
+    },
+    linkIconPosition: {
+      label: "Posição do Ícone",
+      inputType: "select",
+      options: [
+        { label: "Direita", value: "right" },
+        { label: "Esquerda", value: "left" },
+      ],
       group: "Cards",
       showWhen: { field: "ctaVariation", equals: "link" },
     },
