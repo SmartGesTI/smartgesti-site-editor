@@ -51,6 +51,18 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
     showViewAll: false,
     viewAllText: "Ver todos",
     viewAllHref: "/site/p/blog",
+    // Card styling
+    cardBorderRadius: "0.75rem",
+    cardShadow: "md",
+    cardHoverEffect: "lift",
+    cardBorder: true,
+    // Link/Button "Ler mais"
+    linkStyle: "link",
+    linkColor: "#2563eb",
+    linkHoverColor: "#1d4ed8",
+    // Image effects
+    imageHoverEffect: "zoom",
+    imageBorderRadius: "0.75rem",
   },
   inspectorMeta: {
     title: { label: "Título", inputType: "text", group: "Cabeçalho" },
@@ -88,6 +100,90 @@ export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
       inputType: "text",
       group: "Rodapé",
       showWhen: { field: "showViewAll", equals: true },
+    },
+    // Card styling
+    cardBorderRadius: {
+      label: "Arredondamento",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "0" },
+        { label: "Pequeno", value: "0.5rem" },
+        { label: "Médio", value: "0.75rem" },
+        { label: "Grande", value: "1rem" },
+        { label: "Extra Grande", value: "1.5rem" },
+      ],
+      group: "Cards",
+    },
+    cardShadow: {
+      label: "Sombra",
+      inputType: "select",
+      options: [
+        { label: "Nenhuma", value: "none" },
+        { label: "Suave", value: "sm" },
+        { label: "Média", value: "md" },
+        { label: "Grande", value: "lg" },
+        { label: "Extra Grande", value: "xl" },
+      ],
+      group: "Cards",
+    },
+    cardHoverEffect: {
+      label: "Efeito Hover",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "none" },
+        { label: "Elevar", value: "lift" },
+        { label: "Escala", value: "scale" },
+        { label: "Brilho", value: "glow" },
+      ],
+      group: "Cards",
+    },
+    cardBorder: {
+      label: "Borda",
+      inputType: "checkbox",
+      group: "Cards",
+    },
+    // Link/Button "Ler mais"
+    linkStyle: {
+      label: "Estilo do Link",
+      inputType: "select",
+      options: [
+        { label: "Link Simples", value: "link" },
+        { label: "Botão Preenchido", value: "button" },
+        { label: "Botão Outline", value: "button-outline" },
+      ],
+      group: "Link 'Ler mais'",
+    },
+    linkColor: {
+      label: "Cor",
+      inputType: "color-advanced",
+      group: "Link 'Ler mais'",
+    },
+    linkHoverColor: {
+      label: "Cor (Hover)",
+      inputType: "color-advanced",
+      group: "Link 'Ler mais'",
+    },
+    // Image effects
+    imageHoverEffect: {
+      label: "Efeito Hover",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "none" },
+        { label: "Zoom", value: "zoom" },
+        { label: "Brilho", value: "brightness" },
+      ],
+      group: "Imagem",
+    },
+    imageBorderRadius: {
+      label: "Arredondamento",
+      inputType: "select",
+      options: [
+        { label: "Nenhum", value: "0" },
+        { label: "Pequeno", value: "0.5rem" },
+        { label: "Médio", value: "0.75rem" },
+        { label: "Grande", value: "1rem" },
+      ],
+      group: "Imagem",
     },
   },
 };

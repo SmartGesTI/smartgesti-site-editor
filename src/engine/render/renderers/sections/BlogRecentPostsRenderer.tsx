@@ -21,6 +21,7 @@ export function renderBlogRecentPosts(block: any): React.ReactNode {
   const {
     title = "Posts Recentes",
     posts = [],
+    count = 5,
     showThumbnail = true,
     showDate = true,
     showCategory = false,
@@ -31,6 +32,9 @@ export function renderBlogRecentPosts(block: any): React.ReactNode {
     linkHoverEffect: linkHoverEffectProp,
     linkHoverIntensity: linkHoverIntensityProp,
   } = block.props;
+
+  // Limitar posts pela quantidade configurada
+  const limitedPosts = posts.slice(0, count);
 
   const linkColor = linkColorProp || "";
   const linkHoverColor = linkHoverColorProp || "";
@@ -97,7 +101,7 @@ export function renderBlogRecentPosts(block: any): React.ReactNode {
         )}
 
         <div style={{ padding: "0.5rem 0" }}>
-          {posts.length === 0 ? (
+          {limitedPosts.length === 0 ? (
             <p
               style={{
                 padding: "1.5rem 1.25rem",
@@ -110,7 +114,7 @@ export function renderBlogRecentPosts(block: any): React.ReactNode {
               Nenhum post recente
             </p>
           ) : (
-            posts.map((post: RecentPost, index: number) => (
+            limitedPosts.map((post: RecentPost, index: number) => (
               <a
                 key={index}
                 href={`/site/p/blog/${post.slug}`}

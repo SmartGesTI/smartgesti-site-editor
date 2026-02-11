@@ -27,7 +27,7 @@ const SAMPLE_BLOG_CARDS = [
     excerpt:
       "Nossos alunos apresentaram projetos incríveis na Feira de Ciências deste ano. Confira os destaques e premiações!",
     image:
-      "https://images.unsplash.com/photo-1567168544230-3b9e5ec47659?w=800&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&h=400&fit=crop",
     category: "Eventos",
     date: "05 Fev 2026",
     linkHref: "/site/p/blog/feira-de-ciencias-2026",
@@ -38,7 +38,7 @@ const SAMPLE_BLOG_CARDS = [
     excerpt:
       "Garanta a vaga do seu filho na melhor escola da região. Condições especiais para matrículas antecipadas.",
     image:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&h=400&fit=crop",
     category: "Institucional",
     date: "01 Fev 2026",
     linkHref: "/site/p/blog/matriculas-segundo-semestre",
@@ -463,7 +463,7 @@ export const blogPlugin: PluginRegistration = {
                       showThumbnail: true,
                       showDate: true,
                       showCategory: false,
-                      posts: SAMPLE_BLOG_CARDS.slice(0, 5).map((c) => ({
+                      posts: SAMPLE_BLOG_CARDS.map((c) => ({
                         title: c.title,
                         slug: c.linkHref.replace("/site/p/blog/", ""),
                         date: c.date,
@@ -529,10 +529,7 @@ export const blogPlugin: PluginRegistration = {
       const postPageStructure: Block[] = [];
 
       if (homeNavbar) {
-        const navClone = cloneBlock(homeNavbar, "post-page-navbar");
-        // Garantir navbar fixa no topo (position:fixed) mesmo se home não tem
-        (navClone.props as Record<string, any>).sticky = true;
-        postPageStructure.push(navClone);
+        postPageStructure.push(cloneBlock(homeNavbar, "post-page-navbar"));
       }
 
       // Grid layout: conteúdo principal + sidebar (com container e espaçamento)
@@ -547,7 +544,7 @@ export const blogPlugin: PluginRegistration = {
           gap: "2.5rem",
           maxWidth: "1200px",
           padding: "2rem",
-          paddingTop: "6rem",
+          paddingTop: "7rem",
           paddingBottom: "6rem",
           bg: "var(--sg-bg)",
           children: [
@@ -559,7 +556,7 @@ export const blogPlugin: PluginRegistration = {
                 title: "Feira de Ciências 2026: Inovação e Criatividade",
                 content: SAMPLE_POST_CONTENT,
                 featuredImage:
-                  "https://images.unsplash.com/photo-1567168544230-3b9e5ec47659?w=1200&h=600&fit=crop",
+                  "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=1200&h=600&fit=crop",
                 date: "05 Fev 2026",
                 category: "Eventos",
                 authorVariant: "inline",
@@ -582,7 +579,6 @@ export const blogPlugin: PluginRegistration = {
                 gap: "1.5rem",
                 sticky: true,
                 stickyOffset: "100px",
-                paddingBottom: "6rem",
                 children: [
                   {
                     id: "blog-sidebar-search",

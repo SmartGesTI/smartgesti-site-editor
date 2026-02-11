@@ -29,7 +29,6 @@ export const blogTagCloudBlock: BlockDefinition = {
       ],
       group: "Exibição",
     },
-    tags: { label: "Tags", inputType: "text", readOnly: true, group: "Dados" },
     linkColor: {
       label: "Cor do Texto",
       inputType: "color-advanced",

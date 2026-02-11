@@ -589,6 +589,7 @@ export function exportBlogRecentPosts(
   const {
     title = "Posts Recentes",
     posts = [],
+    count = 5,
     showThumbnail = true,
     showDate = true,
     showCategory = false,
@@ -596,6 +597,9 @@ export function exportBlogRecentPosts(
     shadow = "none",
     linkColor: linkColorProp,
   } = (block as any).props;
+
+  // Limitar posts pela quantidade configurada
+  const limitedPosts = posts.slice(0, count);
 
   const linkColor = linkColorProp || "var(--sg-text)";
   const widgetId = `widget-recent-${block.id || ""}`;
@@ -631,10 +635,10 @@ export function exportBlogRecentPosts(
     : "";
 
   let contentHtml = "";
-  if (posts.length === 0) {
+  if (limitedPosts.length === 0) {
     contentHtml = `<p style="padding:1.5rem 1.25rem;color:var(--sg-muted-text);font-size:0.875rem;text-align:center;margin:0;">Nenhum post recente</p>`;
   } else {
-    contentHtml = posts
+    contentHtml = limitedPosts
       .map((post: any) => {
         const imgHtml =
           showThumbnail && post.image

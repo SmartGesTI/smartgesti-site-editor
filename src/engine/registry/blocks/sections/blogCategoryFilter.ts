@@ -31,7 +31,6 @@ export const blogCategoryFilterBlock: BlockDefinition<"blogCategoryFilter"> = {
   },
   inspectorMeta: {
     title: { label: "Título", inputType: "text", group: "Conteúdo" },
-    categories: { label: "Categorias", inputType: "text", group: "Conteúdo", readOnly: true },
     variant: {
       label: "Variante",
       inputType: "select",

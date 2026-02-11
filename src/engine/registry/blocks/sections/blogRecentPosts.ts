@@ -23,11 +23,20 @@ export const blogRecentPostsBlock: BlockDefinition = {
   },
   inspectorMeta: {
     title: { label: "Título", inputType: "text", group: "Conteúdo" },
-    count: { label: "Quantidade", inputType: "number", min: 1, max: 10, group: "Conteúdo" },
+    count: {
+      label: "Quantidade",
+      inputType: "select",
+      options: [
+        { label: "5 posts", value: 5 },
+        { label: "10 posts", value: 10 },
+        { label: "15 posts", value: 15 },
+        { label: "20 posts", value: 20 },
+      ],
+      group: "Conteúdo",
+    },
     showThumbnail: { label: "Mostrar Miniatura", inputType: "checkbox", group: "Exibição" },
     showDate: { label: "Mostrar Data", inputType: "checkbox", group: "Exibição" },
     showCategory: { label: "Mostrar Categoria", inputType: "checkbox", group: "Exibição" },
-    posts: { label: "Posts", inputType: "text", readOnly: true, group: "Dados" },
     linkColor: {
       label: "Cor do Texto",
       inputType: "color-advanced",

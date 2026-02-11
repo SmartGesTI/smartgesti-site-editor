@@ -1083,6 +1083,18 @@ export interface BlogPostGridBlock extends BlockBase {
     currentPage?: number;
     totalPages?: number;
     paginationBaseUrl?: string;
+    /** Card styling */
+    cardBorderRadius?: string;
+    cardShadow?: "none" | "sm" | "md" | "lg" | "xl";
+    cardHoverEffect?: "none" | "lift" | "scale" | "glow";
+    cardBorder?: boolean;
+    /** Link "Ler mais" styling */
+    linkStyle?: "link" | "button" | "button-outline";
+    linkColor?: string;
+    linkHoverColor?: string;
+    /** Image effects */
+    imageHoverEffect?: "none" | "zoom" | "brightness";
+    imageBorderRadius?: string;
   };
 }
 
