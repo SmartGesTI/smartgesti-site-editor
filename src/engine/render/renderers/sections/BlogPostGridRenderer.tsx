@@ -174,6 +174,18 @@ export function renderBlogPostGrid(block: any): React.ReactNode {
     currentPage = 1,
     totalPages = 1,
     paginationBaseUrl = "#",
+    // Card customization
+    cardBorderRadius = "0.75rem",
+    cardShadow = "md",
+    cardHoverEffect = "lift",
+    cardBorder = true,
+    // Link customization
+    linkStyle = "link",
+    linkColor = "#2563eb",
+    linkHoverColor = "#1d4ed8",
+    // Image customization
+    imageHoverEffect = "zoom",
+    imageBorderRadius = "0.75rem",
   } = block.props;
 
   const isMagazine = variant === "magazine";
@@ -262,6 +274,16 @@ export function renderBlogPostGrid(block: any): React.ReactNode {
                       : variant === "minimal"
                         ? "minimal"
                         : "default",
+                  // Pass customization props
+                  cardBorderRadius,
+                  cardShadow,
+                  cardHoverEffect,
+                  cardBorder,
+                  linkStyle,
+                  linkColor,
+                  linkHoverColor,
+                  imageHoverEffect,
+                  imageBorderRadius,
                 },
               }),
             )}

@@ -14,6 +14,9 @@ import {
 } from "../../shared/responsiveGridHelper";
 import { resolveWidgetShadow } from "../../../shared/widgetStyles";
 import { generateLinkHoverStyles } from "../../../shared/hoverEffects";
+import { resolveCardShadow, generateCardHoverStyles } from "../../../shared/cardEffects";
+import { generateImageHoverStyles } from "../../../shared/imageEffects";
+import { getLinkButtonStyles, generateLinkButtonHoverCSS } from "../../../shared/buttonStyles";
 
 // ---------------------------------------------------------------------------
 // BlogPostCard
