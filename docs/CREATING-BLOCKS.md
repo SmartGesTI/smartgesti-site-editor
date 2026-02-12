@@ -1,74 +1,200 @@
-# Guia: Criando Blocos e Propriedades
+# Guia Completo: Criando Blocos e Propriedades
 
-Guia prático para criar novos blocos ou adicionar propriedades a blocos existentes no SmartGesti Site Editor.
+> **Guia definitivo** para criar novos blocos ou adicionar propriedades a blocos existentes no SmartGesti Site Editor.
+> Inclui fluxos completos, exemplos práticos, integração com paleta de cores e troubleshooting.
 
-## Visão Geral da Arquitetura
+---
 
-Cada bloco no editor tem **4 partes** que devem existir:
+## Índice
+
+1. [Arquitetura e Fluxo Completo](#1-arquitetura-e-fluxo-completo)
+2. [Dual Rendering System](#2-dual-rendering-system)
+3. [Exemplo Passo-a-Passo: Criando um Bloco Alert](#3-exemplo-passo-a-passo-criando-um-bloco-alert)
+4. [Integração com Paleta de Cores](#4-integração-com-paleta-de-cores)
+5. [Adicionando Propriedades a Blocos Existentes](#5-adicionando-propriedades-a-blocos-existentes)
+6. [Sistema de Variações](#6-sistema-de-variações)
+7. [Referência de Input Types](#7-referência-de-input-types)
+8. [Visibilidade Condicional (showWhen)](#8-visibilidade-condicional-showwhen)
+9. [Padrões Importantes](#9-padrões-importantes)
+10. [Testando seu Bloco](#10-testando-seu-bloco)
+11. [Troubleshooting](#11-troubleshooting)
+12. [Checklist de Verificação](#12-checklist-de-verificação)
+
+---
+
+## 1. Arquitetura e Fluxo Completo
+
+### 1.1 Visão Geral
+
+Cada bloco no editor possui **4 componentes obrigatórios** que trabalham juntos:
 
 ```
-Schema (tipo TS) → Definition (registro + inspectorMeta) → Renderer (React) → Exporter (HTML)
+┌─────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Schema    │────▶│  Definition  │────▶│   Renderer   │────▶│   Exporter   │
+│ (TypeScript)│     │  (Registry)  │     │   (React)    │     │    (HTML)    │
+└─────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
+      ▲                     │                     │                    │
+      │                     ▼                     ▼                    ▼
+  Interface        defaultProps +         Preview no           HTML Export
+   com tipos       inspectorMeta          Editor              (Site Final)
 ```
 
-1. **Schema** — Interface TypeScript com os tipos das props
-2. **Definition** — Registro no `componentRegistry` com `defaultProps` e `inspectorMeta` (o que aparece no painel de edição)
-3. **Renderer** — Componente React para preview no editor
-4. **Exporter** — Função que gera HTML estático para publicação
+### 1.2 Fluxo de Dados
 
-## Exemplo Completo: Criando um bloco "Alert"
+```
+Usuário edita no painel → onChange atualiza props → Renderer re-renderiza preview
+                                                              ↓
+                                        Usuário clica "Exportar" → Exporter gera HTML
+```
+
+### 1.3 Onde cada peça vive
+
+| Componente | Localização | Responsabilidade |
+|-----------|-------------|------------------|
+| **Schema** | `src/engine/schema/siteDocument.ts` | Define a estrutura de dados (TypeScript) |
+| **Definition** | `src/engine/registry/blocks/{category}/{nome}.ts` | Configuração do bloco (defaultProps, inspectorMeta) |
+| **Renderer** | `src/engine/render/renderers/{category}/{Nome}Renderer.tsx` | Componente React para preview |
+| **Exporter** | `src/engine/export/exporters/{category}/{Nome}Exporter.ts` | Função que gera HTML |
+
+---
+
+## 2. Dual Rendering System
+
+**CRÍTICO:** O editor usa **dois sistemas de renderização independentes**:
+
+### 2.1 React Renderer (Preview no Editor)
+
+- **Onde:** `src/engine/render/renderers/`
+- **Quando:** Usado no preview dentro do iframe do editor
+- **Tecnologia:** Componentes React com inline styles
+- **Dados:** Props do bloco em tempo real
+
+### 2.2 HTML Exporter (Site Final)
+
+- **Onde:** `src/engine/export/exporters/`
+- **Quando:** Usado para gerar o HTML final do site
+- **Tecnologia:** String de HTML com CSS inline
+- **Dados:** Props do bloco congeladas no momento do export
+
+### 2.3 Por que ambos devem estar sincronizados?
+
+**O preview do editor usa o EXPORTER, não o renderer React!**
+
+```typescript
+// ⚠️ ERRO COMUM
+// Você implementa um efeito no Renderer...
+export function renderMyBlock(block: MyBlock) {
+  return <div style={{ animation: "fadeIn 0.3s" }}>...</div>;  // ✅ Funciona no preview? NÃO!
+}
+
+// ...mas esquece de implementar no Exporter
+export function exportMyBlock(block: Block) {
+  return `<div>...</div>`;  // ❌ Sem animation = preview quebrado
+}
+```
+
+**✅ CORRETO:** Sempre implementar a mesma lógica visual em ambos:
+
+```typescript
+// Renderer (React)
+export function renderMyBlock(block: MyBlock) {
+  return (
+    <div
+      style={{
+        animation: "fadeIn 0.3s",
+        backgroundColor: "var(--sg-primary)",
+      }}
+    >
+      {block.props.text}
+    </div>
+  );
+}
+
+// Exporter (HTML)
+export function exportMyBlock(block: Block) {
+  const { text } = (block as any).props;
+  return `
+    <style>
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+    <div style="animation: fadeIn 0.3s; background-color: var(--sg-primary);">
+      ${escapeHtml(text)}
+    </div>
+  `;
+}
+```
+
+---
+
+## 3. Exemplo Passo-a-Passo: Criando um Bloco "Alert"
+
+Vamos criar um bloco de alerta completo, do zero.
 
 ### Passo 1: Schema (`src/engine/schema/siteDocument.ts`)
 
-Adicione a interface e inclua nos unions `BlockType` e `Block`:
+**3 mudanças obrigatórias:**
 
 ```typescript
-// 1. Adicionar ao union BlockType
+// 1️⃣ Adicionar ao union BlockType (linha ~30)
 export type BlockType =
   | "alert"       // ← NOVO
   | "heading"
   | "text"
+  | "button"
   // ...existentes
 
-// 2. Definir interface
+// 2️⃣ Definir a interface do bloco (adicionar no final das interfaces)
 export interface AlertBlock extends BlockBase {
   type: "alert";
   props: {
     text?: string;
     variant?: "info" | "success" | "warning" | "danger";
+    icon?: string;
     dismissible?: boolean;
+    bg?: string;          // Cor de fundo customizável
+    textColor?: string;   // Cor do texto customizável
   };
 }
 
-// 3. Adicionar ao union Block
+// 3️⃣ Adicionar ao union Block (linha ~500+)
 export type Block =
   | AlertBlock    // ← NOVO
   | HeadingBlock
   | TextBlock
+  | ButtonBlock
   // ...existentes
 ```
 
 ### Passo 2: Definition (`src/engine/registry/blocks/content/alert.ts`)
 
+**Criar arquivo novo:**
+
 ```typescript
 import { BlockDefinition } from "../../types";
 import { componentRegistry } from "../../registry";
 
-export const alertBlock: BlockDefinition = {
+export const alertBlock: BlockDefinition<"alert"> = {
   type: "alert",
   name: "Alerta",
-  description: "Caixa de alerta com variantes",
+  description: "Caixa de alerta com variantes (info, success, warning, danger)",
   category: "content",
   canHaveChildren: false,
+
   defaultProps: {
     text: "Esta é uma mensagem de alerta.",
     variant: "info",
+    icon: "info",
     dismissible: false,
+    bg: "",           // Vazio = usa cor do variant
+    textColor: "",    // Vazio = usa cor do variant
   },
+
   inspectorMeta: {
     text: {
       label: "Mensagem",
       inputType: "textarea",
       group: "Conteúdo",
+      description: "Texto da mensagem de alerta",
     },
     variant: {
       label: "Tipo",
@@ -79,21 +205,42 @@ export const alertBlock: BlockDefinition = {
         { label: "Aviso", value: "warning" },
         { label: "Perigo", value: "danger" },
       ],
-      group: "Estilo",
+      group: "Aparência",
+    },
+    icon: {
+      label: "Ícone",
+      inputType: "icon-grid",
+      group: "Aparência",
+      description: "Ícone exibido ao lado da mensagem",
     },
     dismissible: {
-      label: "Permite fechar",
+      label: "Pode ser fechado",
       inputType: "checkbox",
       group: "Comportamento",
+    },
+    // Cores customizáveis (integração com paleta)
+    bg: {
+      label: "Cor de Fundo (Opcional)",
+      inputType: "color-advanced",
+      group: "Cores",
+      description: "Deixe vazio para usar a cor padrão do tipo",
+    },
+    textColor: {
+      label: "Cor do Texto (Opcional)",
+      inputType: "color-advanced",
+      group: "Cores",
+      description: "Deixe vazio para usar a cor padrão do tipo",
     },
   },
 };
 
-// Auto-registro (side effect)
+// ⚠️ CRÍTICO: Auto-registro (side effect)
+// SEM essa linha, o bloco NÃO aparecerá no editor!
 componentRegistry.register(alertBlock);
 ```
 
-**Exportar** no barrel `src/engine/registry/blocks/content/index.ts`:
+**Exportar no barrel `src/engine/registry/blocks/content/index.ts`:**
+
 ```typescript
 export * from "./alert";
 ```
@@ -104,6 +251,7 @@ export * from "./alert";
 import React from "react";
 import { AlertBlock } from "../../../schema/siteDocument";
 
+// Mapa de cores padrão por variant
 const variantStyles: Record<string, { bg: string; border: string; text: string }> = {
   info:    { bg: "#eff6ff", border: "#3b82f6", text: "#1e40af" },
   success: { bg: "#f0fdf4", border: "#22c55e", text: "#166534" },
@@ -112,28 +260,66 @@ const variantStyles: Record<string, { bg: string; border: string; text: string }
 };
 
 export function renderAlert(block: AlertBlock): React.ReactNode {
-  const { text, variant = "info" } = block.props;
+  const {
+    text,
+    variant = "info",
+    dismissible = false,
+    bg,
+    textColor,
+  } = block.props;
+
+  // Usar cores customizadas OU cores do variant
   const style = variantStyles[variant] || variantStyles.info;
+  const backgroundColor = bg || style.bg;
+  const color = textColor || style.text;
 
   return (
     <div
       key={block.id}
+      role="alert"
       style={{
-        padding: "1rem",
+        padding: "1rem 1.25rem",
         borderLeft: `4px solid ${style.border}`,
-        backgroundColor: style.bg,
-        color: style.text,
+        backgroundColor,
+        color,
         borderRadius: "0.5rem",
         margin: "0.5rem 0",
+        display: "flex",
+        alignItems: "center",
+        gap: "0.75rem",
+        position: "relative",
       }}
     >
-      {text}
+      {/* Ícone */}
+      <div style={{ flexShrink: 0, fontSize: "1.25rem" }}>
+        ℹ️ {/* Aqui você pode usar lucide-react */}
+      </div>
+
+      {/* Texto */}
+      <div style={{ flex: 1 }}>{text}</div>
+
+      {/* Botão de fechar (se dismissible) */}
+      {dismissible && (
+        <button
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: "0.25rem",
+            opacity: 0.5,
+          }}
+          aria-label="Fechar"
+        >
+          ✕
+        </button>
+      )}
     </div>
   );
 }
 ```
 
-**Registrar** no `src/engine/render/renderers/content/index.ts`:
+**Registrar no `src/engine/render/renderers/content/index.ts`:**
+
 ```typescript
 import { renderRegistry } from "../../registry/renderRegistry";
 import { renderAlert } from "./AlertRenderer";
@@ -154,8 +340,15 @@ export function exportAlert(
   _basePath?: string,
   _theme?: ThemeTokens,
 ): string {
-  const { text, variant = "info" } = (block as any).props;
+  const {
+    text,
+    variant = "info",
+    dismissible = false,
+    bg,
+    textColor,
+  } = (block as any).props;
 
+  // Cores padrão por variant
   const colors: Record<string, { bg: string; border: string; text: string }> = {
     info:    { bg: "#eff6ff", border: "#3b82f6", text: "#1e40af" },
     success: { bg: "#f0fdf4", border: "#22c55e", text: "#166534" },
@@ -164,12 +357,20 @@ export function exportAlert(
   };
 
   const style = colors[variant] || colors.info;
+  const backgroundColor = bg || style.bg;
+  const color = textColor || style.text;
 
-  return `<div ${dataBlockIdAttr(block.id)} style="padding:1rem;border-left:4px solid ${style.border};background:${style.bg};color:${style.text};border-radius:0.5rem;margin:0.5rem 0">${escapeHtml(text || "")}</div>`;
+  // Botão de fechar (se dismissible)
+  const closeButton = dismissible
+    ? `<button style="background:none;border:none;cursor:pointer;padding:0.25rem;opacity:0.5" aria-label="Fechar">✕</button>`
+    : "";
+
+  return `<div ${dataBlockIdAttr(block.id)} role="alert" style="padding:1rem 1.25rem;border-left:4px solid ${style.border};background-color:${backgroundColor};color:${color};border-radius:0.5rem;margin:0.5rem 0;display:flex;align-items:center;gap:0.75rem;position:relative"><div style="flex-shrink:0;font-size:1.25rem">ℹ️</div><div style="flex:1">${escapeHtml(text || "")}</div>${closeButton}</div>`;
 }
 ```
 
-**Registrar** no `src/engine/export/exporters/content/index.ts`:
+**Registrar no `src/engine/export/exporters/content/index.ts`:**
+
 ```typescript
 import { htmlExportRegistry } from "../HtmlExporter";
 import { exportAlert } from "./AlertExporter";
@@ -177,257 +378,402 @@ import { exportAlert } from "./AlertExporter";
 htmlExportRegistry.register("alert", exportAlert);
 ```
 
-### Passo 5: Exportar na API pública (se necessário)
+### Passo 5: Exportar na API Pública (`src/index.ts`)
 
-Se o tipo do bloco precisa ser acessível por consumidores, adicionar em `src/index.ts`:
+Se o bloco deve ser acessível por consumidores:
+
 ```typescript
-export type { AlertBlock } from './engine/schema/siteDocument'
+// Adicionar ao final do arquivo
+export type { AlertBlock } from './engine/schema/siteDocument';
 ```
 
 ---
 
-## Adicionando Propriedades a Blocos Existentes
+## 4. Integração com Paleta de Cores
 
-Para adicionar uma nova prop a um bloco que já existe (ex: adicionar `icon` ao AlertBlock):
+### 4.1 Entendendo o Sistema de Temas
 
-### 1. Atualizar a interface no Schema
+O editor gera **CSS variables** automaticamente a partir do `theme`:
 
 ```typescript
-// src/engine/schema/siteDocument.ts
+// No SiteDocument, o theme define:
+theme: {
+  colors: {
+    primary: "#6366f1",
+    secondary: "#4f46e5",
+    // ...
+  }
+}
+
+// Isso gera CSS variables:
+:root {
+  --sg-primary: #6366f1;
+  --sg-primary-hover: #4f46e5;  /* Gerado automaticamente */
+  --sg-primary-text: #ffffff;   /* Gerado automaticamente */
+  --sg-secondary: #4f46e5;
+  /* ...80+ variables */
+}
+```
+
+### 4.2 Usando CSS Variables (Método Preferido)
+
+**✅ SEMPRE use CSS variables com fallback:**
+
+```typescript
+// ✅ CORRETO - Respeita o tema
+backgroundColor: "var(--sg-primary, #6366f1)"
+color: "var(--sg-primary-text, #ffffff)"
+borderColor: "var(--sg-border, #e5e7eb)"
+
+// ❌ ERRADO - Cor hardcoded (não respeita tema)
+backgroundColor: "#6366f1"
+```
+
+### 4.3 Lista Completa de CSS Variables Disponíveis
+
+```css
+/* === Cores === */
+--sg-primary              /* Cor principal da marca */
+--sg-primary-hover        /* Primary 10% mais escura */
+--sg-primary-text         /* Texto sobre primary */
+--sg-secondary            /* Cor secundária */
+--sg-accent               /* Cor de destaque */
+--sg-bg                   /* Fundo da página */
+--sg-surface              /* Fundo de cards */
+--sg-text                 /* Texto principal */
+--sg-muted-text           /* Texto secundário */
+--sg-border               /* Bordas */
+--sg-link                 /* Links */
+--sg-link-hover           /* Links no hover */
+--sg-success              /* Verde de sucesso */
+--sg-warning              /* Amarelo de aviso */
+--sg-error                /* Vermelho de erro */
+
+/* === Tipografia === */
+--sg-font-heading         /* Fonte dos títulos */
+--sg-font-body            /* Fonte do corpo */
+--sg-heading-h1           /* 3rem */
+--sg-heading-h2           /* 2.25rem */
+--sg-heading-h3           /* 1.875rem */
+
+/* === Componentes === */
+--sg-button-radius        /* Raio dos botões */
+--sg-card-radius          /* Raio dos cards */
+--sg-card-shadow          /* Sombra dos cards */
+```
+
+### 4.4 Exemplo Prático: Bloco que Respeita a Paleta
+
+```typescript
+// Renderer
+export function renderMyBlock(block: MyBlock) {
+  const { title, useThemeColors } = block.props;
+
+  return (
+    <div
+      style={{
+        // Usa theme variable OU cor customizada
+        backgroundColor: useThemeColors
+          ? "var(--sg-primary)"
+          : block.props.customBg,
+        color: "var(--sg-primary-text)",
+        padding: "var(--sg-spacing-md)",
+        borderRadius: "var(--sg-card-radius)",
+        boxShadow: "var(--sg-card-shadow)",
+      }}
+    >
+      <h2 style={{ color: "var(--sg-text)" }}>{title}</h2>
+    </div>
+  );
+}
+
+// Exporter (mesma lógica)
+export function exportMyBlock(block: Block) {
+  const { title, useThemeColors, customBg } = (block as any).props;
+  const bg = useThemeColors ? "var(--sg-primary)" : customBg;
+
+  return `<div style="background-color:${bg};color:var(--sg-primary-text);padding:var(--sg-spacing-md);border-radius:var(--sg-card-radius);box-shadow:var(--sg-card-shadow)"><h2 style="color:var(--sg-text)">${escapeHtml(title)}</h2></div>`;
+}
+```
+
+### 4.5 Quando Permitir Cores Customizadas
+
+Adicione props de cor customizável quando:
+- O usuário precisa destacar um elemento específico
+- A cor default do tema não faz sentido (ex: badge de "novo" sempre verde)
+
+```typescript
+inspectorMeta: {
+  bgColor: {
+    label: "Cor de Fundo",
+    inputType: "color-advanced",
+    group: "Cores",
+    description: "Deixe vazio para usar a cor primária do tema",
+  },
+}
+
+// No renderer/exporter:
+const bgColor = props.bgColor || "var(--sg-primary)";
+```
+
+---
+
+## 5. Adicionando Propriedades a Blocos Existentes
+
+### 5.1 Fluxo para Adicionar Props
+
+```
+1. Atualizar Schema → 2. Adicionar ao inspectorMeta → 3. Atualizar Renderer → 4. Atualizar Exporter
+```
+
+### 5.2 Exemplo: Adicionar `icon` ao AlertBlock
+
+**Passo 1: Schema**
+
+```typescript
 export interface AlertBlock extends BlockBase {
   type: "alert";
   props: {
     text?: string;
     variant?: "info" | "success" | "warning" | "danger";
-    dismissible?: boolean;
     icon?: string;  // ← NOVA PROP
   };
 }
 ```
 
-### 2. Adicionar ao inspectorMeta na Definition
+**Passo 2: inspectorMeta**
 
 ```typescript
-// No arquivo da definition do bloco
 inspectorMeta: {
   // ...props existentes...
   icon: {
     label: "Ícone",
     inputType: "icon-grid",
-    group: "Estilo",
+    group: "Aparência",
   },
-},
+}
 ```
 
-### 3. Atualizar o Renderer (React)
+**Passo 3: Renderer**
 
-Usar a nova prop na renderização:
 ```typescript
 const { text, variant, icon } = block.props;
-// Renderizar icon...
+
+return (
+  <div ...>
+    {icon && <LucideIcon name={icon} />}  {/* Usar nova prop */}
+    <div>{text}</div>
+  </div>
+);
 ```
 
-### 4. Atualizar o Exporter (HTML)
+**Passo 4: Exporter**
 
-Mesma lógica, gerando HTML:
 ```typescript
 const { text, variant, icon } = (block as any).props;
-// Gerar HTML com icon...
+
+const iconHtml = icon ? `<span>🔔</span>` : "";  // Renderizar icon
+
+return `<div ...>${iconHtml}<div>${escapeHtml(text)}</div></div>`;
 ```
 
 ---
 
-## Referência: Tipos de Input (`inputType`)
+## 6. Sistema de Variações
 
-| inputType | Componente | Uso |
-|-----------|-----------|-----|
-| `text` | TextInput | Texto curto (título, label) |
-| `textarea` | TextAreaInput | Texto longo (descrição, parágrafo) |
-| `number` | NumberInput | Valor numérico com `min`/`max` |
-| `color` | ColorInput | Seletor de cor simples |
-| `color-advanced` | ColorInput | Seletor de cor avançado |
-| `select` | ButtonGroup (2-3 opções) ou Select (4+) | Lista de opções |
-| `slider` | SliderInput | Numérico com slider visual (`min`, `max`, `step`) |
-| `checkbox` | ToggleButton | Booleano (on/off) |
-| `image` | ImageInput (modo URL) | Input de URL de imagem |
-| `image-upload` | ImageInput (modo upload) | Upload autenticado para Supabase |
-| `icon-grid` | IconGridInput | Grid visual de ícones |
-| `image-grid` | ImageGridInput | Grid de imagens com presets |
-| `carousel-images` | CarouselImagesInput | Array de imagens para carrossel (2-5 slots) |
-| `typography` | TypographyInput | Editor de tipografia (tamanho, peso, cor, efeitos) |
+### 6.1 O que são Variações?
 
-### Opções do InspectorMeta
+Variações são **presets visuais** do mesmo bloco com configurações diferentes.
+
+**Exemplo: Hero com 7 variações**
+- `hero-split` → Layout 2 colunas
+- `hero-parallax` → Imagem de fundo com parallax
+- `hero-gradient` → Gradiente vibrante sem imagem
+- etc.
+
+### 6.2 Criando Variações
+
+**1. Definir IDs no Schema:**
 
 ```typescript
-interface InspectorMeta {
-  label: string;                    // Nome exibido no painel
-  description?: string;             // Tooltip de ajuda
-  group?: string;                   // Grupo (seção colapsável) — default: "Geral"
-  inputType?: string;               // Tipo do input (ver tabela acima)
-  options?: { label; value }[];     // Para "select"
-  min?: number;                     // Para "slider" e "number"
-  max?: number;                     // Para "slider" e "number"
-  step?: number;                    // Para "slider"
-  showWhen?: ShowWhenCondition;      // Visibilidade condicional (ver seção abaixo)
+export type MyBlockVariationId =
+  | "my-block-simple"
+  | "my-block-card"
+  | "my-block-gradient";
+```
+
+**2. Adicionar ao Block Definition:**
+
+```typescript
+export const myBlock: BlockDefinition<"myBlock"> = {
+  // ...
+  variations: {
+    "my-block-simple": {
+      id: "my-block-simple",
+      name: "Simples",
+      defaultProps: {
+        variant: "simple",
+        bg: "#ffffff",
+        // NÃO incluir props editáveis como title, image
+      },
+    },
+    "my-block-card": {
+      id: "my-block-card",
+      name: "Card",
+      defaultProps: {
+        variant: "card",
+        bg: "#f8fafc",
+        shadow: "lg",
+      },
+    },
+  },
+};
+```
+
+**3. Lógica no Renderer/Exporter:**
+
+```typescript
+export function renderMyBlock(block: MyBlock) {
+  const { variant } = block.props;
+
+  if (variant === "card") {
+    return renderCardVariant(block);
+  }
+
+  return renderSimpleVariant(block);
 }
 ```
 
-### Visibilidade Condicional (`showWhen`)
+### 6.3 Preservar Props ao Trocar Variação
 
-O sistema `showWhen` controla quando um campo é exibido no painel de propriedades. Importar tipos: `ShowWhenCondition` de `@brunoalz/smartgesti-site-editor`.
+**Problema:** Ao trocar de variação, o usuário pode perder conteúdo customizado.
 
-#### 1. Igualdade simples
-
-Mostrar um campo quando outro campo tem um valor específico:
+**Solução:** Usar `preserveIfDefined` em `VariationSelector.tsx`:
 
 ```typescript
-// Mostrar "overlayColor" apenas quando "overlay" é true
-overlayColor: {
-  label: "Cor do Overlay",
-  inputType: "color-advanced",
-  group: "Aparência",
-  showWhen: { field: "overlay", equals: true },
-},
-
-// Mostrar "contentMaxWidth" quando variant NÃO é "split"
-contentMaxWidth: {
-  label: "Largura do Conteúdo",
-  inputType: "select",
-  options: [...],
-  showWhen: { field: "variant", notEquals: "split" },
-},
+// VariationSelector.tsx
+const newProps = {
+  ...VISUAL_PROPS_TO_RESET,  // Reseta props visuais
+  ...v.defaultProps,          // Aplica defaults da nova variação
+  ...preserveIfDefined(props, "title"),      // Preserva título
+  ...preserveIfDefined(props, "image"),      // Preserva imagem
+  ...preserveIfDefined(props, "description"), // Preserva descrição
+};
 ```
 
-#### 2. OR de valores (`oneOf`)
+---
 
-Mostrar quando o campo é um de vários valores:
+## 7. Referência de Input Types
 
-```typescript
-// Mostrar apenas para variações de carrossel
-autoplaySpeed: {
-  label: "Velocidade",
-  inputType: "slider",
-  showWhen: { field: "variation", oneOf: ["hero-carousel", "hero-slideshow"] },
-},
-```
+| inputType | Componente | Uso | Props Especiais |
+|-----------|-----------|-----|-----------------|
+| `text` | TextInput | Texto curto (título, label) | - |
+| `textarea` | TextAreaInput | Texto longo (descrição) | - |
+| `number` | NumberInput | Numérico | `min`, `max` |
+| `color` | ColorInput | Seletor de cor simples | - |
+| `color-advanced` | ColorInput | Seletor de cor avançado | - |
+| `select` | ButtonGroup/Select | Lista de opções | `options: [{label, value}]` |
+| `slider` | SliderInput | Numérico com slider | `min`, `max`, `step` |
+| `checkbox` | ToggleButton | Booleano (on/off) | - |
+| `image` | ImageInput | URL de imagem | - |
+| `image-upload` | ImageInput | Upload autenticado | - |
+| `icon-grid` | IconGridInput | Grid visual de ícones | - |
+| `image-grid` | ImageGridInput | Grid de imagens com presets | - |
+| `carousel-images` | CarouselImagesInput | Array de imagens (2-5) | - |
+| `typography` | TypographyInput | Editor de tipografia | - |
 
-#### 3. Truthiness
+---
 
-Mostrar quando um campo tem valor truthy (não vazio, não undefined, não false):
+## 8. Visibilidade Condicional (showWhen)
 
-```typescript
-// Mostrar "logoHeight" apenas quando há um logo definido
-logoHeight: {
-  label: "Tamanho do Logo",
-  inputType: "slider",
-  showWhen: { field: "logo", truthy: true },
-},
-```
-
-#### 4. AND — múltiplas condições
-
-Todas as condições devem ser verdadeiras:
+### 8.1 Tipos de Condições
 
 ```typescript
-// Mostrar apenas quando variant é "image-bg" E overlay está ativo
-overlayOpacity: {
-  label: "Opacidade do Overlay",
-  inputType: "slider",
-  showWhen: {
-    and: [
-      { field: "variant", equals: "image-bg" },
-      { field: "overlay", equals: true },
-    ],
-  },
-},
-```
+// 1️⃣ Igualdade simples
+showWhen: { field: "overlay", equals: true }
 
-#### 5. OR — pelo menos uma condição
+// 2️⃣ Diferença
+showWhen: { field: "variant", notEquals: "split" }
 
-```typescript
+// 3️⃣ OR de valores
+showWhen: { field: "variant", oneOf: ["hero-carousel", "hero-slideshow"] }
+
+// 4️⃣ Truthiness
+showWhen: { field: "logo", truthy: true }
+
+// 5️⃣ AND de múltiplas condições
+showWhen: {
+  and: [
+    { field: "variant", equals: "image-bg" },
+    { field: "overlay", equals: true },
+  ],
+}
+
+// 6️⃣ OR de condições
 showWhen: {
   or: [
     { field: "variant", equals: "image-bg" },
     { field: "variant", equals: "parallax" },
   ],
-},
-// Equivalente a: showWhen: { field: "variant", oneOf: ["image-bg", "parallax"] }
+}
+
+// 7️⃣ Comparações numéricas
+showWhen: { field: "columns", gte: 3 }  // gt, gte, lt, lte
+
+// 8️⃣ Array length
+showWhen: { field: "carouselImages", arrayLengthGt: 2 }
+
+// 9️⃣ Cross-block (verificar props de outro bloco)
+showWhen: { field: "floating", equals: true, blockType: "navbar" }
 ```
 
-#### 6. Cross-block
-
-Verificar props de outro bloco na mesma página (busca top-level):
+### 8.2 Exemplo Prático Completo
 
 ```typescript
-// Mostrar apenas quando a navbar tem floating ativo
-heroTopPadding: {
-  label: "Padding Superior",
-  inputType: "slider",
-  showWhen: { field: "floating", equals: true, blockType: "navbar" },
-},
-```
-
-#### 7. Comparações numéricas e array
-
-```typescript
-// Mostrar quando array tem mais de 2 itens
-carouselNavigation: {
-  label: "Navegação",
-  inputType: "select",
-  showWhen: { field: "carouselImages", arrayLengthGt: 2 },
-},
-
-// Comparações: gt, gte, lt, lte
-advancedOption: {
-  label: "Opção Avançada",
-  showWhen: { field: "columns", gte: 3 },
-},
-```
-
-#### Combinando operadores no mesmo campo
-
-Múltiplos operadores no mesmo objeto são combinados com AND implícito:
-
-```typescript
-// Mostrar quando columns >= 2 E columns <= 4
-specialLayout: {
-  showWhen: { field: "columns", gte: 2, lte: 4 },
-},
+inspectorMeta: {
+  overlay: {
+    label: "Ativar Overlay",
+    inputType: "checkbox",
+    group: "Aparência",
+  },
+  overlayColor: {
+    label: "Cor do Overlay",
+    inputType: "color-advanced",
+    group: "Aparência",
+    showWhen: { field: "overlay", equals: true },  // Só aparece se overlay=true
+  },
+  overlayOpacity: {
+    label: "Opacidade",
+    inputType: "slider",
+    min: 0,
+    max: 100,
+    group: "Aparência",
+    showWhen: { field: "overlay", equals: true },  // Só aparece se overlay=true
+  },
+}
 ```
 
 ---
 
-## Padrões Importantes
+## 9. Padrões Importantes
 
-### CSS Variables para Theming
+### 9.1 XSS Prevention
 
-Sempre use CSS variables com fallback para que o bloco respeite o tema:
-
-```typescript
-// Renderer
-backgroundColor: "var(--sg-primary, #3b82f6)"
-
-// Exporter
-`background-color: var(--sg-primary, #3b82f6)`
-```
-
-### XSS Prevention no Exporter
-
-**SEMPRE** usar `escapeHtml()` para conteúdo do usuário no HTML export:
+**⚠️ SEMPRE usar `escapeHtml()` em conteúdo do usuário:**
 
 ```typescript
 import { escapeHtml } from "../../shared/htmlHelpers";
 
-// CORRETO
+// ✅ CORRETO
 return `<p>${escapeHtml(text)}</p>`;
 
-// ERRADO — vulnerável a XSS
+// ❌ ERRADO - Vulnerável a XSS
 return `<p>${text}</p>`;
 ```
 
-### Block ID no Exporter
+### 9.2 Block ID no Exporter
 
-Incluir `dataBlockIdAttr` para o editor identificar o bloco ao clicar:
+Incluir `dataBlockIdAttr` para o editor identificar blocos ao clicar:
 
 ```typescript
 import { dataBlockIdAttr } from "../../shared/htmlHelpers";
@@ -435,493 +781,222 @@ import { dataBlockIdAttr } from "../../shared/htmlHelpers";
 return `<div ${dataBlockIdAttr(block.id)}>...</div>`;
 ```
 
-### Variações (Presets Visuais)
+### 9.3 Shared Utilities
 
-Para blocos com variações visuais (como Hero e Navbar), definir `variations` na Definition:
+Quando renderer e exporter precisam da **mesma lógica** (constantes, cálculos, CSS), extraia para `src/engine/shared/`:
 
 ```typescript
-export const myBlock: BlockDefinition = {
-  // ...
-  variations: {
-    "my-variation-1": {
-      id: "my-variation-1",
-      name: "Layout Centrado",
-      defaultProps: {
-        variant: "centered",
-        align: "center",
-        // NÃO incluir props editáveis como image, title, etc.
-      },
-    },
-    "my-variation-2": {
-      id: "my-variation-2",
-      name: "Layout Dividido",
-      defaultProps: {
-        variant: "split",
-        align: "left",
-      },
-    },
-  },
+// src/engine/shared/myBlockConstants.ts
+export const MY_SHADOW_MAP = {
+  sm: "0 1px 2px rgba(0,0,0,0.05)",
+  md: "0 4px 6px rgba(0,0,0,0.1)",
+  lg: "0 10px 15px rgba(0,0,0,0.1)",
 };
+
+// Renderer e Exporter importam:
+import { MY_SHADOW_MAP } from "../../../shared/myBlockConstants";
 ```
 
-### Inputs Multi-Prop (`image-grid`, `carousel-images`)
-
-Alguns inputs manipulam múltiplas props simultaneamente. Eles recebem `context.allProps` e `context.onMultiUpdate`:
+### 9.4 Hooks Antes de Early Returns
 
 ```typescript
-// No renderPropertyInput.tsx, o image-grid recebe:
-<ImageGridInput
-  allProps={context.allProps}
-  onMultiUpdate={context.onMultiUpdate}  // Atualiza imageGridPreset, imageGridImages, imageGridGap
-/>
-```
+// ✅ CORRETO
+const Component = memo(({ block }) => {
+  const data = useMemo(() => ..., [block]);
+  const handler = useCallback(...);  // ANTES do return
 
-### Shared Utilities (`src/engine/shared/`)
+  if (!block) return null;
+});
 
-Quando renderer e exporter precisam da **mesma lógica** (constantes, cálculos, geração de CSS), extraia para `src/engine/shared/`:
+// ❌ ERRADO
+const Component = memo(({ block }) => {
+  if (!block) return null;  // early return
 
-```
-src/engine/shared/
-├── shadowConstants.ts       # imageShadowMap
-├── layoutConstants.ts       # contentPositionMap, blockGapConfig
-├── socialIcons.ts           # socialIconPaths
-├── carouselAnimation.ts     # generateCarouselCSS (keyframes + dots)
-├── hoverEffects/            # Geradores de hover CSS
-├── imageGrid/               # Presets e tipos do image grid
-└── typography/              # Config e geração de CSS tipográfico
-```
-
-**Atenção**: `spacingMap` é intencionalmente diferente entre renderer e exporter — NÃO extrair para shared.
-
----
-
-## Adicionando Variações a Blocos Existentes
-
-Para adicionar uma nova variação a um bloco que já tem variações (ex: Hero, Navbar):
-
-### 1. Atualizar o union de IDs no Schema
-
-```typescript
-// src/engine/schema/siteDocument.ts
-export type HeroVariationId =
-  | "hero-split"
-  | "hero-parallax"
-  // ...existentes
-  | "hero-nova";  // ← NOVA
-```
-
-### 2. Adicionar novas props (se necessário)
-
-Se a variação precisa de props novas no bloco:
-
-```typescript
-export interface HeroBlock extends BlockBase {
-  type: "hero";
-  props: {
-    // ...existentes...
-    novasProp?: string;  // ← NOVA
-  };
-}
-```
-
-### 3. Adicionar o preset de variação
-
-```typescript
-// src/engine/presets/heroVariations.ts
-
-// Adicionar ao objeto heroVariations:
-"hero-nova": {
-  id: "hero-nova",
-  name: "Nova",
-  defaultProps: {
-    variation: "hero-nova",
-    variant: "image-bg",
-    title: "Título padrão",
-    // ... props visuais (NÃO incluir props editáveis como image)
-  },
-},
-
-// Adicionar ao array heroVariationIds:
-export const heroVariationIds: HeroVariationId[] = [
-  // ...existentes
-  "hero-nova",
-];
-```
-
-### 4. Adicionar inspectorMeta (se novas props)
-
-No arquivo de definition do bloco, adicionar grupo com `showWhen`:
-
-```typescript
-// src/engine/registry/blocks/sections/hero.ts
-novaProp: {
-  label: "Nova Prop",
-  inputType: "text",
-  group: "Novo Grupo",
-  showWhen: { field: "variation", equals: "hero-nova" },
-},
-```
-
-### 5. Render path no Renderer e Exporter
-
-Adicionar branch `if (isNova)` nos dois arquivos:
-- `src/engine/render/renderers/sections/HeroRenderer.tsx`
-- `src/engine/export/exporters/sections/HeroExporter.ts`
-
-### 6. Preservar props ao trocar variação
-
-Em `src/editor/PropertyEditor/VariationSelector.tsx`, adicionar `preserveIfDefined` para que as props customizadas sobrevivam ao trocar de variação:
-
-```typescript
-const newProps = {
-  ...HERO_VISUAL_PROPS_TO_RESET,
-  ...v.defaultProps,
-  ...preserveIfDefined(props, "title"),
-  // ...outros conteúdos...
-
-  // Preserva props da nova variação
-  ...preserveIfDefined(props, "novaProp"),
-};
-```
-
-**Regra**: Props de conteúdo do usuário (imagens uploadadas, textos, configurações) devem ser preservadas com `preserveIfDefined`. Props visuais que definem a aparência da variação (cores, alinhamento) devem estar no `HERO_VISUAL_PROPS_TO_RESET` para serem limpas ao trocar.
-
----
-
-## Criando um Novo `inputType` Customizado
-
-Quando nenhum inputType existente atende, crie um novo:
-
-### 1. Adicionar ao union em `types.ts`
-
-```typescript
-// src/engine/registry/types.ts
-inputType?:
-  | "text"
-  | "textarea"
-  // ...existentes
-  | "meu-input";     // ← NOVO
-```
-
-### 2. Criar componente em `inputs/`
-
-```typescript
-// src/editor/PropertyEditor/inputs/MeuInput.tsx
-export function MeuInput({ value, onChange, label }: MeuInputProps) {
-  return (
-    <div>
-      <label>{label}</label>
-      {/* UI do input */}
-    </div>
-  );
-}
-```
-
-### 3. Exportar no barrel
-
-```typescript
-// src/editor/PropertyEditor/inputs/index.ts
-export { MeuInput } from "./MeuInput";
-```
-
-### 4. Adicionar case no `renderPropertyInput.tsx`
-
-```typescript
-// src/editor/PropertyEditor/renderPropertyInput.tsx
-case "meu-input":
-  return <MeuInput key={propName} value={value} onChange={onChange} label={label} />;
-```
-
-**Se o input manipula múltiplas props** (como `image-grid` e `carousel-images`), use o pattern multi-prop:
-
-```typescript
-case "meu-input":
-  if (context?.allProps && context?.onMultiUpdate) {
-    const myData = context.allProps.myData || [];
-    return (
-      <MeuInput
-        key={propName}
-        data={myData}
-        onDataChange={(newData) => {
-          context.onMultiUpdate!({ myData: newData });
-        }}
-      />
-    );
-  }
-  return null;
+  const handler = useCallback(...);  // ERRO: hooks após return
+});
 ```
 
 ---
 
-## Sistema de Hover Effects
+## 10. Testando seu Bloco
 
-O editor possui um sistema completo de efeitos de hover para **botões** e **links**, implementado em `src/engine/shared/hoverEffects/`. Os efeitos funcionam tanto no React preview quanto no HTML export.
+### 10.1 Build e Demo
 
-### Blocos que Suportam Hover Effects
+```bash
+# 1. Build do projeto
+npm run build
 
-| Bloco | Button Hover | Link Hover | Observação |
-|-------|:----------:|:----------:|------------|
-| **Button** | Props diretas | - | Efeito principal + overlay |
-| **Link** | - | Props diretas | Efeito + cor de hover |
-| **Hero** | `buttonHover*` | - | Controla primary + secondary |
-| **CTA** | `buttonHover*` | - | Controla primary + secondary |
-| **Navbar** | `buttonHover*` (CTA) | `linkHover*` (nav links) | Controles separados |
-| **Footer** | - | `linkHover*` | Links do footer |
+# 2. Iniciar demo
+npm run demo
 
-### Props de Button Hover
-
-Usadas em blocos de seção (Hero, CTA, Navbar):
-
-```typescript
-{
-  // Efeito principal ao passar o mouse
-  buttonHoverEffect: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse",
-
-  // Intensidade do efeito (10 a 100)
-  buttonHoverIntensity: number,
-
-  // Efeito extra (overlay animado)
-  buttonHoverOverlay: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow",
-
-  // Ícone (só quando overlay = "icon")
-  buttonHoverIconName: string,  // ex: "arrow-right", "rocket", "sparkles"
-
-  // Tamanho do botão
-  buttonSize: "sm" | "md" | "lg",
-}
+# 3. Abrir no navegador
+# http://localhost:5173
 ```
 
-No bloco **Button** standalone, as props são sem prefixo `button`:
+### 10.2 Checklist de Testes
 
-```typescript
-{
-  hoverEffect: "none" | "darken" | "lighten" | "scale" | "glow" | "shadow" | "pulse",
-  hoverIntensity: number,
-  hoverOverlay: "none" | "shine" | "fill" | "bounce" | "icon" | "border-glow",
-  hoverIconName: string,
-}
-```
+- [ ] **Aparece no BlockSelector?** (categoria correta)
+- [ ] **Props editáveis no PropertyEditor?** (todos os campos aparecem)
+- [ ] **Preview renderiza corretamente?** (sem console errors)
+- [ ] **Cores respeitam o tema?** (trocar paleta altera as cores)
+- [ ] **showWhen funciona?** (campos condicionais aparecem/somem)
+- [ ] **Export gera HTML correto?** (sem tags quebradas, XSS safe)
+- [ ] **Responsivo?** (testar em mobile/tablet/desktop)
 
-### Props de Link Hover
+### 10.3 Teste de Integração com Paleta
 
-Usadas em Navbar, Footer e bloco Link:
+1. No editor, criar seu bloco
+2. Mudar a paleta do tema (LeftPanel → Paleta)
+3. Verificar se as cores do bloco mudaram automaticamente
 
-```typescript
-{
-  // Efeito ao passar o mouse nos links
-  linkHoverEffect: "none" | "background" | "underline" | "underline-center" | "slide-bg" | "scale" | "glow",
-
-  // Intensidade do efeito (10 a 100)
-  linkHoverIntensity: number,
-
-  // Cor aplicada no hover
-  linkHoverColor: string,  // ex: "#6366f1"
-}
-```
-
-No bloco **Link** standalone, as props são sem prefixo `link`:
-
-```typescript
-{
-  hoverEffect: "none" | "background" | "underline" | "underline-center" | "scale" | "glow",
-  hoverIntensity: number,
-  hoverColor: string,
-}
-```
-
-### Referência Visual dos Efeitos
-
-**Button Hover Effects:**
-
-| Valor | Descrição |
-|-------|-----------|
-| `none` | Sem efeito |
-| `darken` | Escurece o botão + leve elevação |
-| `lighten` | Clareia o botão + leve elevação |
-| `scale` | Aumenta levemente o tamanho |
-| `glow` | Brilho neon colorido ao redor |
-| `shadow` | Sombra elevada dramática |
-| `pulse` | Animação de pulso infinita |
-
-**Button Overlay Effects (extras):**
-
-| Valor | Descrição |
-|-------|-----------|
-| `none` | Sem overlay |
-| `shine` | Faixa de luz deslizando sobre o botão |
-| `fill` | Preenchimento de cor da esquerda para direita |
-| `bounce` | Pequeno salto animado |
-| `icon` | Ícone que aparece ao passar o mouse |
-| `border-glow` | Borda com brilho pulsante |
-
-**Link Hover Effects:**
-
-| Valor | Descrição |
-|-------|-----------|
-| `none` | Apenas mudança de cor |
-| `background` | Fundo colorido aparece |
-| `underline` | Sublinhado desliza da esquerda para direita |
-| `underline-center` | Sublinhado cresce do centro para as pontas |
-| `slide-bg` | Fundo desliza de baixo para cima |
-| `scale` | Texto aumenta levemente |
-| `glow` | Brilho neon ao redor do texto |
-
-### Ícones Disponíveis (para `buttonHoverIconName`)
-
-Quando `buttonHoverOverlay: "icon"`, escolha entre 28 ícones:
-
-- **Navegação**: `arrow-right` (default), `chevron-right`, `external-link`
-- **Ações**: `plus`, `check`, `download`, `send`, `play`
-- **Expressivos**: `star`, `heart`, `zap`, `sparkles`, `rocket`, `fire`, `gift`, `trophy`
-- **Comunicação**: `mail`, `phone`
-- **E-commerce**: `cart`, `tag`
-- **Interface**: `eye`, `lock`, `user`, `settings`
-
-### Arquivos-Chave do Sistema
-
-| Arquivo | Conteúdo |
-|---------|----------|
-| `src/engine/shared/hoverEffects/types.ts` | Tipos e interfaces |
-| `src/engine/shared/hoverEffects/buttonHover.ts` | Gerador de CSS para button hover |
-| `src/engine/shared/hoverEffects/linkHover.ts` | Gerador de CSS para link hover |
-| `src/engine/shared/hoverEffects/index.ts` | Barrel exports |
+**Se não mudaram:** Você está usando cor hardcoded em vez de CSS variable!
 
 ---
 
-## Criando Templates
+## 11. Troubleshooting
 
-Templates são `SiteDocument` estáticos com blocos pré-configurados, usados como ponto de partida no editor.
+### 11.1 Bloco Não Aparece no BlockSelector
 
-### Estrutura de um Template
+**Possíveis causas:**
 
-```typescript
-// src/shared/templates/meu-template.ts
-import type { SiteDocument } from "../schema";
-import { NAVBAR_DEFAULT_PROPS } from "../../engine/registry/blocks/sections/navbar";
+1. **Faltou `componentRegistry.register()`**
+   ```typescript
+   // ADICIONAR NO FINAL DO ARQUIVO DE DEFINITION:
+   componentRegistry.register(myBlock);
+   ```
 
-export const meuTemplate: SiteDocument = {
-  meta: {
-    title: "Meu Template",
-    description: "Descrição curta do template",
-    language: "pt-BR",
-  },
-  theme: {
-    colors: { primary: "#3b82f6", secondary: "#64748b", /* ... */ },
-    typography: { fontFamily: "Inter, system-ui, sans-serif", /* ... */ },
-    spacing: { unit: "0.25rem", scale: [0, 1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64] },
-    effects: { borderRadius: "0.75rem", shadow: "...", shadowLg: "...", transition: "all 0.3s ease" },
-  },
-  structure: [
-    // Blocos aqui...
-  ],
-};
-```
+2. **Faltou export no barrel**
+   ```typescript
+   // src/engine/registry/blocks/{category}/index.ts
+   export * from "./myBlock";
+   ```
 
-### Checklist para Novo Template
+3. **Erro de TypeScript no schema**
+   - Verificar se adicionou ao union `BlockType`
+   - Verificar se adicionou ao union `Block`
 
-1. Criar arquivo em `src/shared/templates/meu-template.ts`
-2. Registrar em `src/shared/templates/index.ts`:
-   - Import + re-export
-   - Adicionar à `templateList[]` (com `id`, `name`, `description`, `category`, `tags`, `preview`)
-   - Adicionar ao mapa `templates`
-3. Atualizar `src/shared/schema.ts` se criou novos tipos de bloco
+### 11.2 Preview Não Atualiza ao Editar
 
-### Hover Effects em Templates
+**Possíveis causas:**
 
-Sempre adicionar hover effects aos blocos que suportam para que o template fique interativo e profissional. Use efeitos coerentes entre si (mesma "família" de efeitos).
+1. **Renderer não está registrado**
+   ```typescript
+   // src/engine/render/renderers/{category}/index.ts
+   import { renderMyBlock } from "./MyBlockRenderer";
+   renderRegistry.register("myBlock", renderMyBlock);
+   ```
 
-**Exemplo completo — Navbar com hover effects:**
+2. **Props não estão sendo lidas corretamente**
+   ```typescript
+   // Verificar destructuring:
+   const { myProp } = block.props;  // ✅
+   const { myProp } = props;        // ❌ (se props não existe)
+   ```
 
-```typescript
-{
-  id: "meu-navbar",
-  type: "navbar",
-  props: {
-    ...NAVBAR_DEFAULT_PROPS,
-    links: [
-      { text: "Home", href: "/site/p/home" },
-      { text: "Sobre", href: "#sobre" },
-    ],
-    ctaButton: { text: "Contato", href: "#contato" },
-    bg: "#ffffff",
-    // Link hover: sublinhado deslizante na cor primária
-    linkHoverEffect: "underline",
-    linkHoverIntensity: 60,
-    linkHoverColor: "#6366f1",
-    // CTA button hover: scale + brilho
-    buttonHoverEffect: "scale",
-    buttonHoverIntensity: 50,
-    buttonHoverOverlay: "shine",
-  },
-},
-```
+### 11.3 Export Gera HTML Quebrado
 
-**Exemplo — Hero com hover effects nos botões:**
+**Possíveis causas:**
 
-```typescript
-{
-  id: "meu-hero",
-  type: "hero",
-  props: {
-    variation: "hero-split",
-    variant: "split",
-    title: "Título Impactante",
-    description: "Descrição do produto ou serviço.",
-    primaryButton: { text: "Começar", href: "#cta" },
-    secondaryButton: { text: "Saiba Mais", href: "#sobre" },
-    background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)",
-    // Button hover: glow neon + shine overlay
-    buttonHoverEffect: "glow",
-    buttonHoverIntensity: 60,
-    buttonHoverOverlay: "shine",
-  },
-},
-```
+1. **Exporter não registrado**
+   ```typescript
+   // src/engine/export/exporters/{category}/index.ts
+   import { exportMyBlock } from "./MyBlockExporter";
+   htmlExportRegistry.register("myBlock", exportMyBlock);
+   ```
 
-**Exemplo — CTA com hover effects:**
+2. **HTML malformado**
+   ```typescript
+   // ❌ ERRADO - tag não fechada
+   return `<div><p>${text}</div>`;
+
+   // ✅ CORRETO
+   return `<div><p>${text}</p></div>`;
+   ```
+
+3. **Faltou `escapeHtml()`**
+   ```typescript
+   // ❌ ERRADO - XSS vulnerability
+   return `<div>${text}</div>`;
+
+   // ✅ CORRETO
+   return `<div>${escapeHtml(text)}</div>`;
+   ```
+
+### 11.4 Cores Não Respeitam o Tema
+
+**Causa:** Usando cor hardcoded em vez de CSS variable.
 
 ```typescript
-{
-  id: "meu-cta",
-  type: "cta",
-  props: {
-    title: "Pronto para começar?",
-    primaryButton: { text: "Começar Agora", href: "#contato" },
-    secondaryButton: { text: "Ver Planos" },
-    variant: "gradient",
-    // Button hover: scale + shine
-    buttonHoverEffect: "scale",
-    buttonHoverIntensity: 50,
-    buttonHoverOverlay: "shine",
-  },
-},
+// ❌ ERRADO
+backgroundColor: "#6366f1"
+
+// ✅ CORRETO
+backgroundColor: "var(--sg-primary, #6366f1)"
 ```
 
-**Exemplo — Footer com hover effects nos links:**
+### 11.5 Build Falha com Erro de Type
 
-```typescript
-{
-  id: "meu-footer",
-  type: "footer",
-  props: {
-    logoText: "Minha Marca",
-    variant: "multi-column",
-    columns: [ /* ... */ ],
-    // Link hover: sublinhado do centro, cor mais suave
-    linkHoverEffect: "underline-center",
-    linkHoverIntensity: 50,
-    linkHoverColor: "#818cf8",
-  },
-},
-```
+**Causa:** Schema desatualizado ou tipos incorretos.
 
-### Combinações Recomendadas por Estilo
+**Solução:**
+1. Verificar se a interface está no `siteDocument.ts`
+2. Verificar se está no union `Block`
+3. Rodar `npm run build` e ler a mensagem de erro
 
-| Estilo | Button Effect | Button Overlay | Link Effect | Notas |
-|--------|:----------:|:----------:|:----------:|-------|
-| **Corporativo** | `scale` | `shine` | `underline` | Elegante e discreto |
-| **Tech/SaaS** | `glow` | `shine` | `underline-center` | Moderno, efeito neon |
-| **Criativo** | `shadow` | `fill` | `slide-bg` | Dramático e visual |
-| **Minimalista** | `lighten` | `none` | `underline` | Limpo, quase sem overlay |
-| **E-commerce** | `scale` | `icon` (cart) | `background` | Ícone incentiva ação |
-| **Educação** | `darken` | `bounce` | `underline-center` | Amigável e convidativo |
+---
+
+## 12. Checklist de Verificação
+
+### 12.1 Antes de Commitar
+
+- [ ] Schema atualizado (`siteDocument.ts`)
+  - [ ] Interface criada
+  - [ ] Adicionada ao union `BlockType`
+  - [ ] Adicionada ao union `Block`
+- [ ] Definition criada
+  - [ ] `componentRegistry.register()` chamado
+  - [ ] Exportada no barrel `index.ts`
+- [ ] Renderer criado
+  - [ ] Registrado no `renderRegistry`
+  - [ ] Usa CSS variables
+  - [ ] Props lidas corretamente
+- [ ] Exporter criado
+  - [ ] Registrado no `htmlExportRegistry`
+  - [ ] Usa `escapeHtml()` em todo conteúdo do usuário
+  - [ ] Usa `dataBlockIdAttr(block.id)`
+  - [ ] Mesma lógica visual que o Renderer
+- [ ] Build passa sem erros
+  - [ ] `npm run build` ✅
+  - [ ] `npm run lint` ✅
+- [ ] Testado no demo
+  - [ ] Bloco aparece no BlockSelector
+  - [ ] Props editáveis funcionam
+  - [ ] Preview renderiza corretamente
+  - [ ] Export gera HTML correto
+  - [ ] Cores respeitam o tema
+
+### 12.2 Checklist de Qualidade
+
+- [ ] Código sem `console.log` (usar `logger`)
+- [ ] Nomes de variáveis descritivos
+- [ ] Comentários em lógica complexa
+- [ ] Props com `description` no `inspectorMeta`
+- [ ] Grupos lógicos no `inspectorMeta`
+- [ ] `showWhen` usado para simplificar UI
+- [ ] Responsivo (testar em 3 tamanhos)
+- [ ] Performance OK (sem re-renders desnecessários)
+
+---
+
+## Recursos Adicionais
+
+- **[TEMPLATE-MANUAL.md](./TEMPLATE-MANUAL.md)** — Guia para criar templates completos
+- **[CLAUDE.md](../CLAUDE.md)** — Instruções do projeto para IA
+- **Exemplos de blocos complexos:**
+  - Hero: `src/engine/registry/blocks/sections/hero.ts`
+  - Navbar: `src/engine/registry/blocks/sections/navbar.ts`
+  - BlogPostGrid: `src/engine/registry/blocks/sections/blogPostGrid.ts`
+
+---
+
+**Dúvidas?** Consulte o código de blocos existentes como referência. Todos seguem o mesmo padrão descrito neste guia.
