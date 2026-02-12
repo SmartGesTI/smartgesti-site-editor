@@ -44,6 +44,7 @@ import {
   exportAboutSection,
   exportContactSection,
 } from "./AdminSectionExporters";
+import { exportImageGallery } from "./ImageGalleryExporter";
 
 // Referência para renderChild
 import { Block } from "../../../schema/siteDocument";
@@ -84,6 +85,7 @@ htmlExportRegistry.register("carousel", exportCarousel);
 htmlExportRegistry.register("productShowcase", exportProductShowcase);
 htmlExportRegistry.register("aboutSection", exportAboutSection);
 htmlExportRegistry.register("contactSection", exportContactSection);
+htmlExportRegistry.register("imageGallery", exportImageGallery);
 
 // Exporters que precisam de renderChild
 htmlExportRegistry.register("featureGrid", (block, depth, basePath, theme) => {
