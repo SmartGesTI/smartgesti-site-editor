@@ -1,6 +1,7 @@
 import { BlockDefinition } from "../../types";
 import { componentRegistry } from "../../registry";
 import type { ImageGalleryBlock } from "../../../schema/siteDocument";
+import { galleryVariations } from "../../../presets/galleryVariations";
 
 /**
  * Valores padrão do ImageGallery - Use para garantir consistência em templates e factories
@@ -85,6 +86,7 @@ export const imageGalleryBlock: BlockDefinition<"imageGallery"> = {
   category: "sections",
   canHaveChildren: false,
   defaultProps: IMAGE_GALLERY_DEFAULT_PROPS,
+  variations: Object.values(galleryVariations),
 
   inspectorMeta: {
     // =========================================================================
