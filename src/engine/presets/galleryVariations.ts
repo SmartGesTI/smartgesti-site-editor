@@ -108,3 +108,25 @@ export const galleryVariations: Record<GalleryVariation, GalleryVariationPreset>
     },
   },
 };
+
+/**
+ * Array of all gallery variation IDs for iteration
+ */
+export const galleryVariationIds: GalleryVariation[] = [
+  "gallery-grid",
+  "gallery-masonry",
+  "gallery-featured",
+  "gallery-carousel",
+  "gallery-alternating",
+];
+
+/**
+ * Get a specific gallery variation by ID
+ */
+export function getGalleryVariation(id: GalleryVariation): GalleryVariationPreset {
+  const variation = galleryVariations[id];
+  if (!variation) {
+    throw new Error(`Gallery variation not found: ${id}`);
+  }
+  return variation;
+}

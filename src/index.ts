@@ -74,6 +74,13 @@ export type {
   BlogPostGridBlock,
   BlogPostDetailBlock,
 
+  // Image Gallery
+  GalleryImage,
+  LightboxConfig,
+  GalleryEnterAnimation,
+  GalleryHoverEffect,
+  ImageGalleryBlock,
+
   // Advanced sections
   ProductShowcaseBlock,
   AboutSectionBlock,
@@ -181,6 +188,11 @@ export {
   RenderPage,
   renderPage,
 } from './engine/render/renderPage'
+
+// Render - Components
+export {
+  Lightbox,
+} from './engine/render/renderers/sections/Lightbox'
 
 // Export
 export type {
@@ -308,6 +320,16 @@ export {
   navbarVariationIds,
   getNavbarVariation,
 } from './engine/presets/navbarVariations'
+
+export type {
+  GalleryVariationPreset,
+} from './engine/presets/galleryVariations'
+
+export {
+  galleryVariations,
+  galleryVariationIds,
+  getGalleryVariation,
+} from './engine/presets/galleryVariations'
 
 export {
   blogPostCardVariations,
