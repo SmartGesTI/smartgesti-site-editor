@@ -48,6 +48,26 @@ const SWIPE_THRESHOLD = 50;
 const DOUBLE_TAP_DELAY = 300;
 const PAN_DEBOUNCE_MS = 16; // ~60fps
 
+/**
+ * Clamps pan values to prevent image from being dragged completely off-screen.
+ * At 1x zoom, no pan allowed (image fills viewport).
+ * At higher zoom, pan range scales proportionally to zoom level.
+ */
+const clampPan = (x: number, y: number, currentZoom: number) => {
+  if (currentZoom <= 1) return { x: 0, y: 0 };
+
+  // Allow panning proportional to zoom level
+  // At 2x zoom: can pan +/-50% of viewport
+  // At 5x zoom: can pan +/-200% of viewport
+  const maxPanX = ((currentZoom - 1) * window.innerWidth) / 2;
+  const maxPanY = ((currentZoom - 1) * window.innerHeight) / 2;
+
+  return {
+    x: Math.max(-maxPanX, Math.min(maxPanX, x)),
+    y: Math.max(-maxPanY, Math.min(maxPanY, y)),
+  };
+};
+
 // ============================================================================
 // Theme Utilities
 // ============================================================================
@@ -205,6 +225,12 @@ const Lightbox: React.FC<LightboxProps> = memo(({
   const lastTapRef = useRef<number>(0);
   const pinchStartDistRef = useRef<number | null>(null);
   const pinchStartZoomRef = useRef<number>(1);
+  const panRef = useRef({ x: 0, y: 0 });
+
+  // Keep pan ref in sync with state (avoids stale closures in drag handlers)
+  useEffect(() => {
+    panRef.current = { x: panX, y: panY };
+  }, [panX, panY]);
 
   // Derived values
   const currentImage = useMemo(() => images[currentIndex] || null, [images, currentIndex]);
@@ -397,10 +423,10 @@ const Lightbox: React.FC<LightboxProps> = memo(({
     dragStartRef.current = {
       x: e.clientX,
       y: e.clientY,
-      panX,
-      panY,
+      panX: panRef.current.x,
+      panY: panRef.current.y,
     };
-  }, [zoom, panX, panY]);
+  }, [zoom]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDragging || !dragStartRef.current || zoom <= 1) return;
@@ -412,8 +438,11 @@ const Lightbox: React.FC<LightboxProps> = memo(({
 
     const dx = e.clientX - dragStartRef.current.x;
     const dy = e.clientY - dragStartRef.current.y;
-    setPanX(dragStartRef.current.panX + dx);
-    setPanY(dragStartRef.current.panY + dy);
+    const newPanX = dragStartRef.current.panX + dx;
+    const newPanY = dragStartRef.current.panY + dy;
+    const clamped = clampPan(newPanX, newPanY, zoom);
+    setPanX(clamped.x);
+    setPanY(clamped.y);
   }, [isDragging, zoom]);
 
   const handleMouseUp = useCallback(() => {
@@ -449,12 +478,12 @@ const Lightbox: React.FC<LightboxProps> = memo(({
         dragStartRef.current = {
           x: touch.clientX,
           y: touch.clientY,
-          panX,
-          panY,
+          panX: panRef.current.x,
+          panY: panRef.current.y,
         };
       }
     }
-  }, [enableTouch, zoom, panX, panY]);
+  }, [enableTouch, zoom]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!enableTouch) return;
@@ -471,6 +500,10 @@ const Lightbox: React.FC<LightboxProps> = memo(({
       if (newZoom === 1) {
         setPanX(0);
         setPanY(0);
+      } else {
+        const clamped = clampPan(panRef.current.x, panRef.current.y, newZoom);
+        setPanX(clamped.x);
+        setPanY(clamped.y);
       }
       return;
     }
@@ -485,8 +518,11 @@ const Lightbox: React.FC<LightboxProps> = memo(({
       const touch = e.touches[0];
       const dx = touch.clientX - dragStartRef.current.x;
       const dy = touch.clientY - dragStartRef.current.y;
-      setPanX(dragStartRef.current.panX + dx);
-      setPanY(dragStartRef.current.panY + dy);
+      const newPanX = dragStartRef.current.panX + dx;
+      const newPanY = dragStartRef.current.panY + dy;
+      const clamped = clampPan(newPanX, newPanY, zoom);
+      setPanX(clamped.x);
+      setPanY(clamped.y);
     }
   }, [enableTouch, enableZoom, zoom]);
 
@@ -588,6 +624,25 @@ const Lightbox: React.FC<LightboxProps> = memo(({
           e.preventDefault();
           resetZoom();
           break;
+        case "Tab":
+          {
+            const focusableElements = document.querySelectorAll<HTMLElement>(
+              `[data-sg-lightbox] button:not([disabled]), [data-sg-lightbox] [tabindex]:not([tabindex="-1"])`,
+            );
+            if (focusableElements.length === 0) return;
+
+            const first = focusableElements[0];
+            const last = focusableElements[focusableElements.length - 1];
+
+            if (e.shiftKey && document.activeElement === first) {
+              e.preventDefault();
+              last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+              e.preventDefault();
+              first.focus();
+            }
+          }
+          break;
         default:
           break;
       }
@@ -596,42 +651,6 @@ const Lightbox: React.FC<LightboxProps> = memo(({
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, enableKeyboard, closeOnEsc, onClose, goToPrev, goToNext, goToFirst, goToLast, zoomIn, zoomOut, resetZoom]);
-
-  // -------------------------------------------------------------------
-  // Focus trap handler
-  // -------------------------------------------------------------------
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleFocusTrap = (e: KeyboardEvent) => {
-      if (e.key !== "Tab") return;
-      const dialog = dialogRef.current;
-      if (!dialog) return;
-
-      const focusableElements = dialog.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [tabindex]:not([tabindex="-1"])',
-      );
-      if (focusableElements.length === 0) return;
-
-      const firstEl = focusableElements[0];
-      const lastEl = focusableElements[focusableElements.length - 1];
-
-      if (e.shiftKey) {
-        if (document.activeElement === firstEl) {
-          e.preventDefault();
-          lastEl.focus();
-        }
-      } else {
-        if (document.activeElement === lastEl) {
-          e.preventDefault();
-          firstEl.focus();
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleFocusTrap);
-    return () => document.removeEventListener("keydown", handleFocusTrap);
-  }, [isOpen]);
 
   // -------------------------------------------------------------------
   // Backdrop click handler
@@ -683,6 +702,7 @@ const Lightbox: React.FC<LightboxProps> = memo(({
   const lightboxContent = (
     <div
       ref={dialogRef}
+      data-sg-lightbox
       role="dialog"
       aria-modal="true"
       aria-labelledby="sg-lightbox-title"
@@ -1076,22 +1096,15 @@ const Lightbox: React.FC<LightboxProps> = memo(({
         </div>
       )}
 
+      {/* TODO: Mobile responsive improvements
+          - Reduce arrow sizes on <768px
+          - Shrink thumbnail items on mobile
+      */}
+
       {/* Inline Styles */}
       <style>{`
         @keyframes sgLightboxSpin {
           to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        /* Hide thumbnails on mobile */
-        @media (max-width: 767px) {
-          [data-thumb-index] {
-            /* Thumbnails strip still shows but items shrink */
-          }
-        }
-
-        /* Mobile: move counter and adjust nav arrows */
-        @media (max-width: 640px) {
-          /* Navigation arrows smaller on mobile */
         }
       `}</style>
     </div>
