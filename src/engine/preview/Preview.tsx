@@ -469,9 +469,11 @@ export function Preview({
         const element = iframeDoc.querySelector(`[data-block-id="${blockId}"]`);
         if (element) {
           try {
-            // Remover <style> tags antigas associadas a este bloco
+            // Remover <style> e <script> tags antigas associadas a este bloco
             const oldStyles = iframeDoc.querySelectorAll(`style[data-block-style="${blockId}"]`);
             oldStyles.forEach(s => s.remove());
+            const oldScripts = iframeDoc.querySelectorAll(`script[data-block-style="${blockId}"]`);
+            oldScripts.forEach(s => s.remove());
 
             const temp = iframeDoc.createElement("div");
             temp.innerHTML = blockHtml;
@@ -480,6 +482,15 @@ export function Preview({
             const styleTags = temp.querySelectorAll("style");
             styleTags.forEach(style => {
               style.setAttribute("data-block-style", blockId);
+            });
+
+            // Extrair <script> tags antes da inserção no DOM
+            // (scripts inseridos via innerHTML/fragment NÃO são executados pelo browser)
+            const scriptTags: { text: string }[] = [];
+            const scripts = temp.querySelectorAll("script");
+            scripts.forEach(script => {
+              scriptTags.push({ text: script.textContent || "" });
+              script.remove();
             });
 
             // Usar DocumentFragment para substituir com múltiplos elementos irmãos
@@ -494,6 +505,16 @@ export function Preview({
             } else {
               element.outerHTML = blockHtml;
             }
+
+            // Re-executar scripts criando novos elementos <script>
+            // (o browser executa scripts criados via createElement + appendChild)
+            scriptTags.forEach(({ text }) => {
+              if (!text.trim()) return;
+              const newScript = iframeDoc.createElement("script");
+              newScript.setAttribute("data-block-style", blockId);
+              newScript.textContent = text;
+              iframeDoc.body.appendChild(newScript);
+            });
 
             // Atualizar refs
             previousDocRef.current = JSON.parse(JSON.stringify(doc));
