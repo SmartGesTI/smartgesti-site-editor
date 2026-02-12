@@ -31,3 +31,4 @@ export * from "./aboutSection";
 export * from "./contactSection";
 export * from "./blogRecentPosts";
 export * from "./blogTagCloud";
+export * from "./imageGallery";
