@@ -71,6 +71,8 @@ export type BlockType =
   | "blogSearchBar"
   | "blogRecentPosts"
   | "blogTagCloud"
+  // Image Gallery
+  | "imageGallery"
   // Seções avançadas
   | "productShowcase"
   | "aboutSection"
@@ -1274,6 +1276,111 @@ export interface BlogTagCloudBlock extends BlockBase {
 }
 
 // ============================================================================
+// IMAGE GALLERY WITH LIGHTBOX
+// ============================================================================
+
+/**
+ * Imagem individual da galeria
+ */
+export interface GalleryImage {
+  id: string;                    // UUID
+  src: string;                   // URL (upload ou externa)
+  thumbnail?: string;            // Futuro - v2 dual images
+  alt: string;                   // Obrigatório (a11y)
+  title?: string;                // Título opcional
+  description?: string;          // Legenda opcional
+  tags?: string[];               // Tags (filtro futuro)
+  width?: number;                // Metadata
+  height?: number;               // Metadata
+  aspectRatio?: number;          // Calculado auto
+}
+
+/**
+ * Configuração do Lightbox
+ */
+export interface LightboxConfig {
+  // Tema
+  mode: "dark" | "light" | "theme" | "adaptive";
+
+  // Navegação
+  showArrows: boolean;
+  showThumbnails: boolean;
+  showCounter: boolean;
+  showCaption: boolean;
+
+  // Funcionalidades
+  enableZoom: boolean;
+  enableDownload: boolean;       // v1.1
+  enableAutoplay: boolean;       // v1.3
+  autoplayInterval: number;      // seconds
+
+  // UX
+  closeOnBackdropClick: boolean;
+  closeOnEsc: boolean;
+  enableKeyboard: boolean;
+  enableTouchGestures: boolean;
+
+  // Animação
+  transitionDuration: number;    // ms
+}
+
+/**
+ * Animação de entrada da galeria
+ */
+export type GalleryEnterAnimation =
+  | "fade-scale"      // Fade + zoom (padrão)
+  | "stagger"         // Cascata
+  | "slide-up"        // Desliza de baixo
+  | "none";
+
+/**
+ * Efeito de hover nas imagens da galeria
+ */
+export type GalleryHoverEffect =
+  | "zoom-overlay"    // Zoom + overlay + ícone (padrão)
+  | "glow"            // Brilho
+  | "scale"           // Apenas aumenta
+  | "caption-reveal"  // Mostra legenda
+  | "none";
+
+/**
+ * ImageGallery - Galeria de imagens com lightbox
+ */
+export interface ImageGalleryBlock extends BlockBase {
+  type: "imageGallery";
+  props: {
+    // Conteúdo
+    title?: string;
+    subtitle?: string;
+    images: GalleryImage[];
+
+    // Layout
+    variation: "gallery-grid" | "gallery-masonry" | "gallery-featured"
+             | "gallery-carousel" | "gallery-alternating";
+    columns: 2 | 3 | 4;
+    gap: number;                 // rem
+    aspectRatio?: "1/1" | "4/3" | "16/9" | "3/2" | "auto";
+
+    // Aparência
+    bg?: string;
+    imageBorderRadius: number;   // px
+    imageShadow: "none" | "sm" | "md" | "lg" | "xl";
+
+    // Animações
+    enterAnimation: GalleryEnterAnimation;
+    hoverEffect: GalleryHoverEffect;
+    hoverIntensity: number;      // 0-100
+
+    // Lightbox
+    lightbox: LightboxConfig;
+
+    // Performance
+    lazyLoad: boolean;
+    showWarningAt: number;       // Default: 50
+  };
+}
+
+// ============================================================================
 // SEÇÕES AVANÇADAS
 // ============================================================================
 
@@ -1490,6 +1597,8 @@ export type Block =
   | BlogSearchBarBlock
   | BlogRecentPostsBlock
   | BlogTagCloudBlock
+  // Image Gallery
+  | ImageGalleryBlock
   // Seções avançadas
   | ProductShowcaseBlock
   | AboutSectionBlock
