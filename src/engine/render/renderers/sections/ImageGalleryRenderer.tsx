@@ -1,12 +1,12 @@
 /**
  * ImageGallery Renderer
  * Renderiza galeria de imagens com grid responsivo, lazy loading,
- * efeitos de hover e lightbox (placeholder para Task 5)
+ * efeitos de hover e lightbox fullscreen.
  */
 
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import type { ImageGalleryBlock, GalleryImage } from "../../../schema/siteDocument";
-import { logger } from "../../../../utils/logger";
+import { Lightbox } from "./Lightbox";
 
 // ============================================================================
 // LazyImage Sub-Component
@@ -183,7 +183,6 @@ const ImageGalleryComponent: React.FC<{ block: ImageGalleryBlock }> = ({ block }
   const handleImageClick = useCallback((index: number) => {
     setCurrentImageIndex(index);
     setLightboxOpen(true);
-    logger.debug("Lightbox would open at index:", index);
   }, []);
 
   const handleCloseLightbox = useCallback(() => {
@@ -461,72 +460,14 @@ const ImageGalleryComponent: React.FC<{ block: ImageGalleryBlock }> = ({ block }
         }
       `}</style>
 
-      {/* Temporary Lightbox Preview (full implementation in Task 5) */}
-      {lightboxOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.9)",
-            zIndex: 50,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={handleCloseLightbox}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Lightbox de imagem"
-        >
-          <div
-            style={{ textAlign: "center", color: "white" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {images[currentImageIndex] && (
-              <img
-                src={images[currentImageIndex].src}
-                alt={images[currentImageIndex].alt}
-                style={{
-                  maxWidth: "90vw",
-                  maxHeight: "80vh",
-                  objectFit: "contain",
-                  borderRadius: "8px",
-                  marginBottom: "1rem",
-                }}
-              />
-            )}
-            <p style={{ marginBottom: "0.5rem", opacity: 0.8 }}>
-              {currentImageIndex + 1} / {images.length}
-            </p>
-            {images[currentImageIndex]?.title && (
-              <p style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.25rem" }}>
-                {images[currentImageIndex].title}
-              </p>
-            )}
-            {images[currentImageIndex]?.description && (
-              <p style={{ fontSize: "0.875rem", opacity: 0.8 }}>
-                {images[currentImageIndex].description}
-              </p>
-            )}
-            <button
-              onClick={handleCloseLightbox}
-              style={{
-                marginTop: "1rem",
-                padding: "0.5rem 1.5rem",
-                backgroundColor: "white",
-                color: "black",
-                border: "none",
-                borderRadius: "0.375rem",
-                cursor: "pointer",
-                fontSize: "0.875rem",
-                fontWeight: 500,
-              }}
-            >
-              Fechar
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Fullscreen Lightbox */}
+      <Lightbox
+        images={images}
+        initialIndex={currentImageIndex}
+        isOpen={lightboxOpen}
+        onClose={handleCloseLightbox}
+        config={props.lightbox}
+      />
     </section>
   );
 };
