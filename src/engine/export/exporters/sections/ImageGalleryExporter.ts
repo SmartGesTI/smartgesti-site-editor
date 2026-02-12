@@ -444,7 +444,7 @@ function generateGalleryHTML(
   if (images.length === 0) {
     return `
     <section ${dataBlockIdAttr(blockId)} ${blockIdAttr(blockId)} data-block-group="Galeria"
-             style="padding: var(--sg-section-padding-md, 3rem 0); background-color: ${bg || "transparent"};">
+             style="padding: var(--sg-section-padding-md, 3rem 0); background-color: ${escapeHtml(bg || "transparent")};">
       <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
         ${headerHTML}
         <div class="sg-ig-empty">
@@ -500,7 +500,7 @@ function generateGalleryHTML(
 
   return `
   <section id="${scope}" ${dataBlockIdAttr(blockId)} ${blockIdAttr(blockId)} data-block-group="Galeria"
-           style="padding: var(--sg-section-padding-md, 3rem 0); background-color: ${bg || "transparent"};">
+           style="padding: var(--sg-section-padding-md, 3rem 0); background-color: ${escapeHtml(bg || "transparent")};">
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
       ${headerHTML}
       ${warningHTML}
@@ -644,7 +644,7 @@ function generateGalleryJS(
   if (!root) return;
 
   // ---------- Images data ----------
-  var images = ${JSON.stringify(jsImages)};
+  var images = ${JSON.stringify(jsImages).replace(/<\//g, '<\\/')};
   if (images.length === 0) return;
 
   // ---------- Config ----------
@@ -669,14 +669,14 @@ function generateGalleryJS(
     thumbBorder: '#fff', spinnerBg: 'rgba(255,255,255,0.1)', spinnerTop: '#fff'
   };
   var LIGHT = {
-    backdrop: 'rgba(255,255,255,0.97)', text: '#1f2937', icon: '#374151',
+    backdrop: 'rgba(255,255,255,0.97)', text: 'var(--sg-text, #1f2937)', icon: 'var(--sg-primary, #374151)',
     btnBg: 'rgba(0,0,0,0.05)', btnHover: 'rgba(0,0,0,0.1)',
-    thumbBorder: '#3b82f6', spinnerBg: 'rgba(0,0,0,0.05)', spinnerTop: '#374151'
+    thumbBorder: 'var(--sg-primary, #3b82f6)', spinnerBg: 'rgba(0,0,0,0.05)', spinnerTop: 'var(--sg-primary, #374151)'
   };
   var THEME_COLORS = {
-    backdrop: 'rgba(0,0,0,0.92)', text: '#fff', icon: '#3b82f6',
+    backdrop: 'rgba(0,0,0,0.92)', text: 'var(--sg-text, #fff)', icon: 'var(--sg-primary, #3b82f6)',
     btnBg: 'rgba(255,255,255,0.1)', btnHover: 'rgba(59,130,246,0.3)',
-    thumbBorder: '#3b82f6', spinnerBg: 'rgba(255,255,255,0.1)', spinnerTop: '#3b82f6'
+    thumbBorder: 'var(--sg-primary, #3b82f6)', spinnerBg: 'rgba(255,255,255,0.1)', spinnerTop: 'var(--sg-primary, #3b82f6)'
   };
 
   function getTheme(adaptiveHint) {
