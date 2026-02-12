@@ -1195,6 +1195,7 @@ O bloco mais versátil — usado para features, benefícios, serviços, etapas, 
 | `categoryCardGrid` | Grid de categorias | `categories`, `columns` (2/3/4) |
 | `countdown` | Contador regressivo | `endDate`, `variant` (default/banner) |
 | `carousel` | Carrossel de imagens | `slides`, `showArrows`, `autoplay` |
+| `imageGallery` | Galeria de imagens com lightbox | `images`, `columns` (2/3/4), `lightbox`, `hoverEffect` |
 
 ---
 
@@ -1966,6 +1967,7 @@ Navbar → Hero → Stats → Courses → About → Features → Testimonials �
 | `categoryCardGrid` | sections | - | - | - | 2/3/4 |
 | `countdown` | sections | - | - | 2 | - |
 | `carousel` | sections | - | - | - | - |
+| `imageGallery` | sections | - | - | 5 | 2/3/4 |
 | `button` | content | Sim | - | - | - |
 | `link` | content | - | Sim | - | - |
 | `section` | composition | - | - | - | - |

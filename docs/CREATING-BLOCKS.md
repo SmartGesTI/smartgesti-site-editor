@@ -19,6 +19,7 @@
 10. [Testando seu Bloco](#10-testando-seu-bloco)
 11. [Troubleshooting](#11-troubleshooting)
 12. [Checklist de Verificação](#12-checklist-de-verificação)
+13. [Exemplo Avancado: ImageGallery com Lightbox](#13-exemplo-avancado-imagegallery-com-lightbox)
 
 ---
 
@@ -988,15 +989,810 @@ backgroundColor: "var(--sg-primary, #6366f1)"
 
 ---
 
-## Recursos Adicionais
+## 13. Exemplo Avancado: ImageGallery com Lightbox
 
-- **[TEMPLATE-MANUAL.md](./TEMPLATE-MANUAL.md)** — Guia para criar templates completos
-- **[CLAUDE.md](../CLAUDE.md)** — Instruções do projeto para IA
-- **Exemplos de blocos complexos:**
-  - Hero: `src/engine/registry/blocks/sections/hero.ts`
-  - Navbar: `src/engine/registry/blocks/sections/navbar.ts`
-  - BlogPostGrid: `src/engine/registry/blocks/sections/blogPostGrid.ts`
+> O bloco **ImageGallery** e o exemplo mais completo de um bloco no editor. Ele demonstra
+> todos os padroes avancados: tipos complexos aninhados, sub-componentes, variacoes,
+> interacoes avancadas (touch, teclado, zoom), Vanilla JS no exporter, lazy loading,
+> e acessibilidade completa. Use-o como referencia ao criar blocos sofisticados.
+
+### 13.1 Estrutura de Arquivos
+
+```
+src/
+├── engine/
+│   ├── schema/
+│   │   └── siteDocument.ts          # GalleryImage, LightboxConfig, ImageGalleryBlock
+│   ├── registry/
+│   │   └── blocks/sections/
+│   │       └── imageGallery.ts       # Block definition (344 linhas, 27 props, 8 grupos)
+│   ├── render/
+│   │   └── renderers/sections/
+│   │       ├── ImageGalleryRenderer.tsx   # Grid + LazyImage (481 linhas)
+│   │       └── Lightbox.tsx               # Fullscreen viewer (1.119 linhas)
+│   ├── export/
+│   │   └── exporters/sections/
+│   │       └── ImageGalleryExporter.ts    # CSS + HTML + Vanilla JS (1.252 linhas)
+│   └── presets/
+│       └── galleryVariations.ts           # 5 variacoes (132 linhas)
+└── index.ts                               # Public API exports
+```
+
+**Total: ~3.328 linhas** distribui­das em 6 arquivos.
+
+### 13.2 Passo 1: Schema com Tipos Complexos Aninhados
+
+O ImageGallery define **3 interfaces auxiliares** alem do bloco principal:
+
+```typescript
+// src/engine/schema/siteDocument.ts
+
+// Interface auxiliar 1: Imagem individual (9 campos)
+export interface GalleryImage {
+  id: string;                    // UUID
+  src: string;                   // URL (upload ou externa)
+  thumbnail?: string;            // Futuro - dual images
+  alt: string;                   // Obrigatorio (a11y)
+  title?: string;                // Titulo opcional
+  description?: string;          // Legenda opcional
+  tags?: string[];               // Tags (filtro futuro)
+  width?: number;                // Metadata
+  height?: number;               // Metadata
+  aspectRatio?: number;          // Calculado auto
+}
+
+// Interface auxiliar 2: Configuracao do lightbox (14 campos)
+export interface LightboxConfig {
+  mode?: "dark" | "light" | "theme" | "adaptive";
+  showArrows?: boolean;
+  showThumbnails?: boolean;
+  showCounter?: boolean;
+  showCaption?: boolean;
+  enableZoom?: boolean;
+  enableDownload?: boolean;
+  enableAutoplay?: boolean;
+  autoplayInterval?: number;
+  closeOnBackdropClick?: boolean;
+  closeOnEsc?: boolean;
+  enableKeyboard?: boolean;
+  enableTouchGestures?: boolean;
+  transitionDuration?: number;
+}
+
+// Type aliases para animacao e hover
+export type GalleryEnterAnimation = "fade-scale" | "stagger" | "slide-up" | "none";
+export type GalleryHoverEffect = "zoom-overlay" | "glow" | "scale" | "caption-reveal" | "none";
+
+// Bloco principal (27 props organizadas em 8 grupos)
+export interface ImageGalleryBlock extends BlockBase {
+  type: "imageGallery";
+  props: {
+    title?: string;
+    subtitle?: string;
+    images: GalleryImage[];              // Array de tipos complexos
+    variation?: "gallery-grid" | "gallery-masonry" | "gallery-featured"
+             | "gallery-carousel" | "gallery-alternating";
+    columns: 2 | 3 | 4;
+    gap: number;
+    aspectRatio?: "1/1" | "4/3" | "16/9" | "3/2" | "auto";
+    bg?: string;
+    imageBorderRadius: number;
+    imageShadow: "none" | "sm" | "md" | "lg" | "xl";
+    enterAnimation: GalleryEnterAnimation;
+    hoverEffect: GalleryHoverEffect;
+    hoverIntensity: number;
+    lightbox: LightboxConfig;            // Objeto aninhado
+    lazyLoad: boolean;
+    showWarningAt: number;
+  };
+}
+```
+
+**Padrao: Tipos complexos aninhados**
+
+Quando um bloco tem configuracoes agrupadas (como lightbox), crie uma interface separada.
+Isso permite reutilizar o tipo em outros lugares (renderer, exporter, presets) e manter
+o schema legivel. Torne os campos opcionais (`?`) para ergonomia da API.
+
+### 13.3 Passo 2: Block Definition com Muitos Grupos
+
+```typescript
+// src/engine/registry/blocks/sections/imageGallery.ts
+
+import { BlockDefinition } from "../../types";
+import { componentRegistry } from "../../registry";
+import type { ImageGalleryBlock } from "../../../schema/siteDocument";
+import { galleryVariations } from "../../../presets/galleryVariations";
+
+// Exportar defaultProps para uso em templates
+export const IMAGE_GALLERY_DEFAULT_PROPS: ImageGalleryBlock["props"] = {
+  title: "Nossa Galeria",
+  subtitle: "Confira nossas imagens",
+  images: [
+    { id: "1", src: "https://placehold.co/800x600/3b82f6/ffffff?text=Image+1",
+      alt: "Imagem 1", title: "Projeto 1", description: "Descricao" },
+    // ... mais imagens placeholder
+  ],
+  variation: "gallery-grid",
+  columns: 4,
+  gap: 1,
+  aspectRatio: "auto",
+  imageBorderRadius: 8,
+  imageShadow: "md",
+  enterAnimation: "fade-scale",
+  hoverEffect: "zoom-overlay",
+  hoverIntensity: 50,
+  lightbox: {
+    mode: "adaptive",
+    showArrows: true,
+    showThumbnails: true,
+    showCounter: true,
+    showCaption: true,
+    enableZoom: true,
+    enableDownload: false,
+    enableAutoplay: false,
+    autoplayInterval: 5,
+    closeOnBackdropClick: true,
+    closeOnEsc: true,
+    enableKeyboard: true,
+    enableTouchGestures: true,
+    transitionDuration: 300,
+  },
+  lazyLoad: true,
+  showWarningAt: 50,
+};
+
+export const imageGalleryBlock: BlockDefinition<"imageGallery"> = {
+  type: "imageGallery",
+  name: "Galeria de Imagens",
+  description: "Galeria de imagens com lightbox profissional e zoom",
+  category: "sections",
+  canHaveChildren: false,
+  defaultProps: IMAGE_GALLERY_DEFAULT_PROPS,
+  variations: Object.values(galleryVariations),  // Conectar variacoes
+
+  inspectorMeta: {
+    // 8 grupos: Conteudo, Layout, Aparencia, Animacoes,
+    //           Lightbox - Tema, Lightbox - Navegacao,
+    //           Lightbox - Funcionalidades, Performance
+
+    title: { label: "Titulo", inputType: "text", group: "Conteudo" },
+    images: {
+      label: "Imagens",
+      inputType: "gallery-images",   // Input type customizado
+      group: "Conteudo",
+    },
+    columns: {
+      label: "Colunas",
+      inputType: "number",
+      min: 2, max: 4,
+      group: "Layout",
+    },
+    // Props aninhadas usam notacao de ponto:
+    "lightbox.mode": {
+      label: "Tema do Lightbox",
+      inputType: "select",
+      options: [
+        { value: "adaptive", label: "Adaptavel (Auto)" },
+        { value: "dark", label: "Escuro" },
+      ],
+      group: "Lightbox - Tema",
+    },
+    "lightbox.enableZoom": {
+      label: "Ativar Zoom",
+      inputType: "checkbox",
+      group: "Lightbox - Funcionalidades",
+    },
+    // ... 27 props no total
+  },
+};
+
+componentRegistry.register(imageGalleryBlock);
+```
+
+**Padrao: Props aninhadas no inspectorMeta**
+
+Para objetos aninhados como `lightbox`, use notacao de ponto nas chaves do `inspectorMeta`:
+`"lightbox.mode"`, `"lightbox.showArrows"`, etc. O PropertyEditor resolve automaticamente.
+
+**Padrao: Exportar defaultProps**
+
+Exporte `IMAGE_GALLERY_DEFAULT_PROPS` para que templates possam reutilizar os valores padrao
+sem duplicar. Templates importam esse objeto e sobrescrevem apenas o que precisam.
+
+### 13.4 Passo 3: React Renderer com Sub-Componentes
+
+O renderer do ImageGallery e dividido em **3 componentes**:
+
+1. **LazyImage** — Imagem individual com Intersection Observer
+2. **ImageGalleryComponent** — Grid principal com estado do lightbox
+3. **renderImageGallery** — Funcao de registro (padrao do registry)
+
+```typescript
+// src/engine/render/renderers/sections/ImageGalleryRenderer.tsx
+
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import type { ImageGalleryBlock, GalleryImage } from "../../../schema/siteDocument";
+import { Lightbox } from "./Lightbox";
+
+// SUB-COMPONENTE 1: LazyImage com Intersection Observer
+const LazyImage: React.FC<LazyImageProps> = ({
+  image, onClick, borderRadius, shadow, hoverEffect, aspectRatio,
+}) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const imgRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer para lazy loading
+  useEffect(() => {
+    const el = imgRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },  // Pre-carrega 200px antes
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={imgRef}
+      className={`sg-gallery__image-item ${hoverClass}`}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}     // Enter/Space para abrir
+      aria-label={`Ver imagem: ${image.alt}`}
+    >
+      {isVisible ? (
+        <img
+          src={image.src}
+          alt={image.alt}
+          loading="lazy"
+          onLoad={() => setIsLoaded(true)}
+          style={{ opacity: isLoaded ? 1 : 0 }}
+        />
+      ) : (
+        <div /* Placeholder com animacao pulse */ />
+      )}
+    </div>
+  );
+};
+
+// COMPONENTE PRINCIPAL: Grid + estado do Lightbox
+const ImageGalleryComponent: React.FC<{ block: ImageGalleryBlock }> = ({ block }) => {
+  // TODOS os hooks ANTES de early returns (regra critica!)
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const handleImageClick = useCallback((index: number) => {
+    setCurrentImageIndex(index);
+    setLightboxOpen(true);
+  }, []);
+
+  return (
+    <section data-block-id={block.id} data-block-group="Galeria">
+      {/* Header, Warning, Grid */}
+      <div className="sg-gallery__grid" style={{
+        display: "grid",
+        gridTemplateColumns: `repeat(${columns}, 1fr)`,
+      }}>
+        {images.map((image, index) => (
+          <LazyImage key={image.id} image={image} onClick={() => handleImageClick(index)} />
+        ))}
+      </div>
+
+      {/* Inline Styles (hover effects, animations, responsive) */}
+      <style>{`
+        @media (max-width: 1024px) { .sg-gallery__grid { grid-template-columns: repeat(3, 1fr) !important; } }
+        @media (max-width: 768px)  { .sg-gallery__grid { grid-template-columns: repeat(2, 1fr) !important; } }
+        @media (max-width: 640px)  { .sg-gallery__grid { grid-template-columns: 1fr !important; } }
+      `}</style>
+
+      {/* Lightbox como componente separado */}
+      <Lightbox
+        images={images}
+        initialIndex={currentImageIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        config={props.lightbox}
+      />
+    </section>
+  );
+};
+
+// Funcao de registro (padrao do registry)
+export function renderImageGallery(block: any): React.ReactNode {
+  return <ImageGalleryComponent block={block as ImageGalleryBlock} />;
+}
+```
+
+**Padrao: Quando extrair sub-componentes**
+
+Extraia sub-componentes quando:
+- O componente filho tem **estado proprio** (LazyImage tem `isVisible`, `isLoaded`)
+- A logica e **reutilizavel** ou **testavel** independentemente
+- O componente principal ficaria com **mais de ~300 linhas**
+- Ha necessidade de **React.memo** para otimizar re-renders
+
+O Lightbox e extraido para **arquivo separado** (`Lightbox.tsx`, 1.119 linhas) porque e
+um componente complexo com zoom, pan, gestos touch, navegacao por teclado e portal.
+O LazyImage permanece **no mesmo arquivo** porque e simples e so faz sentido no contexto da galeria.
+
+### 13.5 Passo 4: Lightbox — Interacoes Avancadas (1.119 linhas)
+
+O Lightbox (`src/engine/render/renderers/sections/Lightbox.tsx`) demonstra os padroes
+mais avancados de interacao:
+
+```typescript
+// src/engine/render/renderers/sections/Lightbox.tsx
+
+import React, { useState, useCallback, useMemo, useEffect, useRef, memo } from "react";
+import ReactDOM from "react-dom";
+
+// Constantes para gestos
+const ZOOM_STEPS = [1, 1.5, 2, 3, 5] as const;
+const SWIPE_THRESHOLD = 50;
+const DOUBLE_TAP_DELAY = 300;
+const PAN_DEBOUNCE_MS = 16;  // ~60fps
+
+export const Lightbox = memo(function Lightbox({
+  images, initialIndex, isOpen, onClose, config,
+}: LightboxProps) {
+  // Estado do zoom e pan
+  const [zoom, setZoom] = useState(1);
+  const [panX, setPanX] = useState(0);
+  const [panY, setPanY] = useState(0);
+
+  // PATTERN: Body scroll lock
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = ""; };
+    }
+  }, [isOpen]);
+
+  // PATTERN: Focus trap
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key === "Tab") {
+        e.preventDefault(); // Prender foco dentro do lightbox
+      }
+    };
+    window.addEventListener("keydown", handleTab);
+    return () => window.removeEventListener("keydown", handleTab);
+  }, [isOpen]);
+
+  // PATTERN: Keyboard navigation
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case "Escape": onClose(); break;
+        case "ArrowLeft": goToPrev(); break;
+        case "ArrowRight": goToNext(); break;
+        case "+": case "=": zoomIn(); break;
+        case "-": zoomOut(); break;
+        case "0": resetZoom(); break;
+        case "Home": goToFirst(); break;
+        case "End": goToLast(); break;
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [isOpen, /* deps */]);
+
+  // PATTERN: Touch gestures (swipe + double-tap)
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    // Double-tap detection
+    const now = Date.now();
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      toggleZoom(); // Double-tap = toggle zoom
+    }
+    lastTapRef.current = now;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
+    if (Math.abs(dx) > SWIPE_THRESHOLD) {
+      dx > 0 ? goToPrev() : goToNext();  // Swipe navigation
+    }
+  }, []);
+
+  // PATTERN: Pan bounds clamping
+  const clampPan = (x: number, y: number, currentZoom: number) => {
+    if (currentZoom <= 1) return { x: 0, y: 0 };
+    const maxPan = ((currentZoom - 1) / currentZoom) * 50;
+    return {
+      x: Math.max(-maxPan, Math.min(maxPan, x)),
+      y: Math.max(-maxPan, Math.min(maxPan, y)),
+    };
+  };
+
+  // PATTERN: Portal rendering
+  return ReactDOM.createPortal(
+    <div role="dialog" aria-modal="true" aria-label="Visualizador de imagens">
+      {/* Backdrop, Image, Controls, Thumbnails */}
+      <div aria-live="polite">{`Imagem ${index + 1} de ${images.length}`}</div>
+    </div>,
+    document.body,
+  );
+});
+```
+
+**Padroes demonstrados no Lightbox:**
+
+| Padrao | Descricao | Exemplo |
+|--------|-----------|---------|
+| Body scroll lock | Impedir scroll do body quando modal esta aberto | `document.body.style.overflow = "hidden"` |
+| Focus trap | Manter foco dentro do modal | Interceptar `Tab` key |
+| Keyboard navigation | Atalhos de teclado completos | ESC, Arrows, +/-/0, Home, End |
+| Touch gestures | Swipe para navegar, double-tap para zoom | `touchstart` + `touchend` com threshold |
+| Pan bounds clamping | Impedir arrastar imagem para fora da tela | Calcular maxPan baseado no zoom |
+| Portal rendering | Renderizar fora da arvore DOM do editor | `ReactDOM.createPortal` para `document.body` |
+| ARIA completo | Dialog, live regions, labels | `role="dialog"`, `aria-live="polite"` |
+| Pan debouncing | Atualizar posicao a ~60fps | `requestAnimationFrame` ou timer de 16ms |
+
+### 13.6 Passo 5: HTML Exporter — Vanilla JS Completo (1.252 linhas)
+
+O exporter replica **toda** a funcionalidade do React no Vanilla JS:
+
+```typescript
+// src/engine/export/exporters/sections/ImageGalleryExporter.ts
+
+import type { Block, GalleryImage, LightboxConfig } from "../../../schema/siteDocument";
+import { dataBlockIdAttr, escapeHtml } from "../../shared/htmlHelpers";
+import { generateScopedId } from "../../shared/idGenerator";
+import { imageShadowMap } from "../../../shared/shadowConstants";
+
+// PATTERN: Funcoes separadas para CSS, HTML e JS
+function generateGalleryCSS(scope: string, columns: number): string { /* ~200 linhas */ }
+function generateGalleryHTML(scope: string, images: GalleryImage[]): string { /* ~100 linhas */ }
+function generateLightboxHTML(scope: string): string { /* ~50 linhas */ }
+function generateLightboxJS(scope: string, images: GalleryImage[], config: LightboxConfig): string { /* ~600 linhas */ }
+
+export function exportImageGallery(
+  block: Block,
+  _depth: number,
+  _basePath?: string,
+  _theme?: ThemeTokens,
+): string {
+  const props = (block as any).props;
+  const scope = generateScopedId("ig");  // PATTERN: ID unico para escopo
+
+  const css = generateGalleryCSS(scope, props.columns || 4);
+  const html = generateGalleryHTML(scope, props.images || []);
+  const lightboxHtml = generateLightboxHTML(scope);
+  const js = generateLightboxJS(scope, props.images || [], props.lightbox || {});
+
+  return `
+<section ${dataBlockIdAttr(block.id)} data-block-group="Galeria" id="${scope}">
+  <style>${css}</style>
+  ${html}
+  ${lightboxHtml}
+  <script>${js}<\/script>
+</section>`;
+}
+```
+
+**Padroes criticos no Exporter:**
+
+**1. IIFE para encapsulamento:**
+```javascript
+// Dentro do generateLightboxJS():
+(function() {
+  'use strict';
+  var container = document.getElementById('${scope}');
+  // Todo estado e logica ficam DENTRO do IIFE
+  // Nenhuma variavel global e criada
+})();
+```
+
+**2. Scoped CSS (prefixo `#${scope}`):**
+```css
+/* CORRETO - Seletores com escopo */
+#ig-abc123 .sg-ig-grid { display: grid; }
+#ig-abc123 .sg-ig-item:hover img { transform: scale(1.1); }
+
+/* ERRADO - Seletores globais (poluem outros blocos) */
+.sg-ig-grid { display: grid; }
+```
+
+**3. Scoped DOM queries:**
+```javascript
+// CORRETO - Busca dentro do container
+var items = container.querySelectorAll('.sg-ig-item');
+
+// ERRADO - Busca no documento inteiro
+var items = document.querySelectorAll('.sg-ig-item');
+```
+
+**4. Seguranca: escapeHtml() e escape de script:**
+```typescript
+// OBRIGATORIO: Escapar todo conteudo do usuario
+const title = escapeHtml(image.title || "");
+const alt = escapeHtml(image.alt || "");
+
+// OBRIGATORIO: Escapar </script> dentro de JSON.stringify
+const jsonImages = JSON.stringify(images)
+  .replace(/<\/script>/gi, "<\\/script>");
+```
+
+**5. Estado sem React:**
+```javascript
+// No Vanilla JS, estado e gerenciado com variaveis simples
+var currentIndex = 0;
+var zoom = 1;
+var panX = 0, panY = 0;
+
+function navigate(newIndex) {
+  currentIndex = newIndex;
+  zoom = 1; panX = 0; panY = 0;  // Reset ao navegar
+  updateImage();
+  updateThumbnails();
+  updateCounter();
+}
+```
+
+**6. Cleanup de event listeners:**
+```javascript
+// Adicionar listeners com referencia nomeada para remover depois
+function onKeyDown(e) { /* ... */ }
+document.addEventListener('keydown', onKeyDown);
+
+// Ao fechar lightbox:
+document.removeEventListener('keydown', onKeyDown);
+```
+
+### 13.7 Passo 6: Sistema de Variacoes
+
+```typescript
+// src/engine/presets/galleryVariations.ts
+
+export interface GalleryVariationPreset {
+  id: GalleryVariation;
+  name: string;
+  description: string;
+  thumbnail?: string;
+  defaultProps: {
+    variation: GalleryVariation;
+    columns: 2 | 3 | 4;
+    gap: number;
+    aspectRatio?: "1/1" | "4/3" | "16/9" | "3/2" | "auto";
+    imageBorderRadius: number;
+    imageShadow: "none" | "sm" | "md" | "lg" | "xl";
+    enterAnimation: "fade-scale" | "stagger" | "slide-up" | "none";
+    hoverEffect: "zoom-overlay" | "glow" | "scale" | "caption-reveal" | "none";
+  };
+}
+
+export const galleryVariations: Record<GalleryVariation, GalleryVariationPreset> = {
+  "gallery-grid": {
+    id: "gallery-grid",
+    name: "Grid Classico",
+    description: "Grade responsiva com 4 colunas",
+    defaultProps: {
+      variation: "gallery-grid",
+      columns: 4, gap: 1, aspectRatio: "auto",
+      imageBorderRadius: 8, imageShadow: "md",
+      enterAnimation: "fade-scale", hoverEffect: "zoom-overlay",
+    },
+  },
+  "gallery-masonry": { /* Mosaico tipo Pinterest */ },
+  "gallery-featured": { /* 1 grande + grid de miniaturas */ },
+  "gallery-carousel": { /* Slider horizontal */ },
+  "gallery-alternating": { /* Zigue-zague */ },
+};
+
+// Helper para iterar
+export const galleryVariationIds: GalleryVariation[] = [
+  "gallery-grid", "gallery-masonry", "gallery-featured",
+  "gallery-carousel", "gallery-alternating",
+];
+
+// Helper para buscar por ID
+export function getGalleryVariation(id: GalleryVariation): GalleryVariationPreset {
+  const variation = galleryVariations[id];
+  if (!variation) throw new Error(`Gallery variation not found: ${id}`);
+  return variation;
+}
+```
+
+**Padrao: Variacoes com helpers**
+
+Ao criar variacoes, sempre exporte:
+1. `Record<VariationId, VariationPreset>` — Mapa completo
+2. `variationIds: VariationId[]` — Array de IDs para iteracao
+3. `getVariation(id): VariationPreset` — Helper de busca com erro explicito
+
+Conecte ao block definition com `variations: Object.values(galleryVariations)`.
+
+**Regra critica:** Variacoes so devem definir props **visuais/layout** no `defaultProps`.
+Nunca incluir props editaveis como `images`, `title`, `subtitle` — senao ao trocar
+de variacao o conteudo do usuario e sobrescrito.
+
+### 13.8 Passo 7: API Publica e Integracao
+
+Adicionar todos os exports ao `src/index.ts`:
+
+```typescript
+// Tipos
+export type {
+  GalleryImage,
+  LightboxConfig,
+  GalleryEnterAnimation,
+  GalleryHoverEffect,
+  ImageGalleryBlock,
+} from './engine/schema/siteDocument'
+
+// Componentes React
+export {
+  Lightbox,
+} from './engine/render/renderers/sections/Lightbox'
+
+// Presets
+export type {
+  GalleryVariationPreset,
+} from './engine/presets/galleryVariations'
+
+export {
+  galleryVariations,
+  galleryVariationIds,
+  getGalleryVariation,
+} from './engine/presets/galleryVariations'
+```
+
+### 13.9 Uso em Templates
+
+Para usar o ImageGallery em um template, importe os defaults e sobrescreva conforme necessario:
+
+```typescript
+import { IMAGE_GALLERY_DEFAULT_PROPS } from "../../engine/registry/blocks/sections/imageGallery";
+
+// No template:
+{
+  id: "galeria-principal",
+  type: "imageGallery",
+  props: {
+    ...IMAGE_GALLERY_DEFAULT_PROPS,
+    title: "Nossa Galeria",
+    subtitle: "Confira nossos projetos",
+    images: [
+      {
+        id: "1",
+        src: "https://placehold.co/800x600/6366f1/ffffff?text=Imagem+1",
+        alt: "Descricao da imagem",
+        title: "Titulo da Imagem",
+        description: "Descricao detalhada",
+      },
+      // ... mais imagens
+    ],
+    variation: "gallery-grid",
+    columns: 3,
+    gap: 1.5,
+    aspectRatio: "4/3",
+    lightbox: {
+      mode: "adaptive",
+      showArrows: true,
+      showThumbnails: true,
+      showCounter: true,
+      showCaption: true,
+      enableZoom: true,
+      enableKeyboard: true,
+      enableTouchGestures: true,
+    },
+  },
+},
+```
+
+### 13.10 Checklist de Testes para Blocos Complexos
+
+O ImageGallery usa uma checklist de **35 testes** organizados em 7 categorias.
+Adapte para o seu bloco conforme a complexidade:
+
+#### Funcional (12 testes)
+
+- [ ] Grid renderiza com N colunas configuradas
+- [ ] Adicionar conteudo via modal/input funciona
+- [ ] Drag-to-reorder (se aplicavel)
+- [ ] Click abre lightbox/modal/overlay
+- [ ] Navegacao interna (prev/next)
+- [ ] Zoom in/out/reset
+- [ ] Pan quando zoom > 1x
+- [ ] Fechar (ESC, X, backdrop click)
+- [ ] Keyboard navigation (arrows)
+- [ ] Touch swipe navigation
+- [ ] Double-tap interaction
+- [ ] Thumbnails/tabs clicaveis
+
+#### Responsivo (4 testes)
+
+- [ ] Desktop 1280px: layout completo
+- [ ] Tablet 768px: layout adaptado
+- [ ] Mobile 640px: layout compacto
+- [ ] Mobile 375px: layout minimo
+
+#### Configuracao de Props (9 testes)
+
+- [ ] Mudar numero de colunas/items
+- [ ] Mudar espacamento
+- [ ] Mudar proporcao/aspect ratio
+- [ ] Mudar border radius
+- [ ] Mudar sombra
+- [ ] Mudar efeito de hover
+- [ ] Mudar animacao de entrada
+- [ ] Mudar tema (dark/light)
+- [ ] Toggle features (arrows, thumbnails, counter)
+
+#### Acessibilidade (3 testes)
+
+- [ ] Navegacao por Tab funciona
+- [ ] ARIA labels presentes (inspecionar DevTools)
+- [ ] Alt text obrigatorio e exibido
+
+#### Export (2 testes)
+
+- [ ] Export HTML renderiza corretamente
+- [ ] Interacoes funcionam no export (Vanilla JS)
+
+#### Performance (2 testes)
+
+- [ ] Lazy loading funciona (verificar aba Network)
+- [ ] Warning mostra com muitos items
+
+#### Compatibilidade (3 testes)
+
+- [ ] Chrome: todas as features funcionam
+- [ ] Firefox: todas as features funcionam
+- [ ] Safari: todas as features funcionam
 
 ---
 
-**Dúvidas?** Consulte o código de blocos existentes como referência. Todos seguem o mesmo padrão descrito neste guia.
+### 13.11 Resumo dos Padroes
+
+| Padrao | Onde | Descricao |
+|--------|------|-----------|
+| Tipos aninhados | Schema | `GalleryImage`, `LightboxConfig` como interfaces separadas |
+| Props aninhadas | Definition | `"lightbox.mode"` com notacao de ponto no inspectorMeta |
+| DefaultProps exportados | Definition | `IMAGE_GALLERY_DEFAULT_PROPS` para reuso em templates |
+| Sub-componentes | Renderer | `LazyImage` (mesmo arquivo), `Lightbox` (arquivo separado) |
+| Intersection Observer | Renderer | Lazy loading com `rootMargin: "200px"` |
+| Portal rendering | Lightbox | `ReactDOM.createPortal` para renderizar fora da arvore |
+| Body scroll lock | Lightbox | `document.body.style.overflow = "hidden"` |
+| Focus trap | Lightbox | Interceptar Tab para manter foco no modal |
+| Touch gestures | Lightbox | Swipe, double-tap com thresholds configurados |
+| Pan bounds | Lightbox | Clamp baseado no nivel de zoom |
+| IIFE | Exporter | `(function() { 'use strict'; ... })()` para encapsulamento |
+| Scoped CSS | Exporter | `#${scope}` como prefixo em todos os seletores |
+| Scoped DOM | Exporter | `container.querySelector()` em vez de `document.querySelector()` |
+| Script escape | Exporter | `<\/script>` para evitar fechar a tag prematuramente |
+| escapeHtml | Exporter | Em todo conteudo do usuario (XSS prevention) |
+| Variacoes com helpers | Presets | `Record`, `variationIds[]`, `getVariation()` |
+
+> **Plano de implementacao detalhado:** Para ver o passo-a-passo completo com commits
+> individuais e criterios de sucesso, consulte
+> [docs/plans/2026-02-12-image-gallery-implementation.md](./plans/2026-02-12-image-gallery-implementation.md).
+
+---
+
+## Recursos Adicionais
+
+- **[TEMPLATE-MANUAL.md](./TEMPLATE-MANUAL.md)** — Guia para criar templates completos
+- **[CLAUDE.md](../CLAUDE.md)** — Instrucoes do projeto para IA
+- **Exemplos de blocos por complexidade:**
+  - **Simples:** Alert (secao 3 deste guia)
+  - **Medio:** Hero (`src/engine/registry/blocks/sections/hero.ts`) com variacoes e image grid
+  - **Medio:** Navbar (`src/engine/registry/blocks/sections/navbar.ts`) com responsive CSS
+  - **Avancado:** ImageGallery (secao 13 deste guia) com lightbox, gestos e Vanilla JS
+  - **Plugin:** BlogPostGrid (`src/engine/registry/blocks/sections/blogPostGrid.ts`) com pluginId
+
+---
+
+**Duvidas?** Consulte o codigo de blocos existentes como referencia. Todos seguem o mesmo padrao descrito neste guia.
