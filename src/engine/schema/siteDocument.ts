@@ -1300,28 +1300,28 @@ export interface GalleryImage {
  */
 export interface LightboxConfig {
   // Tema
-  mode: "dark" | "light" | "theme" | "adaptive";
+  mode?: "dark" | "light" | "theme" | "adaptive";
 
   // Navegação
-  showArrows: boolean;
-  showThumbnails: boolean;
-  showCounter: boolean;
-  showCaption: boolean;
+  showArrows?: boolean;
+  showThumbnails?: boolean;
+  showCounter?: boolean;
+  showCaption?: boolean;
 
   // Funcionalidades
-  enableZoom: boolean;
-  enableDownload: boolean;       // v1.1
-  enableAutoplay: boolean;       // v1.3
-  autoplayInterval: number;      // seconds
+  enableZoom?: boolean;
+  enableDownload?: boolean;       // v1.1
+  enableAutoplay?: boolean;       // v1.3
+  autoplayInterval?: number;      // seconds
 
   // UX
-  closeOnBackdropClick: boolean;
-  closeOnEsc: boolean;
-  enableKeyboard: boolean;
-  enableTouchGestures: boolean;
+  closeOnBackdropClick?: boolean;
+  closeOnEsc?: boolean;
+  enableKeyboard?: boolean;
+  enableTouchGestures?: boolean;
 
   // Animação
-  transitionDuration: number;    // ms
+  transitionDuration?: number;    // ms
 }
 
 /**
@@ -1355,7 +1355,7 @@ export interface ImageGalleryBlock extends BlockBase {
     images: GalleryImage[];
 
     // Layout
-    variation: "gallery-grid" | "gallery-masonry" | "gallery-featured"
+    variation?: "gallery-grid" | "gallery-masonry" | "gallery-featured"
              | "gallery-carousel" | "gallery-alternating";
     columns: 2 | 3 | 4;
     gap: number;                 // rem
