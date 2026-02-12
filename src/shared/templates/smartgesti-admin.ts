@@ -18,6 +18,7 @@
 
 import type { SiteDocument } from "../schema";
 import { NAVBAR_DEFAULT_PROPS } from "../../engine/registry/blocks/sections/navbar";
+import { IMAGE_GALLERY_DEFAULT_PROPS } from "../../engine/registry/blocks/sections/imageGallery";
 
 export const smartgestiAdminTemplate: SiteDocument = {
   meta: {
@@ -219,7 +220,88 @@ export const smartgestiAdminTemplate: SiteDocument = {
       },
     },
 
-    // 6. FEATURE GRID
+    // 6. IMAGE GALLERY
+    {
+      id: "admin-gallery",
+      type: "imageGallery",
+      props: {
+        title: "Nossa Equipe e Escritório",
+        subtitle: "Conheça Quem Faz Acontecer",
+        images: [
+          {
+            id: "1",
+            src: "https://placehold.co/800x600/6366f1/ffffff?text=Equipe+SmartGesti",
+            alt: "Equipe SmartGesti reunida no escritório",
+            title: "Nossa Equipe",
+            description: "Time dedicado a transformar a gestão educacional",
+          },
+          {
+            id: "2",
+            src: "https://placehold.co/800x600/8b5cf6/ffffff?text=Escritório+Moderno",
+            alt: "Escritório moderno do SmartGesti",
+            title: "Nosso Espaço",
+            description: "Ambiente colaborativo e inovador",
+          },
+          {
+            id: "3",
+            src: "https://placehold.co/800x600/ec4899/ffffff?text=Atendimento+Cliente",
+            alt: "Equipe de suporte atendendo cliente",
+            title: "Suporte Dedicado",
+            description: "Atendimento humanizado e eficiente",
+          },
+          {
+            id: "4",
+            src: "https://placehold.co/800x600/10b981/ffffff?text=Tecnologia",
+            alt: "Infraestrutura tecnológica SmartGesti",
+            title: "Infraestrutura",
+            description: "Servidores de ponta para máxima performance",
+          },
+          {
+            id: "5",
+            src: "https://placehold.co/800x600/f59e0b/ffffff?text=Treinamento",
+            alt: "Treinamento de clientes SmartGesti",
+            title: "Capacitação",
+            description: "Treinamos sua equipe para o sucesso",
+          },
+          {
+            id: "6",
+            src: "https://placehold.co/800x600/ef4444/ffffff?text=Eventos",
+            alt: "Evento SmartGesti com clientes",
+            title: "Comunidade",
+            description: "Eventos e networking com gestores educacionais",
+          },
+        ],
+        variation: "gallery-grid",
+        columns: 3,
+        gap: 1.5,
+        aspectRatio: "4/3",
+        imageBorderRadius: 12,
+        imageShadow: "lg",
+        enterAnimation: "fade-scale",
+        hoverEffect: "zoom-overlay",
+        hoverIntensity: 60,
+        lightbox: {
+          mode: "adaptive",
+          showArrows: true,
+          showThumbnails: true,
+          showCounter: true,
+          showCaption: true,
+          enableZoom: true,
+          enableDownload: false,
+          enableAutoplay: false,
+          autoplayInterval: 5,
+          closeOnBackdropClick: true,
+          closeOnEsc: true,
+          enableKeyboard: true,
+          enableTouchGestures: true,
+          transitionDuration: 300,
+        },
+        lazyLoad: true,
+        showWarningAt: 50,
+      },
+    },
+
+    // 7. FEATURE GRID
     {
       id: "admin-features",
       type: "featureGrid",
@@ -269,7 +351,7 @@ export const smartgestiAdminTemplate: SiteDocument = {
       },
     },
 
-    // 7. TESTIMONIALS
+    // 8. TESTIMONIALS
     {
       id: "admin-testimonials",
       type: "testimonialGrid",
@@ -306,7 +388,7 @@ export const smartgestiAdminTemplate: SiteDocument = {
       },
     },
 
-    // 8. FAQ
+    // 9. FAQ
     {
       id: "admin-faq",
       type: "faq",
@@ -343,7 +425,7 @@ export const smartgestiAdminTemplate: SiteDocument = {
       },
     },
 
-    // 9. CONTACT SECTION
+    // 10. CONTACT SECTION
     {
       id: "admin-contact",
       type: "contactSection",
@@ -400,7 +482,7 @@ export const smartgestiAdminTemplate: SiteDocument = {
       },
     },
 
-    // 10. CTA
+    // 11. CTA
     {
       id: "admin-cta",
       type: "cta",
@@ -418,7 +500,7 @@ export const smartgestiAdminTemplate: SiteDocument = {
       },
     },
 
-    // 11. FOOTER
+    // 12. FOOTER
     {
       id: "admin-footer",
       type: "footer",
