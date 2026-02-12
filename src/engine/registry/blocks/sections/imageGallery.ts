@@ -102,12 +102,10 @@ export const imageGalleryBlock: BlockDefinition<"imageGallery"> = {
       inputType: "text",
       group: "Conteúdo",
     },
-    images: {
-      label: "Imagens",
-      inputType: "gallery-images",
-      group: "Conteúdo",
-      description: "Gerencie as imagens da galeria",
-    },
+    // Note: "images" field is hidden because there's no modal UI for it yet.
+    // Users add images via defaultProps or programmatically.
+    // The gallery-images input type exists but shows confusing "[object Object]..." text.
+    // Will be re-enabled when GalleryImagesInput modal component is implemented.
 
     // =========================================================================
     // GRUPO: Layout
@@ -128,18 +126,18 @@ export const imageGalleryBlock: BlockDefinition<"imageGallery"> = {
       label: "Colunas",
       inputType: "number",
       min: 2,
-      max: 4,
+      max: 12,
       group: "Layout",
-      description: "Número de colunas no desktop",
+      description: "Número de colunas no desktop (responsivo: 4→3→2→1)",
     },
     gap: {
-      label: "Espaçamento",
+      label: "Espaçamento (rem)",
       inputType: "number",
       min: 0,
-      max: 3,
+      max: 5,
       step: 0.5,
       group: "Layout",
-      description: "Espaçamento entre imagens (rem)",
+      description: "Espaçamento entre imagens (0 = sem espaço)",
     },
     aspectRatio: {
       label: "Proporção",
@@ -171,14 +169,14 @@ export const imageGalleryBlock: BlockDefinition<"imageGallery"> = {
       description: "Arredondamento das imagens (px)",
     },
     imageShadow: {
-      label: "Sombra",
+      label: "Sombra da Imagem",
       inputType: "select",
       options: [
-        { value: "none", label: "Sem sombra" },
+        { value: "none", label: "Nenhuma" },
         { value: "sm", label: "Pequena" },
         { value: "md", label: "Média" },
         { value: "lg", label: "Grande" },
-        { value: "xl", label: "Extra grande" },
+        { value: "xl", label: "Extra Grande" },
       ],
       group: "Aparência",
     },
