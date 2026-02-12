@@ -29,6 +29,7 @@ import { renderAboutSection } from "./AboutSectionRenderer";
 import { renderContactSection } from "./ContactSectionRenderer";
 import { renderBlogRecentPosts } from "./BlogRecentPostsRenderer";
 import { renderBlogTagCloud } from "./BlogTagCloudRenderer";
+import { renderImageGallery } from "./ImageGalleryRenderer";
 
 // Registrar renderizadores
 renderRegistry.register("hero", renderHero);
@@ -56,3 +57,4 @@ renderRegistry.register("aboutSection", renderAboutSection);
 renderRegistry.register("contactSection", renderContactSection);
 renderRegistry.register("blogRecentPosts", renderBlogRecentPosts);
 renderRegistry.register("blogTagCloud", renderBlogTagCloud);
+renderRegistry.register("imageGallery", renderImageGallery);
