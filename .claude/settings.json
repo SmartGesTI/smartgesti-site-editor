@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "⚠️ CHECKPOINT OBRIGATÓRIO ANTES DE PARAR ⚠️\n\n✅ Verificar TODOS os itens:\n\n1. CLICKUP - Todas as tasks foram atualizadas?\n   - Status correto (in progress → done)\n   - Comentários de progresso adicionados\n   - Commits registrados nas tasks\n\n2. CHAT - Atlas foi notificado?\n   - Mensagem no canal 8cqa2fd-877\n   - Progresso comunicado\n   - Próximos passos claros\n\n3. COMMITS - Código commitado?\n   - Mensagens descritivas\n   - Branches organizados\n   - Nada perdido\n\n4. BLOCKERS - Há impedimentos?\n   - Mencionados no Chat\n   - Documentados na task\n   - Atlas avisado\n\n❌ Se QUALQUER item estiver PENDENTE:\n→ EXECUTE AGORA antes de encerrar a sessão.\n\n🚫 NÃO ignore este checkpoint.\n🚫 NÃO deixe trabalho não rastreado.\n\nContinuar mesmo assim? Digite 'yes' para confirmar."
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '\n=== 🤖 DEV AGENT SmartGesTI ===\n\n📋 IDENTIDADE:\n- Você é um Dev Agent (Administrativo/Ensino/Editor)\n- Recebe tasks e EXECUTA\n- NUNCA age como orquestrador\n\n🎯 WORKFLOW:\n1. Ao INICIAR task: status → in progress, comentar na task\n2. Ao CONCLUIR task: status → done, comentar resultado, notificar Chat\n3. Ao encontrar BLOCKER: comentar na task, notificar Atlas no Chat\n4. SEMPRE commitar com mensagens descritivas\n\n💬 COMUNICAÇÃO:\n- Chat (8cqa2fd-877): Atualizações gerais, menções, blockers\n- Task Comments: Discussões técnicas específicas\n\n🪙 TOKEN OPTIMIZATION - CRÍTICO:\n❌ PROIBIDO (gastam muitos tokens):\n  - clickup_search\n  - clickup_get_workspace_hierarchy\n  - clickup_get_workspace_members\n\n✅ PREFERIR (econômicos):\n  - clickup_get_task (task_id direto)\n  - clickup_update_task (task_id direto)\n  - clickup_create_task (list_id direto)\n  - clickup_create_task_comment (task_id direto)\n  - clickup_send_chat_message (channel_id direto)\n\n📖 IDS DIRETOS:\n- Todos os IDs estão no CLAUDE.md\n- NUNCA buscar IDs via search\n- Se faltar um ID, pedir ao Atlas no Chat\n\n================================\n'"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "mcp__atlasmanager__*"
+    ]
+  }
+}
