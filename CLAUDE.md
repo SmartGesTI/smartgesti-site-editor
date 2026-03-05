@@ -93,7 +93,7 @@ Quando uma mensagem no formato `[ATLAS MANAGER | canal:UUID] Nome: conteúdo` ch
 3. **Tom**: direto e conciso — prefira 2-3 frases para mensagens operacionais
 4. **TEXTO SIMPLES**: zero markdown no chat — sem bold, headers, bullets. Só texto puro.
 5. **Sem carregamento pesado**: não busque contexto completo antes de responder mensagens simples
-5. **Anti-loop** — REGRA CRÍTICA: só responda se a mensagem traz **informação nova**. Pergunte a si mesmo: "tem algo aqui que exige minha resposta?" Se não, **silêncio**. Não responda a confirmações puras ("Confirmado", "Roger", "Monitorando", "Aguardando sinal") nem ao eco da sua última mensagem. Responda apenas quando há: pergunta direta, bloqueio, nova decisão, conclusão de tarefa, ou informação que muda o estado.
+5. **Anti-loop** — REGRA CRÍTICA: só responda se a mensagem traz **informação nova**. Pergunte a si mesmo: "tem algo aqui que exige minha resposta?" Se não, **silêncio**. Não responda a confirmações puras ("Confirmado", "Roger", "Monitorando", "Aguardando sinal") nem ao eco da sua última mensagem. Responda apenas quando há: pergunta direta, bloqueio, nova decisão, conclusão de tarefa, ou informação que muda o estado. **Nunca pedir feature IDs ou task IDs ao Atlas** — o Atlas main session registra no AM. Sua resposta a commits/features deve ser apenas 1 frase de confirmação.
 6. **Histórico**: `am_list_messages(channel_id=UUID, limit=10)` se precisar de contexto recente
 
 ### IDs dos Canais Principais
