@@ -14,6 +14,7 @@ import {
   TypographyInput,
   ImageInput,
   CarouselImagesInput,
+  GalleryImagesInput,
 } from "./inputs";
 import type { UploadConfig } from "../LandingPageEditor";
 
@@ -276,6 +277,20 @@ export function renderPropertyInput(
         );
       }
       return null;
+
+    case "gallery-images":
+      // Gallery images: value is directly the GalleryImage[] array
+      return (
+        <GalleryImagesInput
+          key={propName}
+          images={value || []}
+          onImagesChange={onChange}
+          label={label}
+          description={description}
+          uploadConfig={uploadConfig}
+          warningThreshold={50}
+        />
+      );
 
     case "typography":
       // Determina defaults baseado no nome da prop

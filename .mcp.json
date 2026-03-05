@@ -1,5 +1,10 @@
 {
   "mcpServers": {
+    "atlasmanager": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/home/bruno/GithubPessoal/SmartGesTI-Atlas/bridge/mcp-server.js"]
+    },
     "supabase": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp?project_ref=kyszbkkhggzugadamgku"

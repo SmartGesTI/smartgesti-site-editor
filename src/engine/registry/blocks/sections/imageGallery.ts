@@ -102,10 +102,12 @@ export const imageGalleryBlock: BlockDefinition<"imageGallery"> = {
       inputType: "text",
       group: "Conteúdo",
     },
-    // Note: "images" field is hidden because there's no modal UI for it yet.
-    // Users add images via defaultProps or programmatically.
-    // The gallery-images input type exists but shows confusing "[object Object]..." text.
-    // Will be re-enabled when GalleryImagesInput modal component is implemented.
+    images: {
+      label: "Imagens",
+      inputType: "gallery-images",
+      group: "Conteúdo",
+      description: "Adicione e gerencie as imagens da galeria",
+    },
 
     // =========================================================================
     // GRUPO: Layout
