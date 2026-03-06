@@ -1344,6 +1344,16 @@ export type GalleryHoverEffect =
   | "none";
 
 /**
+ * Variação de layout da galeria
+ */
+export type GalleryVariation =
+  | "gallery-grid"
+  | "gallery-masonry"
+  | "gallery-featured"
+  | "gallery-carousel"
+  | "gallery-alternating";
+
+/**
  * ImageGallery - Galeria de imagens com lightbox
  */
 export interface ImageGalleryBlock extends BlockBase {
@@ -1355,8 +1365,7 @@ export interface ImageGalleryBlock extends BlockBase {
     images: GalleryImage[];
 
     // Layout
-    variation?: "gallery-grid" | "gallery-masonry" | "gallery-featured"
-             | "gallery-carousel" | "gallery-alternating";
+    variation?: GalleryVariation;
     columns: 2 | 3 | 4;
     gap: number;                 // rem
     aspectRatio?: "1/1" | "4/3" | "16/9" | "3/2" | "auto";

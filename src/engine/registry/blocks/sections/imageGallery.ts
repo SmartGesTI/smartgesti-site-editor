@@ -131,6 +131,10 @@ export const imageGalleryBlock: BlockDefinition<"imageGallery"> = {
       max: 12,
       group: "Layout",
       description: "Número de colunas no desktop (responsivo: 4→3→2→1)",
+      showWhen: {
+        field: "variation",
+        notOneOf: ["gallery-carousel", "gallery-alternating"],
+      },
     },
     gap: {
       label: "Espaçamento (rem)",
@@ -152,6 +156,10 @@ export const imageGalleryBlock: BlockDefinition<"imageGallery"> = {
         { value: "3/2", label: "Clássico (3:2)" },
       ],
       group: "Layout",
+      showWhen: {
+        field: "variation",
+        notOneOf: ["gallery-masonry"],
+      },
     },
 
     // =========================================================================

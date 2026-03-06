@@ -79,6 +79,7 @@ export type {
   LightboxConfig,
   GalleryEnterAnimation,
   GalleryHoverEffect,
+  GalleryVariation,
   ImageGalleryBlock,
 
   // Advanced sections
