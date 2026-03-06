@@ -189,6 +189,42 @@ const ImageGalleryComponent: React.FC<{ block: ImageGalleryBlock }> = ({ block }
     setLightboxOpen(false);
   }, []);
 
+  // Move images/columns/gap up so carousel hooks can reference them
+  const images = props.images || [];
+  const columns = props.columns || 4;
+  const gap = props.gap || 1;
+
+  // Carousel hooks (must be before any early returns)
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  const handleCarouselPrev = useCallback(() => {
+    setCarouselIndex((prev) => Math.max(0, prev - 1));
+  }, []);
+
+  const handleCarouselNext = useCallback(() => {
+    setCarouselIndex((prev) => Math.min(images.length - 1, prev + 1));
+  }, [images.length]);
+
+  // Carousel: scroll to current slide
+  useEffect(() => {
+    if (props.variation !== 'gallery-carousel' || !carouselRef.current) return;
+    const container = carouselRef.current;
+    const slideWidth = container.offsetWidth;
+    container.scrollTo({ left: carouselIndex * slideWidth, behavior: 'smooth' });
+  }, [carouselIndex, props.variation]);
+
+  // Carousel: autoplay
+  useEffect(() => {
+    if (props.variation !== 'gallery-carousel') return;
+    if (!props.lightbox?.enableAutoplay) return;
+    const interval = (props.lightbox?.autoplayInterval || 5) * 1000;
+    const timer = setInterval(() => {
+      setCarouselIndex((prev) => (prev >= images.length - 1 ? 0 : prev + 1));
+    }, interval);
+    return () => clearInterval(timer);
+  }, [props.variation, props.lightbox?.enableAutoplay, props.lightbox?.autoplayInterval, images.length]);
+
   const enterAnimationClass = useMemo<string>(() => {
     switch (props.enterAnimation) {
       case "fade-scale":
@@ -202,10 +238,274 @@ const ImageGalleryComponent: React.FC<{ block: ImageGalleryBlock }> = ({ block }
     }
   }, [props.enterAnimation]);
 
-  const images = props.images || [];
-  const columns = props.columns || 4;
-  const gap = props.gap || 1;
   const showWarningAt = props.showWarningAt || 50;
+
+  // ---- Layout render functions ----
+
+  const renderGridLayout = () => (
+    <div
+      className={`sg-gallery__grid ${enterAnimationClass}`}
+      style={{
+        display: "grid",
+        gridTemplateColumns: `repeat(${columns}, 1fr)`,
+        gap: `${gap}rem`,
+      }}
+    >
+      {images.map((image, index) => (
+        <LazyImage
+          key={image.id}
+          image={image}
+          onClick={() => handleImageClick(index)}
+          borderRadius={props.imageBorderRadius || 8}
+          shadow={props.imageShadow || "md"}
+          hoverEffect={props.hoverEffect || "zoom-overlay"}
+          aspectRatio={props.aspectRatio}
+        />
+      ))}
+    </div>
+  );
+
+  const renderMasonryLayout = () => (
+    <div
+      className={`sg-gallery__masonry ${enterAnimationClass}`}
+      style={{
+        columnCount: columns,
+        columnGap: `${gap}rem`,
+      }}
+    >
+      {images.map((image, index) => (
+        <div key={image.id} style={{ breakInside: "avoid", marginBottom: `${gap}rem` }}>
+          <LazyImage
+            image={image}
+            onClick={() => handleImageClick(index)}
+            borderRadius={props.imageBorderRadius || 8}
+            shadow={props.imageShadow || "md"}
+            hoverEffect={props.hoverEffect || "zoom-overlay"}
+            aspectRatio={undefined}
+          />
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderFeaturedLayout = () => (
+    <div className={`sg-gallery__featured ${enterAnimationClass}`}>
+      <div className="sg-gallery__featured-main">
+        <LazyImage
+          image={images[0]}
+          onClick={() => handleImageClick(0)}
+          borderRadius={props.imageBorderRadius || 8}
+          shadow={props.imageShadow || "md"}
+          hoverEffect={props.hoverEffect || "zoom-overlay"}
+          aspectRatio="16/9"
+        />
+      </div>
+      {images.length > 1 && (
+        <div
+          className="sg-gallery__featured-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${Math.min(columns, images.length - 1)}, 1fr)`,
+            gap: `${gap}rem`,
+            marginTop: `${gap}rem`,
+          }}
+        >
+          {images.slice(1).map((image, index) => (
+            <LazyImage
+              key={image.id}
+              image={image}
+              onClick={() => handleImageClick(index + 1)}
+              borderRadius={props.imageBorderRadius || 8}
+              shadow={props.imageShadow || "md"}
+              hoverEffect={props.hoverEffect || "zoom-overlay"}
+              aspectRatio={props.aspectRatio}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderCarouselLayout = () => (
+    <div className={`sg-gallery__carousel ${enterAnimationClass}`} style={{ position: "relative" }}>
+      <div
+        ref={carouselRef}
+        className="sg-gallery__carousel-track"
+        style={{
+          display: "flex",
+          overflowX: "hidden",
+          scrollSnapType: "x mandatory",
+          scrollBehavior: "smooth",
+          borderRadius: `${props.imageBorderRadius || 8}px`,
+        }}
+      >
+        {images.map((image, index) => (
+          <div
+            key={image.id}
+            className="sg-gallery__carousel-slide"
+            style={{
+              flex: "0 0 100%",
+              scrollSnapAlign: "start",
+              aspectRatio: props.aspectRatio || "16/9",
+              cursor: "pointer",
+              position: "relative",
+              overflow: "hidden",
+            }}
+            onClick={() => handleImageClick(index)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleImageClick(index);
+              }
+            }}
+            aria-label={`Ver imagem: ${image.alt}`}
+          >
+            <img
+              src={image.src}
+              alt={image.alt}
+              loading={index > 2 ? "lazy" : "eager"}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+            />
+            {(image.title || image.description) && (
+              <div className="sg-gallery__carousel-caption">
+                {image.title && (
+                  <div style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.25rem" }}>
+                    {image.title}
+                  </div>
+                )}
+                {image.description && (
+                  <div style={{ fontSize: "0.875rem", opacity: 0.9 }}>
+                    {image.description}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={handleCarouselPrev}
+            disabled={carouselIndex === 0}
+            aria-label="Slide anterior"
+            className="sg-gallery__carousel-nav sg-gallery__carousel-nav--prev"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <button
+            onClick={handleCarouselNext}
+            disabled={carouselIndex === images.length - 1}
+            aria-label="Próximo slide"
+            className="sg-gallery__carousel-nav sg-gallery__carousel-nav--next"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </>
+      )}
+
+      {images.length > 1 && (
+        <div className="sg-gallery__carousel-dots">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCarouselIndex(index)}
+              aria-label={`Ir para slide ${index + 1}`}
+              className={`sg-gallery__carousel-dot ${carouselIndex === index ? "sg-gallery__carousel-dot--active" : ""}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderAlternatingLayout = () => (
+    <div className={`sg-gallery__alternating ${enterAnimationClass}`}>
+      {images.map((image, index) => {
+        const isReversed = index % 2 === 1;
+        return (
+          <div
+            key={image.id}
+            className={`sg-gallery__alternating-row ${isReversed ? "sg-gallery__alternating-row--reverse" : ""}`}
+            style={{ marginBottom: `${gap * 2}rem` }}
+          >
+            <div className="sg-gallery__alternating-image">
+              <LazyImage
+                image={image}
+                onClick={() => handleImageClick(index)}
+                borderRadius={props.imageBorderRadius || 8}
+                shadow={props.imageShadow || "md"}
+                hoverEffect={props.hoverEffect || "zoom-overlay"}
+                aspectRatio={props.aspectRatio || "4/3"}
+              />
+            </div>
+            <div className="sg-gallery__alternating-text">
+              {image.title && (
+                <h3 style={{
+                  fontSize: "var(--sg-heading-h3, 1.5rem)",
+                  fontWeight: 600,
+                  marginBottom: "0.75rem",
+                  color: "var(--sg-heading, var(--sg-text))",
+                }}>
+                  {image.title}
+                </h3>
+              )}
+              {image.description && (
+                <p style={{
+                  fontSize: "1rem",
+                  lineHeight: 1.6,
+                  color: "var(--sg-muted-text, #6b7280)",
+                  margin: 0,
+                }}>
+                  {image.description}
+                </p>
+              )}
+              {!image.title && !image.description && (
+                <p style={{
+                  fontSize: "0.875rem",
+                  color: "var(--sg-muted-text, #9ca3af)",
+                  fontStyle: "italic",
+                  margin: 0,
+                }}>
+                  Adicione título e descrição a esta imagem
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const renderGalleryLayout = () => {
+    const variation = props.variation || "gallery-grid";
+
+    switch (variation) {
+      case "gallery-masonry":
+        return renderMasonryLayout();
+      case "gallery-featured":
+        return renderFeaturedLayout();
+      case "gallery-carousel":
+        return renderCarouselLayout();
+      case "gallery-alternating":
+        return renderAlternatingLayout();
+      case "gallery-grid":
+      default:
+        return renderGridLayout();
+    }
+  };
 
   return (
     <section
@@ -262,29 +562,8 @@ const ImageGalleryComponent: React.FC<{ block: ImageGalleryBlock }> = ({ block }
           </div>
         )}
 
-        {/* Gallery Grid */}
-        {images.length > 0 && (
-          <div
-            className={`sg-gallery__grid ${enterAnimationClass}`}
-            style={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${columns}, 1fr)`,
-              gap: `${gap}rem`,
-            }}
-          >
-            {images.map((image, index) => (
-              <LazyImage
-                key={image.id}
-                image={image}
-                onClick={() => handleImageClick(index)}
-                borderRadius={props.imageBorderRadius || 8}
-                shadow={props.imageShadow || "md"}
-                hoverEffect={props.hoverEffect || "zoom-overlay"}
-                aspectRatio={props.aspectRatio}
-              />
-            ))}
-          </div>
-        )}
+        {/* Gallery Layout */}
+        {images.length > 0 && renderGalleryLayout()}
 
         {/* Empty State */}
         {images.length === 0 && (
@@ -456,6 +735,97 @@ const ImageGalleryComponent: React.FC<{ block: ImageGalleryBlock }> = ({ block }
         @media (max-width: 640px) {
           .sg-gallery__grid {
             grid-template-columns: 1fr !important;
+          }
+        }
+
+        /* Masonry Responsive */
+        @media (max-width: 1024px) {
+          .sg-gallery__masonry { column-count: 3 !important; }
+        }
+        @media (max-width: 768px) {
+          .sg-gallery__masonry { column-count: 2 !important; }
+        }
+        @media (max-width: 640px) {
+          .sg-gallery__masonry { column-count: 1 !important; }
+        }
+
+        /* Featured Layout */
+        .sg-gallery__featured-main { width: 100%; }
+        @media (max-width: 768px) {
+          .sg-gallery__featured-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+        @media (max-width: 640px) {
+          .sg-gallery__featured-grid { grid-template-columns: 1fr !important; }
+        }
+
+        /* Carousel Layout */
+        .sg-gallery__carousel-caption {
+          position: absolute;
+          bottom: 0; left: 0; right: 0;
+          background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+          padding: 2rem 1.5rem 1.5rem;
+          color: white;
+        }
+        .sg-gallery__carousel-nav {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(0,0,0,0.5);
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 40px; height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 2;
+          transition: opacity 0.2s;
+        }
+        .sg-gallery__carousel-nav--prev { left: 1rem; }
+        .sg-gallery__carousel-nav--next { right: 1rem; }
+        .sg-gallery__carousel-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+        .sg-gallery__carousel-dots {
+          display: flex;
+          justify-content: center;
+          gap: 0.5rem;
+          margin-top: 1rem;
+        }
+        .sg-gallery__carousel-dot {
+          height: 0.5rem;
+          border-radius: 999px;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          transition: all 0.3s ease;
+          width: 0.5rem;
+          background: var(--sg-muted-text, #d1d5db);
+        }
+        .sg-gallery__carousel-dot--active {
+          width: 2rem;
+          background: var(--sg-primary, #3b82f6);
+        }
+
+        /* Alternating Layout */
+        .sg-gallery__alternating-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 2rem;
+          align-items: center;
+        }
+        .sg-gallery__alternating-row--reverse {
+          direction: rtl;
+        }
+        .sg-gallery__alternating-row--reverse > * {
+          direction: ltr;
+        }
+        .sg-gallery__alternating-text {
+          padding: 1rem;
+        }
+        @media (max-width: 768px) {
+          .sg-gallery__alternating-row {
+            grid-template-columns: 1fr !important;
+            direction: ltr !important;
           }
         }
       `}</style>
