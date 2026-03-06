@@ -90,7 +90,8 @@ export class PatchBuilder {
       throw new Error(`Block ${blockId} not found in page ${pageId}`)
     }
 
-    const propPath = `${blockInfo.path}/props/${propName}`
+    // Expandir dot-notation: "lightbox.showArrows" -> "lightbox/showArrows"
+    const propPath = `${blockInfo.path}/props/${propName.replace(/\./g, '/')}`
     return [{ op: 'replace', path: propPath, value }]
   }
 
@@ -114,10 +115,23 @@ export class PatchBuilder {
     const existingProps = blockInfo.block.props as Record<string, any>
 
     for (const [propName, value] of Object.entries(updates)) {
-      const propPath = `${blockInfo.path}/props/${propName}`
-      
-      // Se a propriedade já existe, usar replace; caso contrário, usar add
-      if (propName in existingProps) {
+      // Expandir dot-notation: "lightbox.showArrows" -> "lightbox/showArrows"
+      const expandedName = propName.replace(/\./g, '/')
+      const propPath = `${blockInfo.path}/props/${expandedName}`
+
+      // Verificar existencia considerando nested path
+      const parts = propName.split('.')
+      let exists = true
+      let current: any = existingProps
+      for (const part of parts) {
+        if (current == null || !(part in current)) {
+          exists = false
+          break
+        }
+        current = current[part]
+      }
+
+      if (exists) {
         patches.push({ op: 'replace', path: propPath, value })
       } else {
         patches.push({ op: 'add', path: propPath, value })

@@ -112,6 +112,18 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
       Array<{ propName: string; meta: InspectorMeta; value: any }>
     > = {};
 
+    // Helper para ler props com dot-notation (ex: "lightbox.showArrows" -> props.lightbox.showArrows)
+    const getNestedValue = (obj: Record<string, any>, path: string): any => {
+      if (!path.includes('.')) return obj[path];
+      const parts = path.split('.');
+      let current: any = obj;
+      for (const part of parts) {
+        if (current == null) return undefined;
+        current = current[part];
+      }
+      return current;
+    };
+
     for (const [propName, meta] of Object.entries(
       blockDefinition.inspectorMeta,
     )) {
@@ -128,11 +140,11 @@ export const BlockPropertyEditor = memo(function BlockPropertyEditor({
       }
 
       // Usar valor atual ou fallback para defaultProps, e depois theme colors
-      const currentValue = props[propName];
+      const currentValue = getNestedValue(props, propName);
       // Para campos de cor, também fazer fallback se o valor for string vazia
       const isColorInput = meta.inputType === "color" || meta.inputType === "color-advanced";
       const shouldUseFallback = currentValue === undefined || (isColorInput && currentValue === "");
-      let value = shouldUseFallback ? defaultProps[propName] : currentValue;
+      let value = shouldUseFallback ? getNestedValue(defaultProps, propName) : currentValue;
 
       // Para color inputs sem valor definido, tentar fallback para cor do theme
       if (value === undefined && isColorInput && document?.theme?.colors) {
