@@ -24,7 +24,176 @@ import { imageShadowMap } from "../../../shared/shadowConstants";
 // CSS Generation
 // ============================================================================
 
-function generateGalleryCSS(scope: string, columns: number): string {
+function generateGalleryCSS(scope: string, columns: number, variation: string, gap: number): string {
+  // Variation-specific CSS
+  let variationCSS = "";
+
+  if (variation === "gallery-masonry") {
+    variationCSS = `
+/* Masonry layout */
+#${scope} .sg-ig-masonry {
+  column-gap: ${gap}rem;
+}
+#${scope} .sg-ig-masonry .sg-ig-item {
+  break-inside: avoid;
+  display: inline-block;
+  width: 100%;
+}
+@media (max-width: 1024px) {
+  #${scope} .sg-ig-masonry { column-count: 3 !important; }
+}
+@media (max-width: 768px) {
+  #${scope} .sg-ig-masonry { column-count: 2 !important; }
+}
+@media (max-width: 640px) {
+  #${scope} .sg-ig-masonry { column-count: 1 !important; }
+}`;
+  } else if (variation === "gallery-featured") {
+    variationCSS = `
+/* Featured layout */
+#${scope} .sg-ig-featured-main {
+  width: 100%;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+#${scope} .sg-ig-featured-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+#${scope} .sg-ig-featured-grid {
+  display: grid;
+}
+@media (max-width: 768px) {
+  #${scope} .sg-ig-featured-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+@media (max-width: 640px) {
+  #${scope} .sg-ig-featured-grid {
+    grid-template-columns: 1fr !important;
+  }
+}`;
+  } else if (variation === "gallery-carousel") {
+    variationCSS = `
+/* Carousel layout */
+#${scope} .sg-ig-carousel { position: relative; }
+#${scope} .sg-ig-carousel-track {
+  display: flex;
+  overflow-x: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+#${scope} .sg-ig-carousel-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+#${scope} .sg-ig-carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+#${scope} .sg-ig-carousel-caption {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  padding: 2rem 1.5rem 1.5rem;
+  color: white;
+}
+#${scope} .sg-ig-carousel-caption-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+#${scope} .sg-ig-carousel-caption-desc {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+#${scope} .sg-ig-carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: opacity 0.2s;
+}
+#${scope} .sg-ig-carousel-nav--prev { left: 1rem; }
+#${scope} .sg-ig-carousel-nav--next { right: 1rem; }
+#${scope} .sg-ig-carousel-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+#${scope} .sg-ig-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+#${scope} .sg-ig-dot {
+  height: 0.5rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+#${scope} .sg-ig-dot--active {
+  width: 2rem;
+  background: var(--sg-primary, #3b82f6);
+}
+#${scope} .sg-ig-dot--inactive {
+  width: 0.5rem;
+  background: var(--sg-muted-text, #d1d5db);
+}`;
+  } else if (variation === "gallery-alternating") {
+    variationCSS = `
+/* Alternating layout */
+#${scope} .sg-ig-alt-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+}
+#${scope} .sg-ig-alt-row--reverse {
+  direction: rtl;
+}
+#${scope} .sg-ig-alt-row--reverse > * {
+  direction: ltr;
+}
+#${scope} .sg-ig-alt-text {
+  padding: 1rem;
+}
+#${scope} .sg-ig-alt-text h3 {
+  font-size: var(--sg-heading-h3, 1.5rem);
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  color: var(--sg-heading, var(--sg-text));
+}
+#${scope} .sg-ig-alt-text p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--sg-muted-text, #6b7280);
+  margin: 0;
+}
+@media (max-width: 768px) {
+  #${scope} .sg-ig-alt-row {
+    grid-template-columns: 1fr !important;
+    direction: ltr !important;
+  }
+}`;
+  }
+
   return `
 /* Gallery base */
 #${scope} .sg-ig-header { text-align: center; margin-bottom: 2rem; }
@@ -181,6 +350,7 @@ function generateGalleryCSS(scope: string, columns: number): string {
     grid-template-columns: 1fr !important;
   }
 }
+${variationCSS}
 `.trim();
 }
 
@@ -389,6 +559,7 @@ function generateGalleryHTML(
     showWarningAt: number;
     bg?: string;
     lightbox: LightboxConfig;
+    variation?: string;
   },
 ): string {
   const {
@@ -404,6 +575,7 @@ function generateGalleryHTML(
     lazyLoad,
     showWarningAt,
     bg,
+    variation = "gallery-grid",
   } = props;
 
   const shadow = imageShadowMap[imageShadow] || "none";
@@ -459,44 +631,170 @@ function generateGalleryHTML(
     </section>`;
   }
 
-  // Image items
-  const itemsHTML = images
-    .map((img, i) => {
-      let overlayHTML = "";
-      if (hoverEffect === "zoom-overlay") {
-        overlayHTML = `
-          <div class="sg-ig-overlay">
-            <svg style="width:3rem;height:3rem;color:white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
-            </svg>
-          </div>`;
-      }
-
-      let captionHTML = "";
-      if (hoverEffect === "caption-reveal" && (img.title || img.description)) {
-        captionHTML = `<div class="sg-ig-caption">`;
-        if (img.title) captionHTML += `<div class="sg-ig-caption-title">${escapeHtml(img.title)}</div>`;
-        if (img.description) captionHTML += `<div class="sg-ig-caption-desc">${escapeHtml(img.description)}</div>`;
-        captionHTML += `</div>`;
-      }
-
-      return `
-        <div class="sg-ig-item ${hoverClass}"
-             data-gallery-index="${i}"
-             role="button" tabindex="0"
-             aria-label="Ver imagem: ${escapeHtml(img.alt)}"
-             style="border-radius: ${imageBorderRadius}px; aspect-ratio: ${aspectRatio || "auto"}; box-shadow: ${shadow};">
-          <img src="${escapeHtml(img.src)}"
-               alt="${escapeHtml(img.alt)}"
-               ${lazyLoad ? 'loading="lazy"' : 'loading="eager"'} />
-          ${overlayHTML}${captionHTML}
+  // Helper: build a single gallery item with hover/overlay/caption
+  function buildItemHTML(img: GalleryImage, i: number, extraStyle?: string): string {
+    let overlayHTML = "";
+    if (hoverEffect === "zoom-overlay") {
+      overlayHTML = `
+        <div class="sg-ig-overlay">
+          <svg style="width:3rem;height:3rem;color:white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+          </svg>
         </div>`;
-    })
-    .join("");
+    }
+
+    let captionHTML = "";
+    if (hoverEffect === "caption-reveal" && (img.title || img.description)) {
+      captionHTML = `<div class="sg-ig-caption">`;
+      if (img.title) captionHTML += `<div class="sg-ig-caption-title">${escapeHtml(img.title)}</div>`;
+      if (img.description) captionHTML += `<div class="sg-ig-caption-desc">${escapeHtml(img.description)}</div>`;
+      captionHTML += `</div>`;
+    }
+
+    const baseStyle = `border-radius: ${imageBorderRadius}px; aspect-ratio: ${aspectRatio || "auto"}; box-shadow: ${shadow};`;
+    const finalStyle = extraStyle ? `${baseStyle} ${extraStyle}` : baseStyle;
+
+    return `
+      <div class="sg-ig-item ${hoverClass}"
+           data-gallery-index="${i}"
+           role="button" tabindex="0"
+           aria-label="Ver imagem: ${escapeHtml(img.alt)}"
+           style="${finalStyle}">
+        <img src="${escapeHtml(img.src)}"
+             alt="${escapeHtml(img.alt)}"
+             ${lazyLoad ? 'loading="lazy"' : 'loading="eager"'} />
+        ${overlayHTML}${captionHTML}
+      </div>`;
+  }
 
   // Lightbox DOM
   const lightboxHTML = generateLightboxHTML(scope, images, props.lightbox);
+
+  // Build layout-specific gallery content
+  let galleryContentHTML = "";
+
+  if (variation === "gallery-masonry") {
+    const itemsHTML = images
+      .map((img, i) => `<div style="break-inside: avoid; margin-bottom: ${gap}rem;">${buildItemHTML(img, i)}</div>`)
+      .join("");
+    galleryContentHTML = `
+      <div class="sg-ig-masonry" style="column-count: ${columns};">
+        ${itemsHTML}
+      </div>`;
+  } else if (variation === "gallery-featured") {
+    const featuredCols = Math.max(2, columns);
+    const firstImg = images[0];
+    const restImages = images.slice(1);
+
+    let firstOverlayHTML = "";
+    if (hoverEffect === "zoom-overlay") {
+      firstOverlayHTML = `
+        <div class="sg-ig-overlay">
+          <svg style="width:3rem;height:3rem;color:white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+          </svg>
+        </div>`;
+    }
+
+    const featuredMainHTML = `
+      <div class="sg-ig-featured-main ${hoverClass}"
+           data-gallery-index="0"
+           role="button" tabindex="0"
+           aria-label="Ver imagem: ${escapeHtml(firstImg.alt)}"
+           style="border-radius: ${imageBorderRadius}px; aspect-ratio: 16/9; box-shadow: ${shadow}; position: relative;">
+        <img src="${escapeHtml(firstImg.src)}"
+             alt="${escapeHtml(firstImg.alt)}"
+             ${lazyLoad ? 'loading="lazy"' : 'loading="eager"'}
+             style="border-radius: ${imageBorderRadius}px;" />
+        ${firstOverlayHTML}
+      </div>`;
+
+    const restItemsHTML = restImages
+      .map((img, i) => buildItemHTML(img, i + 1))
+      .join("");
+
+    const featuredGridHTML = restImages.length > 0
+      ? `<div class="sg-ig-featured-grid" style="grid-template-columns: repeat(${featuredCols}, 1fr); gap: ${gap}rem; margin-top: ${gap}rem;">
+          ${restItemsHTML}
+        </div>`
+      : "";
+
+    galleryContentHTML = `${featuredMainHTML}${featuredGridHTML}`;
+  } else if (variation === "gallery-carousel") {
+    const chevronLeftSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
+    const chevronRightSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+
+    const slidesHTML = images
+      .map((img, i) => {
+        let captionOverlay = "";
+        if (img.title || img.description) {
+          captionOverlay = `<div class="sg-ig-carousel-caption">`;
+          if (img.title) captionOverlay += `<div class="sg-ig-carousel-caption-title">${escapeHtml(img.title)}</div>`;
+          if (img.description) captionOverlay += `<div class="sg-ig-carousel-caption-desc">${escapeHtml(img.description)}</div>`;
+          captionOverlay += `</div>`;
+        }
+        return `
+          <div class="sg-ig-carousel-slide"
+               data-gallery-index="${i}"
+               role="button" tabindex="0"
+               aria-label="Ver imagem: ${escapeHtml(img.alt)}"
+               style="aspect-ratio: 16/9;">
+            <img src="${escapeHtml(img.src)}"
+                 alt="${escapeHtml(img.alt)}"
+                 ${lazyLoad && i > 0 ? 'loading="lazy"' : 'loading="eager"'} />
+            ${captionOverlay}
+          </div>`;
+      })
+      .join("");
+
+    const dotsHTML = images
+      .map((_, i) => `<button class="sg-ig-dot ${i === 0 ? "sg-ig-dot--active" : "sg-ig-dot--inactive"}" aria-label="Ir para imagem ${i + 1}"></button>`)
+      .join("");
+
+    galleryContentHTML = `
+      <div class="sg-ig-carousel">
+        <div class="sg-ig-carousel-track" style="border-radius: ${imageBorderRadius}px;">
+          ${slidesHTML}
+        </div>
+        ${images.length > 1 ? `
+        <button class="sg-ig-carousel-nav sg-ig-carousel-nav--prev" aria-label="Anterior" style="opacity: 0.3;" disabled>${chevronLeftSVG}</button>
+        <button class="sg-ig-carousel-nav sg-ig-carousel-nav--next" aria-label="Pr\u00f3xima">${chevronRightSVG}</button>
+        <div class="sg-ig-dots">
+          ${dotsHTML}
+        </div>
+        ` : ""}
+      </div>`;
+  } else if (variation === "gallery-alternating") {
+    galleryContentHTML = images
+      .map((img, i) => {
+        const reverseClass = i % 2 === 1 ? "sg-ig-alt-row--reverse" : "";
+        const imgTitle = img.title ? escapeHtml(img.title) : "Imagem " + (i + 1);
+        const imgDesc = img.description ? escapeHtml(img.description) : "";
+
+        return `
+          <div class="sg-ig-alt-row ${reverseClass}" style="gap: ${gap}rem; margin-bottom: ${gap * 2}rem;">
+            ${buildItemHTML(img, i)}
+            <div class="sg-ig-alt-text">
+              <h3>${imgTitle}</h3>
+              ${imgDesc ? `<p>${imgDesc}</p>` : ""}
+            </div>
+          </div>`;
+      })
+      .join("");
+  } else {
+    // Default grid layout
+    const itemsHTML = images
+      .map((img, i) => buildItemHTML(img, i))
+      .join("");
+
+    galleryContentHTML = `
+      <div class="sg-ig-grid sg-ig-grid--cols-${columns} ${animClass}"
+           style="grid-template-columns: repeat(${columns}, 1fr); gap: ${gap}rem;">
+        ${itemsHTML}
+      </div>`;
+  }
 
   return `
   <section id="${scope}" ${dataBlockIdAttr(blockId)} ${blockIdAttr(blockId)} data-block-group="Galeria"
@@ -504,10 +802,7 @@ function generateGalleryHTML(
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
       ${headerHTML}
       ${warningHTML}
-      <div class="sg-ig-grid sg-ig-grid--cols-${columns} ${animClass}"
-           style="grid-template-columns: repeat(${columns}, 1fr); gap: ${gap}rem;">
-        ${itemsHTML}
-      </div>
+      ${galleryContentHTML}
     </div>
     ${lightboxHTML}
   </section>`;
@@ -614,6 +909,7 @@ function generateGalleryJS(
   scope: string,
   images: GalleryImage[],
   config: LightboxConfig,
+  variation: string = "gallery-grid",
 ): string {
   // Serialize images for JS (only the fields we need)
   const jsImages = images.map((img) => ({
@@ -635,6 +931,8 @@ function generateGalleryJS(
   const enableTouch = config.enableTouchGestures !== false;
   const transitionDuration = config.transitionDuration ?? 300;
   const mode = config.mode ?? "dark";
+  const enableAutoplay = config.enableAutoplay === true;
+  const autoplayInterval = (config.autoplayInterval as number) ?? 5;
 
   return `
 (function() {
@@ -659,7 +957,10 @@ function generateGalleryJS(
     enableKeyboard: ${enableKeyboard},
     enableTouch: ${enableTouch},
     transitionDuration: ${transitionDuration},
-    mode: '${mode}'
+    mode: '${mode}',
+    variation: '${variation}',
+    enableAutoplay: ${enableAutoplay},
+    autoplayInterval: ${autoplayInterval}
   };
 
   // ---------- Theme colors ----------
@@ -1190,6 +1491,45 @@ function generateGalleryJS(
       touchStart = null;
     }, { passive: true });
   }
+
+  // ---------- Carousel navigation ----------
+  if (CFG.variation === 'gallery-carousel') {
+    var track = root.querySelector('.sg-ig-carousel-track');
+    var slides = root.querySelectorAll('.sg-ig-carousel-slide');
+    var cPrevBtn = root.querySelector('.sg-ig-carousel-nav--prev');
+    var cNextBtn = root.querySelector('.sg-ig-carousel-nav--next');
+    var dots = root.querySelectorAll('.sg-ig-dot');
+    var carouselIdx = 0;
+
+    function goToSlide(idx) {
+      carouselIdx = Math.max(0, Math.min(slides.length - 1, idx));
+      if (track) track.scrollTo({ left: carouselIdx * track.offsetWidth, behavior: 'smooth' });
+      for (var d = 0; d < dots.length; d++) {
+        dots[d].className = 'sg-ig-dot ' + (d === carouselIdx ? 'sg-ig-dot--active' : 'sg-ig-dot--inactive');
+      }
+      if (cPrevBtn) {
+        cPrevBtn.disabled = carouselIdx === 0;
+        cPrevBtn.style.opacity = carouselIdx === 0 ? '0.3' : '0.8';
+      }
+      if (cNextBtn) {
+        cNextBtn.disabled = carouselIdx === slides.length - 1;
+        cNextBtn.style.opacity = carouselIdx === slides.length - 1 ? '0.3' : '0.8';
+      }
+    }
+
+    if (cPrevBtn) cPrevBtn.addEventListener('click', function(e) { e.stopPropagation(); goToSlide(carouselIdx - 1); });
+    if (cNextBtn) cNextBtn.addEventListener('click', function(e) { e.stopPropagation(); goToSlide(carouselIdx + 1); });
+    for (var di = 0; di < dots.length; di++) {
+      (function(i) { dots[i].addEventListener('click', function() { goToSlide(i); }); })(di);
+    }
+
+    if (CFG.enableAutoplay) {
+      var autoInt = (CFG.autoplayInterval || 5) * 1000;
+      setInterval(function() {
+        goToSlide(carouselIdx >= slides.length - 1 ? 0 : carouselIdx + 1);
+      }, autoInt);
+    }
+  }
 })();
 `.trim();
 }
@@ -1217,11 +1557,12 @@ export function exportImageGallery(block: Block, _depth: number, _basePath?: str
   const showWarningAt = (props.showWarningAt as number) || 50;
   const bg = (props.bg as string) || "";
   const lightbox: LightboxConfig = (props.lightbox as LightboxConfig) || {};
+  const variation = (props.variation as string) || "gallery-grid";
 
   const scope = generateScopedId(blockId, "sg-ig");
 
   // Generate CSS
-  const galleryCSS = generateGalleryCSS(scope, columns);
+  const galleryCSS = generateGalleryCSS(scope, columns, variation, gap);
   const lightboxCSS = generateLightboxCSS(scope);
 
   // Generate HTML
@@ -1239,12 +1580,13 @@ export function exportImageGallery(block: Block, _depth: number, _basePath?: str
     showWarningAt,
     bg,
     lightbox,
+    variation,
   });
 
   // Generate JS (only if there are images)
   let jsBlock = "";
   if (images.length > 0) {
-    const js = generateGalleryJS(scope, images, lightbox);
+    const js = generateGalleryJS(scope, images, lightbox, variation);
     jsBlock = `<script>${js}</script>`;
   }
 
