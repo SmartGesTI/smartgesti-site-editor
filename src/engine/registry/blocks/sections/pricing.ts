@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const pricingBlock: BlockDefinition = {
   type: "pricing",
-  name: "Pricing",
-  description: "Seção de preços completa",
+  name: "Planos e Preços",
+  description: "Tabela de preços com planos",
   category: "sections",
+  userCategory: "Marketing",
   canHaveChildren: false,
   defaultProps: {
     title: "Planos e Preços",

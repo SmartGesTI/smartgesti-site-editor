@@ -43,9 +43,10 @@ const sampleCards = [
 
 export const blogPostGridBlock: BlockDefinition<"blogPostGrid"> = {
   type: "blogPostGrid",
-  name: "Blog Post Grid",
-  description: "Grid de posts do blog com suporte a dados dinâmicos (plugin Blog)",
+  name: "Grade de Posts",
+  description: "Grid de posts com dados dinâmicos",
   category: "sections",
+  userCategory: "Blog (Plugin)",
   pluginId: "blog",
   canHaveChildren: false,
   defaultProps: {

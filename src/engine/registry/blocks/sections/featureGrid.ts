@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const featureGridBlock: BlockDefinition = {
   type: "featureGrid",
-  name: "Feature Grid",
-  description: "Grid de features (ícones, cards ou cards com imagem)",
+  name: "Grade de Recursos",
+  description: "Grid com ícones e descrições de recursos",
   category: "sections",
+  userCategory: "Marketing",
   canHaveChildren: false,
   defaultProps: {
     title: "Nossas Features",

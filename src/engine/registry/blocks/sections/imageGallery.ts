@@ -84,6 +84,7 @@ export const imageGalleryBlock: BlockDefinition<"imageGallery"> = {
   name: "Galeria de Imagens",
   description: "Galeria de imagens com lightbox profissional e zoom",
   category: "sections",
+  userCategory: "Galeria e Mídia",
   canHaveChildren: false,
   defaultProps: IMAGE_GALLERY_DEFAULT_PROPS,
   variations: Object.values(galleryVariations),

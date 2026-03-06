@@ -3,9 +3,11 @@ import { componentRegistry } from "../../registry";
 
 export const teamCardBlock: BlockDefinition = {
   type: "teamCard",
-  name: "Team Card",
-  description: "Card de membro da equipe/professor",
+  name: "Membro da Equipe",
+  description: "Card individual de membro",
   category: "sections",
+  userCategory: "Equipe",
+  isChildBlock: true,
   canHaveChildren: false,
   defaultProps: {
     name: "John Doe",

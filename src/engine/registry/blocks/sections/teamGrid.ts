@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const teamGridBlock: BlockDefinition = {
   type: "teamGrid",
-  name: "Team Grid",
-  description: "Grid de membros da equipe/professores",
+  name: "Equipe",
+  description: "Grid com membros da equipe",
   category: "sections",
+  userCategory: "Equipe",
   canHaveChildren: false,
   defaultProps: {
     title: "Meet Our Teachers",

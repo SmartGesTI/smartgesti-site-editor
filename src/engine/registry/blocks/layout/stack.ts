@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const stackBlock: BlockDefinition = {
   type: "stack",
-  name: "Stack",
-  description: "Layout flex (linha ou coluna)",
+  name: "Pilha Flexível",
+  description: "Empilha elementos na vertical ou horizontal",
   category: "layout",
+  userCategory: "Estrutura",
   canHaveChildren: true,
   defaultProps: {
     direction: "col",

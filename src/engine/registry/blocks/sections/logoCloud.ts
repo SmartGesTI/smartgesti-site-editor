@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const logoCloudBlock: BlockDefinition = {
   type: "logoCloud",
-  name: "Logo Cloud",
-  description: "Grid de logos de clientes/parceiros",
+  name: "Logos de Parceiros",
+  description: "Grid de logos de empresas",
   category: "sections",
+  userCategory: "Marketing",
   canHaveChildren: false,
   defaultProps: {
     title: "Empresas que confiam em nós",

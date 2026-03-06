@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const containerBlock: BlockDefinition = {
   type: "container",
-  name: "Container",
+  name: "Contêiner",
   description: "Container com largura máxima e padding",
   category: "layout",
+  userCategory: "Estrutura",
   canHaveChildren: true,
   defaultProps: {
     maxWidth: "1200px",

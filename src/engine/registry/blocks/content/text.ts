@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const textBlock: BlockDefinition = {
   type: "text",
-  name: "Text",
+  name: "Texto",
   description: "Parágrafo de texto",
   category: "content",
+  userCategory: "Texto e Mídia",
   canHaveChildren: false,
   defaultProps: {
     text: "Texto do parágrafo",

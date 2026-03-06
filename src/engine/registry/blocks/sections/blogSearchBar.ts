@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const blogSearchBarBlock: BlockDefinition<"blogSearchBar"> = {
   type: "blogSearchBar",
-  name: "Blog Search Bar",
-  description: "Barra de busca para o blog (plugin Blog)",
+  name: "Busca do Blog",
+  description: "Barra de busca para posts",
   category: "sections",
+  userCategory: "Blog (Plugin)",
   pluginId: "blog",
   canHaveChildren: false,
   defaultProps: {

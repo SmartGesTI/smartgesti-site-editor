@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const blogCategoryFilterBlock: BlockDefinition<"blogCategoryFilter"> = {
   type: "blogCategoryFilter",
-  name: "Blog Category Filter",
-  description: "Filtro de categorias para listagem do blog (plugin Blog)",
+  name: "Filtro de Categorias",
+  description: "Sidebar com filtro por categoria",
   category: "sections",
+  userCategory: "Blog (Plugin)",
   pluginId: "blog",
   canHaveChildren: false,
   defaultProps: {

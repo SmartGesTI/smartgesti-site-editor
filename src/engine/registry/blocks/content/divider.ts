@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const dividerBlock: BlockDefinition = {
   type: "divider",
-  name: "Divider",
+  name: "Divisor",
   description: "Divisor horizontal",
   category: "content",
+  userCategory: "Texto e Mídia",
   canHaveChildren: false,
   defaultProps: {
     color: "#e5e7eb",

@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const inputBlock: BlockDefinition = {
   type: "input",
-  name: "Input",
+  name: "Campo de Texto",
   description: "Campo de entrada",
   category: "forms",
+  userCategory: "Formulários",
   canHaveChildren: false,
   defaultProps: {
     name: "campo",

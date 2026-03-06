@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const boxBlock: BlockDefinition = {
   type: "box",
-  name: "Box",
-  description: "Container genérico com estilos",
+  name: "Caixa",
+  description: "Área genérica com estilos customizáveis",
   category: "layout",
+  userCategory: "Estrutura",
   canHaveChildren: true,
   defaultProps: {
     padding: "1rem",

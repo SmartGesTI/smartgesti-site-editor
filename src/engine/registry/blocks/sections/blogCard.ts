@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const blogCardBlock: BlockDefinition = {
   type: "blogCard",
-  name: "Blog Card",
-  description: "Card de post/notícia individual",
+  name: "Card de Notícia",
+  description: "Card individual de post/notícia",
   category: "sections",
+  userCategory: "Blog e Notícias",
   canHaveChildren: false,
   defaultProps: {
     title: "Post Title",

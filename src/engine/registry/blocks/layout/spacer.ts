@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const spacerBlock: BlockDefinition = {
   type: "spacer",
-  name: "Spacer",
-  description: "Espaçador flexível",
+  name: "Espaçador",
+  description: "Espaço vazio entre elementos",
   category: "layout",
+  userCategory: "Estrutura",
   canHaveChildren: false,
   defaultProps: {
     height: "2rem",

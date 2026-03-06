@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const aboutSectionBlock: BlockDefinition = {
   type: "aboutSection",
-  name: "About Section",
-  description: "Seção sobre com imagem, texto e conquistas",
+  name: "Sobre Nós",
+  description: "Seção institucional com imagem e conquistas",
   category: "sections",
+  userCategory: "Institucional",
   canHaveChildren: false,
   defaultProps: {
     title: "Sobre Nós",

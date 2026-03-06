@@ -3,9 +3,11 @@ import { componentRegistry } from "../../registry";
 
 export const featureBlock: BlockDefinition = {
   type: "feature",
-  name: "Feature",
-  description: "Card de feature individual",
+  name: "Recurso",
+  description: "Card individual de recurso",
   category: "sections",
+  userCategory: "Marketing",
+  isChildBlock: true,
   canHaveChildren: false,
   defaultProps: {
     icon: "star",

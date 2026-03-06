@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const testimonialGridBlock: BlockDefinition = {
   type: "testimonialGrid",
-  name: "Testimonial Grid",
-  description: "Grid de depoimentos",
+  name: "Grade de Depoimentos",
+  description: "Grid com depoimentos de clientes",
   category: "sections",
+  userCategory: "Prova Social",
   canHaveChildren: false,
   defaultProps: {
     title: "O Que Nossos Clientes Dizem",

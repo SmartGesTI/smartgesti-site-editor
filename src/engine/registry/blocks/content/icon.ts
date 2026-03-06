@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const iconBlock: BlockDefinition = {
   type: "icon",
-  name: "Icon",
+  name: "Ícone",
   description: "Ícone SVG",
   category: "content",
+  userCategory: "Texto e Mídia",
   canHaveChildren: false,
   defaultProps: {
     name: "star",

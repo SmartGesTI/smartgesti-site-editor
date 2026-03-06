@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const buttonBlock: BlockDefinition = {
   type: "button",
-  name: "Button",
+  name: "Botão",
   description: "Botão",
   category: "content",
+  userCategory: "Texto e Mídia",
   canHaveChildren: false,
   defaultProps: {
     text: "Clique aqui",

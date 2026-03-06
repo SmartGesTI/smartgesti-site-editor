@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const cardBlock: BlockDefinition = {
   type: "card",
-  name: "Card",
+  name: "Cartão",
   description: "Card com slots (header/content/footer)",
   category: "composition",
+  userCategory: "Estrutura",
   canHaveChildren: false,
   defaultProps: {
     padding: "1rem",

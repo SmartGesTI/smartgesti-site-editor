@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const courseCardGridBlock: BlockDefinition = {
   type: "courseCardGrid",
-  name: "Course Card Grid",
-  description: "Grid de cards de curso (thumbnail, preço, rating, View Course)",
+  name: "Grade de Cursos",
+  description: "Grid de cards de curso com preço e avaliação",
   category: "sections",
+  userCategory: "Educação",
   canHaveChildren: false,
   defaultProps: {
     title: "Popular Courses",

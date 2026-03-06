@@ -3,9 +3,11 @@ import { componentRegistry } from "../../registry";
 
 export const faqItemBlock: BlockDefinition = {
   type: "faqItem",
-  name: "FAQ Item",
+  name: "Pergunta",
   description: "Item individual do FAQ",
   category: "sections",
+  userCategory: "Marketing",
+  isChildBlock: true,
   canHaveChildren: false,
   defaultProps: {
     question: "Pergunta frequente?",

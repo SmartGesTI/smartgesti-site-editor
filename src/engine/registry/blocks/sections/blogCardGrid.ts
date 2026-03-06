@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const blogCardGridBlock: BlockDefinition = {
   type: "blogCardGrid",
-  name: "Blog Card Grid",
+  name: "Grade de Notícias",
   description: "Grid de cards de blog/notícias",
   category: "sections",
+  userCategory: "Blog e Notícias",
   canHaveChildren: false,
   defaultProps: {
     title: "Recently News & Blogs",

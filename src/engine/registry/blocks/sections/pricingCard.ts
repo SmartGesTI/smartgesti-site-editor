@@ -3,9 +3,11 @@ import { componentRegistry } from "../../registry";
 
 export const pricingCardBlock: BlockDefinition = {
   type: "pricingCard",
-  name: "Pricing Card",
-  description: "Card de preço individual",
+  name: "Cartão de Preço",
+  description: "Card individual de plano",
   category: "sections",
+  userCategory: "Marketing",
+  isChildBlock: true,
   canHaveChildren: false,
   defaultProps: {
     name: "Plano Pro",

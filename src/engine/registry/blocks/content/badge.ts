@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const badgeBlock: BlockDefinition = {
   type: "badge",
-  name: "Badge",
-  description: "Tag/badge com variantes",
+  name: "Etiqueta",
+  description: "Tag colorida com variantes",
   category: "content",
+  userCategory: "Texto e Mídia",
   canHaveChildren: false,
   defaultProps: {
     text: "Badge",

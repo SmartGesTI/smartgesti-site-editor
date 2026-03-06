@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const carouselBlock: BlockDefinition = {
   type: "carousel",
-  name: "Carousel",
-  description: "Slider de slides (programas, destaques)",
+  name: "Carrossel de Slides",
+  description: "Slider com slides de conteúdo",
   category: "sections",
+  userCategory: "Galeria e Mídia",
   canHaveChildren: false,
   defaultProps: {
     slides: [

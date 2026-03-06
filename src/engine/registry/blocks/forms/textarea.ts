@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const textareaBlockDef: BlockDefinition = {
   type: "textarea",
-  name: "Textarea",
-  description: "Campo de texto longo",
+  name: "Campo de Texto Longo",
+  description: "Área de texto para mensagens",
   category: "forms",
+  userCategory: "Formulários",
   canHaveChildren: false,
   defaultProps: {
     name: "mensagem",

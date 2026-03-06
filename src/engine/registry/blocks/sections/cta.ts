@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const ctaBlock: BlockDefinition = {
   type: "cta",
-  name: "CTA",
-  description: "Seção Call-to-Action",
+  name: "Chamada para Ação",
+  description: "Seção com botão de ação destacado",
   category: "sections",
+  userCategory: "Marketing",
   canHaveChildren: false,
   defaultProps: {
     title: "Pronto para começar?",

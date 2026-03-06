@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const formBlock: BlockDefinition = {
   type: "form",
-  name: "Form",
-  description: "Container de formulário",
+  name: "Formulário",
+  description: "Container de formulário com envio",
   category: "forms",
+  userCategory: "Formulários",
   canHaveChildren: true,
   defaultProps: {
     submitText: "Enviar",

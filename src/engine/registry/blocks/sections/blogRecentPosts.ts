@@ -6,6 +6,7 @@ export const blogRecentPostsBlock: BlockDefinition = {
   name: "Posts Recentes",
   description: "Widget com os posts mais recentes do blog",
   category: "sections",
+  userCategory: "Blog (Plugin)",
   pluginId: "blog",
   defaultProps: {
     title: "Posts Recentes",

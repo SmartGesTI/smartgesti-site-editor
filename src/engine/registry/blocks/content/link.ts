@@ -6,6 +6,7 @@ export const linkBlock: BlockDefinition = {
   name: "Link",
   description: "Link",
   category: "content",
+  userCategory: "Texto e Mídia",
   canHaveChildren: false,
   defaultProps: {
     text: "Link",

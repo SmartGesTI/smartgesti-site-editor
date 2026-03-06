@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const blogPostCardBlock: BlockDefinition<"blogPostCard"> = {
   type: "blogPostCard",
-  name: "Blog Post Card",
-  description: "Card de post do blog (plugin Blog)",
+  name: "Card de Post",
+  description: "Card de post do blog (dinâmico)",
   category: "sections",
+  userCategory: "Blog (Plugin)",
   pluginId: "blog",
   canHaveChildren: false,
   defaultProps: {

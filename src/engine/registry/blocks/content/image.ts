@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const imageBlock: BlockDefinition = {
   type: "image",
-  name: "Image",
+  name: "Imagem",
   description: "Imagem",
   category: "content",
+  userCategory: "Texto e Mídia",
   canHaveChildren: false,
   defaultProps: {
     src: "",

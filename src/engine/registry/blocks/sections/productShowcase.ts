@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const productShowcaseBlock: BlockDefinition = {
   type: "productShowcase",
-  name: "Product Showcase",
-  description: "Vitrine de produtos com layout alternado imagem/conteúdo",
+  name: "Vitrine de Produtos",
+  description: "Produtos com layout alternado imagem/texto",
   category: "sections",
+  userCategory: "Institucional",
   canHaveChildren: false,
   defaultProps: {
     title: "Nossos Produtos",

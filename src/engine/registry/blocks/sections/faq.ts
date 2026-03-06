@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const faqBlock: BlockDefinition = {
   type: "faq",
-  name: "FAQ",
-  description: "Seção FAQ completa",
+  name: "Perguntas Frequentes",
+  description: "Seção de perguntas e respostas",
   category: "sections",
+  userCategory: "Marketing",
   canHaveChildren: false,
   defaultProps: {
     title: "Perguntas Frequentes",

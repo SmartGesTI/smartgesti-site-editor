@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const videoBlock: BlockDefinition = {
   type: "video",
-  name: "Video",
+  name: "Vídeo",
   description: "Embed de vídeo",
   category: "content",
+  userCategory: "Texto e Mídia",
   canHaveChildren: false,
   defaultProps: {
     src: "",

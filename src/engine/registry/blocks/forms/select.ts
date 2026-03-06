@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const formSelectBlock: BlockDefinition = {
   type: "formSelect",
-  name: "Select",
-  description: "Dropdown de formulário",
+  name: "Menu Suspenso",
+  description: "Dropdown com opções",
   category: "forms",
+  userCategory: "Formulários",
   canHaveChildren: false,
   defaultProps: {
     name: "opcao",

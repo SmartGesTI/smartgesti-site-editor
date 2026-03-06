@@ -3,9 +3,11 @@ import { componentRegistry } from "../../registry";
 
 export const testimonialBlock: BlockDefinition = {
   type: "testimonial",
-  name: "Testimonial",
-  description: "Card de depoimento individual",
+  name: "Depoimento",
+  description: "Card individual de depoimento",
   category: "sections",
+  userCategory: "Prova Social",
+  isChildBlock: true,
   canHaveChildren: false,
   defaultProps: {
     quote: "Produto incrível! Recomendo a todos.",

@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const footerBlock: BlockDefinition = {
   type: "footer",
-  name: "Footer",
-  description: "Rodapé do site",
+  name: "Rodapé",
+  description: "Rodapé do site com links e redes sociais",
   category: "sections",
+  userCategory: "Banner e Navegação",
   canHaveChildren: false,
   defaultProps: {
     logoText: "Logo",

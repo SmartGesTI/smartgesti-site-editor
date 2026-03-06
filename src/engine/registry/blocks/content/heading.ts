@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const headingBlock: BlockDefinition = {
   type: "heading",
-  name: "Heading",
+  name: "Título",
   description: "Título (H1-H6)",
   category: "content",
+  userCategory: "Texto e Mídia",
   canHaveChildren: false,
   defaultProps: {
     level: 1,

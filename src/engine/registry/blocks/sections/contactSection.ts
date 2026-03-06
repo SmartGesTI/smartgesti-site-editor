@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const contactSectionBlock: BlockDefinition = {
   type: "contactSection",
-  name: "Contact Section",
-  description: "Seção de contato com informações e formulário",
+  name: "Contato",
+  description: "Formulário de contato com informações",
   category: "sections",
+  userCategory: "Institucional",
   canHaveChildren: false,
   defaultProps: {
     title: "Entre em Contato",

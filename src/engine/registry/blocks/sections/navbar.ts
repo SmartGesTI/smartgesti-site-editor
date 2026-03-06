@@ -49,9 +49,10 @@ export const NAVBAR_DEFAULT_PROPS = {
 
 export const navbarBlock: BlockDefinition = {
   type: "navbar",
-  name: "Navbar",
-  description: "Barra de navegação customizável",
+  name: "Barra de Navegação",
+  description: "Menu principal do site",
   category: "sections",
+  userCategory: "Banner e Navegação",
   canHaveChildren: false,
   defaultProps: NAVBAR_DEFAULT_PROPS,
   variations: navbarVariationIds.reduce(

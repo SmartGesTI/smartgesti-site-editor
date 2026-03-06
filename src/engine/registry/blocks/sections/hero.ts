@@ -39,9 +39,10 @@ export const HERO_DEFAULT_PROPS = {
 
 export const heroBlock: BlockDefinition = {
   type: "hero",
-  name: "Hero",
-  description: "Seção hero completa com múltiplas variações",
+  name: "Banner Principal",
+  description: "Seção de destaque com título, imagem e botões",
   category: "sections",
+  userCategory: "Banner e Navegação",
   canHaveChildren: false,
   defaultProps: HERO_DEFAULT_PROPS,
   variations: heroVariationIds.reduce(

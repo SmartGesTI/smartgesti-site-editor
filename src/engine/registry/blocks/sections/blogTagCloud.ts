@@ -6,6 +6,7 @@ export const blogTagCloudBlock: BlockDefinition = {
   name: "Nuvem de Tags",
   description: "Widget com tags dos posts do blog",
   category: "sections",
+  userCategory: "Blog (Plugin)",
   pluginId: "blog",
   defaultProps: {
     title: "Tags",

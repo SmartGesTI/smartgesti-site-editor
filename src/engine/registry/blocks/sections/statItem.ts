@@ -3,9 +3,11 @@ import { componentRegistry } from "../../registry";
 
 export const statItemBlock: BlockDefinition = {
   type: "statItem",
-  name: "Stat Item",
+  name: "Indicador",
   description: "Item individual de estatística",
   category: "sections",
+  userCategory: "Prova Social",
+  isChildBlock: true,
   canHaveChildren: false,
   defaultProps: {
     value: "100",

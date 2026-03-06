@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const sectionBlock: BlockDefinition = {
   type: "section",
-  name: "Section",
-  description: "Seção container",
+  name: "Seção",
+  description: "Container de seção com fundo",
   category: "composition",
+  userCategory: "Estrutura",
   canHaveChildren: true,
   defaultProps: {
     padding: "2rem",

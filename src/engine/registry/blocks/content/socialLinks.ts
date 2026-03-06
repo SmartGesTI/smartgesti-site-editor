@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const socialLinksBlock: BlockDefinition = {
   type: "socialLinks",
-  name: "Social Links",
+  name: "Redes Sociais",
   description: "Links para redes sociais",
   category: "content",
+  userCategory: "Texto e Mídia",
   canHaveChildren: false,
   defaultProps: {
     size: "md",

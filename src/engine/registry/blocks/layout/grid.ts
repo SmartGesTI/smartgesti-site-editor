@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const gridBlock: BlockDefinition = {
   type: "grid",
-  name: "Grid",
-  description: "Layout em grid responsivo",
+  name: "Grade",
+  description: "Layout em colunas responsivo",
   category: "layout",
+  userCategory: "Estrutura",
   canHaveChildren: true,
   defaultProps: {
     cols: 2,

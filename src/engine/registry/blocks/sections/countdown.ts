@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const countdownBlock: BlockDefinition = {
   type: "countdown",
-  name: "Countdown",
-  description: "Contador regressivo (eventos, matrículas, promoções)",
+  name: "Contagem Regressiva",
+  description: "Contador para eventos e prazos",
   category: "sections",
+  userCategory: "Marketing",
   canHaveChildren: false,
   defaultProps: {
     title: "Spring 2024 Admission is Now Open!",

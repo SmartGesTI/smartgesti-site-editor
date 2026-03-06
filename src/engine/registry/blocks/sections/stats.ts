@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const statsBlock: BlockDefinition = {
   type: "stats",
-  name: "Stats",
-  description: "Seção de estatísticas",
+  name: "Estatísticas",
+  description: "Seção com números e indicadores",
   category: "sections",
+  userCategory: "Prova Social",
   canHaveChildren: false,
   defaultProps: {
     title: "Números que Impressionam",

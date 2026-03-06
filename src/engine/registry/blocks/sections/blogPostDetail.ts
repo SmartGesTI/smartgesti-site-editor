@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const blogPostDetailBlock: BlockDefinition<"blogPostDetail"> = {
   type: "blogPostDetail",
-  name: "Blog Post Detail",
-  description: "Conteúdo completo de um post do blog (plugin Blog)",
+  name: "Conteúdo do Post",
+  description: "Página completa de um post",
   category: "sections",
+  userCategory: "Blog (Plugin)",
   pluginId: "blog",
   canHaveChildren: false,
   defaultProps: {

@@ -6,6 +6,7 @@ export const avatarBlock: BlockDefinition = {
   name: "Avatar",
   description: "Imagem circular com fallback",
   category: "content",
+  userCategory: "Texto e Mídia",
   canHaveChildren: false,
   defaultProps: {
     size: "md",

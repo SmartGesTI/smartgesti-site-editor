@@ -3,9 +3,10 @@ import { componentRegistry } from "../../registry";
 
 export const categoryCardGridBlock: BlockDefinition = {
   type: "categoryCardGrid",
-  name: "Category Card Grid",
-  description: "Grid de categorias (imagem de fundo + título overlay + link)",
+  name: "Grade de Categorias",
+  description: "Grid de categorias com imagem de fundo",
   category: "sections",
+  userCategory: "Educação",
   canHaveChildren: false,
   defaultProps: {
     title: "Top Categories",
