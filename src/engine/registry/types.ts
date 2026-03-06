@@ -82,6 +82,10 @@ export interface BlockDefinition<T extends BlockType = BlockType> {
   description: string;
   icon?: string;
   category: "layout" | "content" | "composition" | "sections" | "forms";
+  /** Categoria visível ao usuário na biblioteca de blocos */
+  userCategory?: string;
+  /** Bloco filho (não aparece na biblioteca, apenas dentro de blocos compostos) */
+  isChildBlock?: boolean;
   defaultProps: T extends BlockType ? Partial<BlockPropsFor<T>> : Record<string, any>;
   /** Variações pré-definidas (ex.: Hero Dividido, Hero Parallax) */
   variations?: Record<string, BlockVariation<T>>;
