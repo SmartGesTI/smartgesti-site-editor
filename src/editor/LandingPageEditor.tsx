@@ -66,6 +66,7 @@ export function LandingPageEditor({
     setSelectedBlockId,
     handleUndo,
     handleRedo,
+    handleAddBlock,
     handleDeleteBlock,
     handleUpdateBlock,
     applyChange,
@@ -357,6 +358,8 @@ export function LandingPageEditor({
           isPaletteSelected={isPaletteSelected}
           onSelectBlock={(id) => { setSelectedBlockId(id); setFocusedGroup(null); }}
           onDeleteBlock={handleDeleteBlock}
+          onAddBlock={handleAddBlock}
+          activePlugins={activePlugins}
         />
 
         {/* Center: Preview (apenas a página em edição) */}

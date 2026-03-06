@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { cn } from "../../utils/cn";
 import { BlockSelector } from "../BlockSelector";
+import { BlockPalette } from "../BlockPalette";
+import { BlockType, Block } from "../../engine";
+import { List, Plus } from "lucide-react";
 
 interface LeftPanelProps {
   currentPage: any;
@@ -8,6 +11,8 @@ interface LeftPanelProps {
   isPaletteSelected: boolean;
   onSelectBlock: (id: string | null) => void;
   onDeleteBlock: (id: string) => void;
+  onAddBlock: (blockType: BlockType, parentBlockId?: string, position?: number) => void;
+  activePlugins?: string[];
 }
 
 export const LeftPanel = React.memo(function LeftPanel({
@@ -16,7 +21,19 @@ export const LeftPanel = React.memo(function LeftPanel({
   isPaletteSelected,
   onSelectBlock,
   onDeleteBlock,
+  onAddBlock,
+  activePlugins,
 }: LeftPanelProps) {
+  const [mode, setMode] = useState<"blocks" | "add">("blocks");
+
+  // Extrair tipos de blocos existentes na página (para restrições navbar/footer)
+  const existingBlockTypes = useMemo(() => {
+    if (!currentPage?.structure) return [];
+    return currentPage.structure
+      .filter((b: Block) => b?.type)
+      .map((b: Block) => b.type);
+  }, [currentPage]);
+
   return (
     <div className="w-64 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
       {/* Paletas de Cores */}
@@ -33,17 +50,55 @@ export const LeftPanel = React.memo(function LeftPanel({
           🎨 Paletas de Cores
         </button>
       </div>
-      {/* Lista de blocos da página atual */}
+
+      {/* Toggle Blocos / Adicionar */}
+      <div className="flex-shrink-0 flex border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => setMode("blocks")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-all",
+            mode === "blocks"
+              ? "bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500"
+              : "bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200",
+          )}
+        >
+          <List className="w-3.5 h-3.5" />
+          Blocos
+        </button>
+        <button
+          onClick={() => setMode("add")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-all",
+            mode === "add"
+              ? "bg-white dark:bg-gray-900 text-green-600 dark:text-green-400 border-b-2 border-green-500"
+              : "bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200",
+          )}
+        >
+          <Plus className="w-3.5 h-3.5" />
+          Adicionar
+        </button>
+      </div>
+
+      {/* Conteúdo dinâmico */}
       {currentPage && (
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-          <BlockSelector
-            structure={
-              currentPage.structure?.filter((b: any) => b?.id && b?.type) || []
-            }
-            selectedBlockId={selectedBlockId}
-            onSelectBlock={onSelectBlock}
-            onDeleteBlock={onDeleteBlock}
-          />
+          {mode === "blocks" ? (
+            <BlockSelector
+              structure={
+                currentPage.structure?.filter((b: any) => b?.id && b?.type) || []
+              }
+              selectedBlockId={selectedBlockId}
+              onSelectBlock={onSelectBlock}
+              onDeleteBlock={onDeleteBlock}
+            />
+          ) : (
+            <BlockPalette
+              onAddBlock={onAddBlock}
+              selectedParentBlockId={selectedBlockId}
+              activePlugins={activePlugins}
+              existingBlockTypes={existingBlockTypes}
+            />
+          )}
         </div>
       )}
     </div>
