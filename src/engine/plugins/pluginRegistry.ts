@@ -5,10 +5,8 @@
 
 import { logger } from "../../utils/logger";
 import type { BlockType, SiteDocument } from "../schema/siteDocument";
-import type { BlockDefinition } from "../registry/types";
 import { componentRegistry } from "../registry/registry";
 import type {
-  PluginManifest,
   PluginRegistration,
   ContentProvider,
   EditorRestriction,

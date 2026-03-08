@@ -7,7 +7,7 @@ import { Block } from "../../../schema/siteDocument";
 import { ThemeTokens } from "../../../schema/themeTokens";
 import { dataBlockIdAttr } from "../../shared/htmlHelpers";
 import { generateContainerId } from "../../shared/idGenerator";
-import { generatePaddingMediaQueries, BREAKPOINTS } from "../../shared/responsiveGridHelper";
+import { generatePaddingMediaQueries } from "../../shared/responsiveGridHelper";
 
 export function exportContainer(
   block: Block,

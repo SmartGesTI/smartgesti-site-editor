@@ -4,7 +4,7 @@
 
 import { Block } from "../../../schema/siteDocument";
 import { ThemeTokens } from "../../../schema/themeTokens";
-import { dataBlockIdAttr, blockIdAttr, escapeHtml } from "../../shared/htmlHelpers";
+import { dataBlockIdAttr, blockIdAttr } from "../../shared/htmlHelpers";
 
 export function exportSection(
   block: Block,

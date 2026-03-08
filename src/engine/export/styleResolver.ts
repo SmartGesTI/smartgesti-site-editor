@@ -15,11 +15,8 @@ import {
     hexToRgb,
     hexToRgba,
     adjustColor,
-    type LinkHoverConfig,
-    type ButtonHoverConfig,
     type ButtonHoverOverlay,
 } from "../shared/hoverEffects";
-import { logger } from "../../utils/logger";
 
 // Re-export for backwards compatibility
 export { hexToRgb, hexToRgba, adjustColor };

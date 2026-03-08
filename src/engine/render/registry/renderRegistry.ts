@@ -3,7 +3,7 @@
  * Sistema de registro de renderizadores de blocos
  */
 
-import { Block, BlockType } from "../../schema/siteDocument";
+import { BlockType } from "../../schema/siteDocument";
 
 export type BlockRenderer = (block: any, depth: number) => React.ReactNode;
 

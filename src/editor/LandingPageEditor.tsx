@@ -3,13 +3,12 @@
  * Editor de landing pages usando block engine
  */
 
-import { useState, useCallback, useEffect, lazy, Suspense } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { TemplatePicker } from "./TemplatePicker";
 import { Toolbar, LeftPanel, CenterPanel, RightPanel } from "./components";
 import { useEditorState } from "../hooks/useEditorState";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
-import { LoadingSpinner } from "./components/LoadingSpinner";
-import { SiteDocument, PatchBuilder, Block } from "../engine";
+import { SiteDocument, PatchBuilder } from "../engine";
 import { getTemplate, templateDefaultPalette } from "../shared/templates";
 import type { TemplateId } from "../shared/templates";
 import { findPaletteByName } from "./PaletteSelector";

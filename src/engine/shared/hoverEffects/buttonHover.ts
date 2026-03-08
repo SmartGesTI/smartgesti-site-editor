@@ -19,7 +19,7 @@
  * - border-glow: Borda que pulsa
  */
 
-import { ButtonHoverConfig, ButtonOverlayConfig, ButtonHoverOverlay, HoverStyles } from "./types";
+import { ButtonHoverConfig, ButtonOverlayConfig, HoverStyles } from "./types";
 import { hexToRgba, adjustColor, normalizeIntensity } from "./colorUtils";
 
 /**

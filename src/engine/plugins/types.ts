@@ -3,7 +3,7 @@
  * Tipos para o sistema de plugins do SmartGesti Site Editor
  */
 
-import type { Block, BlockType, SiteDocument, SitePage } from "../schema/siteDocument";
+import type { Block, BlockType, SiteDocument } from "../schema/siteDocument";
 import type { BlockDefinition } from "../registry/types";
 
 // ============================================================================
