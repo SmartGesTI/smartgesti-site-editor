@@ -58,6 +58,26 @@ Posso criar como subtasks de uma feature existente:
 - **Melhoria**: `am_create_task(type='melhoria', ...)`
 - **Refatoramento**: `am_create_task(type='refatoramento', ...)`
 
+## Plan Drafts — Aprovação de Planos (OBRIGATÓRIO)
+
+Ao usar a skill `writing-plans` para criar um plano de implementação:
+
+1. **Salvar** o plano em `docs/plans/YYYY-MM-DD-nome.md`
+2. **Criar draft** no Atlas Manager via `am_create_plan_draft`:
+   ```
+   am_create_plan_draft({
+     title: "Nome do Plano",
+     content: "<conteúdo markdown do plano>",
+     agent_slug: "dev-editor",
+     feature_name: "Nome da Feature (se aplicável)"
+   })
+   ```
+3. **Notificar Atlas** no #editor: `@atlas plan_ready | Plano X criado | draft pendente aprovação`
+4. **Aguardar aprovação** do Bruno antes de executar o plano
+5. O Bruno receberá o plano automaticamente no Atlas Manager e poderá aprovar, pedir ajustes ou cancelar
+
+**NUNCA executar um plano sem aprovação.** O draft aparece na tela do Bruno para revisão imediata.
+
 ## Padrões Críticos do Editor
 
 - **Variações de bloco**: NUNCA incluir editable props
