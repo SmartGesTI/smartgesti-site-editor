@@ -45,6 +45,7 @@ import {
   exportContactSection,
 } from "./AdminSectionExporters";
 import { exportImageGallery } from "./ImageGalleryExporter";
+import { exportCategoryCardGrid } from "./CategoryCardGridExporter";
 
 // Referência para renderChild
 import { Block } from "../../../schema/siteDocument";
@@ -86,6 +87,7 @@ htmlExportRegistry.register("productShowcase", exportProductShowcase);
 htmlExportRegistry.register("aboutSection", exportAboutSection);
 htmlExportRegistry.register("contactSection", exportContactSection);
 htmlExportRegistry.register("imageGallery", exportImageGallery);
+htmlExportRegistry.register("categoryCardGrid", exportCategoryCardGrid);
 
 // Exporters que precisam de renderChild
 htmlExportRegistry.register("featureGrid", (block, depth, basePath, theme) => {

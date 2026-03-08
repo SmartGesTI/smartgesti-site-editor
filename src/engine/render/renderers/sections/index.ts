@@ -30,6 +30,14 @@ import { renderContactSection } from "./ContactSectionRenderer";
 import { renderBlogRecentPosts } from "./BlogRecentPostsRenderer";
 import { renderBlogTagCloud } from "./BlogTagCloudRenderer";
 import { renderImageGallery } from "./ImageGalleryRenderer";
+import { renderCountdown } from "./CountdownRenderer";
+import { renderCarousel } from "./CarouselRenderer";
+import { renderBlogCard } from "./BlogCardRenderer";
+import { renderBlogCardGrid } from "./BlogCardGridRenderer";
+import { renderTeamCard } from "./TeamCardRenderer";
+import { renderTeamGrid } from "./TeamGridRenderer";
+import { renderCourseCardGrid } from "./CourseCardGridRenderer";
+import { renderCategoryCardGrid } from "./CategoryCardGridRenderer";
 
 // Registrar renderizadores
 renderRegistry.register("hero", renderHero);
@@ -58,3 +66,11 @@ renderRegistry.register("contactSection", renderContactSection);
 renderRegistry.register("blogRecentPosts", renderBlogRecentPosts);
 renderRegistry.register("blogTagCloud", renderBlogTagCloud);
 renderRegistry.register("imageGallery", renderImageGallery);
+renderRegistry.register("countdown", renderCountdown);
+renderRegistry.register("carousel", renderCarousel);
+renderRegistry.register("blogCard", renderBlogCard);
+renderRegistry.register("blogCardGrid", renderBlogCardGrid);
+renderRegistry.register("teamCard", renderTeamCard);
+renderRegistry.register("teamGrid", renderTeamGrid);
+renderRegistry.register("courseCardGrid", renderCourseCardGrid);
+renderRegistry.register("categoryCardGrid", renderCategoryCardGrid);
