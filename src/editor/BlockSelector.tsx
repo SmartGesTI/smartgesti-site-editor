@@ -1,6 +1,6 @@
 /**
  * Block Selector
- * Lista blocos da estrutura de forma hierárquica
+ * Lista blocos da estrutura de forma hierárquica com drag & drop
  */
 
 import React, { useMemo } from 'react'
@@ -8,12 +8,16 @@ import { Block } from '../engine'
 import { componentRegistry } from '../engine'
 import { Trash2, ChevronRight } from 'lucide-react'
 import { cn } from '../utils/cn'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { useDroppable } from '@dnd-kit/core'
+import { SortableBlockItem } from './dnd'
 
 interface BlockSelectorProps {
   structure: Block[]
   selectedBlockId: string | null
   onSelectBlock: (blockId: string) => void
   onDeleteBlock: (blockId: string) => void
+  overIndex?: number | null
 }
 
 /**
@@ -67,7 +71,6 @@ function renderBlockTree(
   onSelectBlock: (blockId: string) => void,
   onDeleteBlock: (blockId: string) => void
 ): React.ReactNode {
-  // Verificar se o bloco é válido
   if (!block || typeof block !== 'object' || !block.id || !block.type) {
     return null
   }
@@ -90,7 +93,6 @@ function renderBlockTree(
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
         onClick={() => onSelectBlock(block.id)}
       >
-        {/* Indentação visual */}
         {depth > 0 && (
           <div className="flex-shrink-0 w-4 flex items-center justify-center">
             <ChevronRight className="w-3 h-3 opacity-50" />
@@ -149,7 +151,7 @@ function renderBlockTree(
       {hasChildren && (
         <div className="mt-1">
           {props.children
-            .filter((child: Block) => child && child.id && child.type) // Filtrar children inválidos
+            .filter((child: Block) => child && child.id && child.type)
             .map((child: Block) =>
               renderBlockTree(child, depth + 1, selectedBlockId, onSelectBlock, onDeleteBlock)
             )}
@@ -159,11 +161,30 @@ function renderBlockTree(
   )
 }
 
+/**
+ * Zona de drop no final da lista
+ */
+function EndDropZone({ index }: { index: number }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: "end-drop-zone",
+    data: { index },
+  });
+
+  return (
+    <div ref={setNodeRef} className="h-8 mt-1">
+      {isOver && (
+        <div className="h-0.5 bg-blue-500 rounded-full mx-2" />
+      )}
+    </div>
+  );
+}
+
 export const BlockSelector = React.memo(function BlockSelector({
   structure,
   selectedBlockId,
   onSelectBlock,
   onDeleteBlock,
+  overIndex,
 }: BlockSelectorProps) {
   // Filtrar estrutura inválida ANTES de usar
   const validStructure = useMemo(() => {
@@ -171,33 +192,36 @@ export const BlockSelector = React.memo(function BlockSelector({
     return structure.filter((b) => b && typeof b === 'object' && b.id && b.type)
   }, [structure])
 
-  // Contar total de blocos (incluindo children) - usando useMemo para evitar recálculos
+  // IDs para SortableContext
+  const blockIds = useMemo(
+    () => validStructure.map((b) => b.id),
+    [validStructure]
+  )
+
+  // Contar total de blocos (incluindo children)
   const totalBlocks = useMemo(() => {
     const count = (blocks: Block[]): number => {
       if (!blocks || !Array.isArray(blocks) || blocks.length === 0) return 0
-      
+
       let total = 0
       for (let i = 0; i < blocks.length; i++) {
         const block = blocks[i]
-        
-        // Verificar se o bloco é válido ANTES de acessar qualquer propriedade
+
         if (!block || typeof block !== 'object' || !block.id || !block.type) {
           continue
         }
-        
-        total++ // Contar o bloco atual
-        
-        // Verificar props de forma segura - SEMPRE dentro de try-catch
+
+        total++
+
         try {
           if (!block.props) {
             continue
           }
-          
+
           const props = block.props
           if (props && typeof props === 'object' && !Array.isArray(props)) {
             const children = (props as Record<string, any>).children
             if (children && Array.isArray(children) && children.length > 0) {
-              // Filtrar children inválidos antes de contar recursivamente
               const validChildren = children.filter(
                 (child: unknown) => child && typeof child === 'object' && (child as Block).id && (child as Block).type
               )
@@ -206,14 +230,13 @@ export const BlockSelector = React.memo(function BlockSelector({
               }
             }
           }
-        } catch (error) {
-          // Se houver erro ao acessar props, apenas continuar
+        } catch {
           continue
         }
       }
       return total
     }
-    
+
     return count(validStructure)
   }, [validStructure])
 
@@ -234,9 +257,20 @@ export const BlockSelector = React.memo(function BlockSelector({
             Nenhum bloco adicionado ainda
           </div>
         ) : (
-          validStructure.map((block) =>
-            renderBlockTree(block, 0, selectedBlockId, onSelectBlock, onDeleteBlock)
-          )
+          <SortableContext items={blockIds} strategy={verticalListSortingStrategy}>
+            {validStructure.map((block, index) => (
+              <SortableBlockItem
+                key={block.id}
+                id={block.id}
+                blockType={block.type}
+                index={index}
+                isOver={overIndex === index}
+              >
+                {renderBlockTree(block, 0, selectedBlockId, onSelectBlock, onDeleteBlock)}
+              </SortableBlockItem>
+            ))}
+            <EndDropZone index={validStructure.length} />
+          </SortableContext>
         )}
       </div>
     </div>

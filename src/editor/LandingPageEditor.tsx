@@ -66,6 +66,7 @@ export function LandingPageEditor({
     handleUndo,
     handleRedo,
     handleAddBlock,
+    handleMoveBlock,
     handleDeleteBlock,
     handleUpdateBlock,
     applyChange,
@@ -358,6 +359,7 @@ export function LandingPageEditor({
           onSelectBlock={(id) => { setSelectedBlockId(id); setFocusedGroup(null); }}
           onDeleteBlock={handleDeleteBlock}
           onAddBlock={handleAddBlock}
+          onMoveBlock={handleMoveBlock}
           activePlugins={activePlugins}
         />
 

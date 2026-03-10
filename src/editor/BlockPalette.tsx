@@ -9,6 +9,7 @@ import { componentRegistry } from "../engine";
 import { cn } from "../utils/cn";
 import { getBlockIcon } from "../utils/blockIcons";
 import { Search } from "lucide-react";
+import { DraggablePaletteItem } from "./dnd";
 
 /** Ordem fixa das categorias na paleta */
 const CATEGORY_ORDER = [
@@ -148,31 +149,40 @@ export function BlockPalette({
                     isUnique && existingBlockTypes?.includes(def.type);
 
                   return (
-                    <button
+                    <DraggablePaletteItem
                       key={def.type}
-                      onClick={() => !alreadyExists && handleAddBlock(def.type)}
+                      blockType={def.type}
                       disabled={!!alreadyExists}
-                      className={cn(
-                        "flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all",
-                        alreadyExists
-                          ? "opacity-40 cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                          : cn(
-                              "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 cursor-pointer",
-                              "hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20",
-                              "hover:scale-[1.02] active:scale-[0.98]",
-                            ),
-                      )}
-                      title={
-                        alreadyExists
-                          ? `${def.name} já existe na página`
-                          : def.description
-                      }
                     >
-                      <div className="text-2xl">{getBlockIcon(def.type)}</div>
-                      <div className="text-xs font-medium text-gray-700 dark:text-gray-300 text-center">
-                        {def.name}
-                      </div>
-                    </button>
+                      <button
+                        onClick={() =>
+                          !alreadyExists && handleAddBlock(def.type)
+                        }
+                        disabled={!!alreadyExists}
+                        className={cn(
+                          "flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all w-full",
+                          alreadyExists
+                            ? "opacity-40 cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                            : cn(
+                                "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
+                                "hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20",
+                                "hover:scale-[1.02] active:scale-[0.98]",
+                              ),
+                        )}
+                        title={
+                          alreadyExists
+                            ? `${def.name} já existe na página`
+                            : def.description
+                        }
+                      >
+                        <div className="text-2xl">
+                          {getBlockIcon(def.type)}
+                        </div>
+                        <div className="text-xs font-medium text-gray-700 dark:text-gray-300 text-center">
+                          {def.name}
+                        </div>
+                      </button>
+                    </DraggablePaletteItem>
                   );
                 })}
               </div>

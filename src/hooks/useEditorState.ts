@@ -54,6 +54,7 @@ interface UseEditorStateReturn {
     parentBlockId?: string,
     position?: number,
   ) => void;
+  handleMoveBlock: (blockId: string, newPosition: number) => void;
   handleDeleteBlock: (blockId: string) => void;
   handleUpdateBlock: (updates: Record<string, any>) => void;
   applyChange: (patch: any[], description?: string) => void;
@@ -201,7 +202,7 @@ export function useEditorState(
     [],
   );
 
-  // Adicionar bloco (mantido para API; editor template-based não exibe paleta de blocos)
+  // Adicionar bloco
   const handleAddBlock = useCallback(
     (blockType: BlockType, parentBlockId?: string, position?: number) => {
       if (!document || !currentPage) return;
@@ -213,12 +214,23 @@ export function useEditorState(
           return;
         }
 
+        // Se position nao foi especificada e nao tem parentBlockId,
+        // inserir antes do footer (se existir)
+        let insertPosition = position;
+        if (insertPosition === undefined && !parentBlockId) {
+          const structure = currentPage.structure || [];
+          const lastBlock = structure[structure.length - 1];
+          if (lastBlock?.type === "footer") {
+            insertPosition = structure.length - 1;
+          }
+        }
+
         const patch = PatchBuilder.addBlock(
           document,
           currentPage.id,
           newBlock,
           parentBlockId,
-          position,
+          insertPosition,
         );
 
         applyChange(patch, `Add ${blockType} block`);
@@ -228,6 +240,27 @@ export function useEditorState(
       }
     },
     [currentPage, document, createBlockFromType, applyChange],
+  );
+
+  // Mover bloco (reordenar)
+  const handleMoveBlock = useCallback(
+    (blockId: string, newPosition: number) => {
+      if (!document || !currentPage) return;
+
+      try {
+        const patch = PatchBuilder.moveBlock(
+          document,
+          currentPage.id,
+          blockId,
+          null,
+          newPosition,
+        );
+        applyChange(patch, "Move block");
+      } catch (error) {
+        logger.error("[handleMoveBlock] Error moving block:", error);
+      }
+    },
+    [document, currentPage, applyChange],
   );
 
   // Deletar bloco
@@ -421,6 +454,7 @@ export function useEditorState(
     handleUndo,
     handleRedo,
     handleAddBlock,
+    handleMoveBlock,
     handleDeleteBlock,
     handleUpdateBlock,
     applyChange,
